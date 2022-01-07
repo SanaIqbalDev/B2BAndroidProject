@@ -1,0 +1,9 @@
+query getCustomerCart{
+    customerCart{
+        id
+        shipping_addresses
+        {
+            city
+        }
+    }
+}

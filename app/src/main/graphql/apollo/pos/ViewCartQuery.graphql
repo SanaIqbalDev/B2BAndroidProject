@@ -1,0 +1,24 @@
+query getCartById($cart_id: String!){
+    cart(cart_id: $cart_id){
+        total_quantity
+        items{
+            quantity
+            uid
+            product{
+                name
+                sku
+                description{
+                    html
+                }
+                price {
+                    regularPrice {
+                        amount {
+                            currency
+                            value
+                            __typename
+                        }
+                    }
+                }
+                small_image{url}
+            }
+        }}}

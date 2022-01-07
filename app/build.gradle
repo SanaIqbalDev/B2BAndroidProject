@@ -1,0 +1,66 @@
+plugins {
+    id 'com.android.application'
+    id 'dagger.hilt.android.plugin'
+    id "com.apollographql.apollo"
+    id "com.google.gms.google-services"
+}
+
+android {
+    compileSdk 31
+
+    defaultConfig {
+        applicationId "com.code24seven.pos"
+        minSdk 21
+        targetSdk 31
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    buildFeatures {
+        dataBinding true
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.appcompat:appcompat:1.4.0'
+    implementation 'com.google.android.material:material:1.6.0-alpha01'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.2'
+    implementation 'androidx.navigation:navigation-fragment:2.3.5'
+    implementation 'androidx.navigation:navigation-ui:2.3.5'
+    implementation 'com.squareup.picasso:picasso:2.71828'
+    implementation 'androidx.legacy:legacy-support-v4:1.0.0'
+    implementation 'com.google.dagger:hilt-android:2.40.5'
+    implementation 'androidx.hilt:hilt-navigation-fragment:1.0.0'
+    implementation 'com.apollographql.apollo:apollo-runtime:2.5.11'
+    implementation 'com.apollographql.apollo:apollo-coroutines-support:2.5.11'
+//    implementation 'androidx.paging:paging-runtime:3.1.0'
+//    implementation 'androidx.paging:paging-rxjava3:3.1.0'
+//    implementation "com.apollographql.apollo:apollo-android-support:2.5.11"
+
+    // Import the BoM for the Firebase platform
+    implementation platform('com.google.firebase:firebase-bom:29.0.3')
+
+    // Declare the dependency for the Cloud Storage library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation 'com.google.firebase:firebase-storage'
+    implementation 'com.google.firebase:firebase-analytics'
+
+
+    testImplementation 'junit:junit:4.+'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.3'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.4.0'
+    annotationProcessor "com.google.dagger:hilt-android-compiler:2.40.5"
+}

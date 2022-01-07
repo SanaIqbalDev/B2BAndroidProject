@@ -1,0 +1,12 @@
+mutation removeItemFromCart($removeItem: RemoveItemFromCartInput!){
+    removeItemFromCart(input:$removeItem){
+        cart{
+            items{
+                uid
+                product{
+                    name
+                }
+            }
+        }
+    }
+}

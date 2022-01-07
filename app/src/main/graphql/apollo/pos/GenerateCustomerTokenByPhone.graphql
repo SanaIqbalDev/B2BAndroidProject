@@ -1,0 +1,5 @@
+mutation generateCustomerTokenByPhone($usernamethis: String!, $password: String!, $is_mobile: Boolean!){
+    generateCustomerTokenByPhone(username: $usernamethis, password: $password, is_mobile: $is_mobile){
+        token
+    }
+}

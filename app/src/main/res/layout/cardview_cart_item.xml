@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+<androidx.cardview.widget.CardView
+
+    android:id="@+id/cardview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:strokeWidth="1dp"
+    app:cardBackgroundColor="@color/white"
+    app:cardCornerRadius="3dp"
+    app:cardElevation="1dp"
+    app:cardMaxElevation="1dp"
+    android:layout_marginBottom="5dp"
+    app:cardPreventCornerOverlap="true"
+    app:cardUseCompatPadding="true"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:weightSum="5"
+            android:padding="2dp"
+            android:layout_gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/iv_product_image"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="80dp"
+                android:padding="2dp"
+
+                app:srcCompat="@drawable/product_item_temp"
+                android:scaleType="centerCrop"/>
+
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_weight="1.5"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_marginTop="5dp"
+                android:layout_marginBottom="5dp"
+              >
+                <TextView
+                    android:id="@+id/tv_product_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceHeadline6"
+                    android:gravity="left|center_vertical"
+                    android:singleLine="false"
+                    android:scrollbars="vertical"
+                    android:textSize="16sp"
+                    android:textColor="@color/black"
+                    android:text="@string/tomato_ketchup"/>
+
+                <TextView
+                    android:id="@+id/tv_product_price"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?attr/textAppearanceBody2"
+                    android:textColor="@color/primaryColor"
+                    android:layout_marginTop="5dp"
+                    android:gravity="center_vertical|left"
+                    android:textSize="14sp"
+                    android:text="@string/product_subtitle_temp"/>
+
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="45dp"
+                android:layout_weight="1.75"
+                android:background="@drawable/border"
+                android:orientation="horizontal"
+                android:weightSum="3.5"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/tv_item_detail_content">
+
+                <ImageButton
+                    android:id="@+id/btn_decrement_cart"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_minus_smaller" />
+
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    app:dividerColor="@color/colorDivider" />
+
+                <EditText
+                    android:id="@+id/et_quantity"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.5"
+                    android:backgroundTint="@android:color/transparent"
+                    android:gravity="center"
+                    android:inputType="number"
+                    android:singleLine="true"
+                    android:text="1"
+                    android:textColor="@color/primaryColor"
+                    android:textCursorDrawable="@color/primaryColor"
+                    android:textSize="16sp"
+                    />
+                <com.google.android.material.divider.MaterialDivider
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    app:dividerColor="@color/colorDivider" />
+
+                <ImageButton
+                    android:id="@+id/btn_increment_cart"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:background="@android:color/transparent"
+                    android:src="@drawable/ic_plus_smaller" />
+            </LinearLayout>
+
+            <ImageButton
+                android:id="@+id/btn_cart_item_remove"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="0.75"
+                android:src="@drawable/ic_baseline_cancel_24"
+                android:background="@android:color/transparent"
+                />
+
+        </LinearLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
+</layout>
