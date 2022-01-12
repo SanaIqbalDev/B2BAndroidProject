@@ -11,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.codeseven.pos.R;
 import com.codeseven.pos.databinding.CardviewCartItemBinding;
+import com.codeseven.pos.util.CartItemClickListener;
+import com.codeseven.pos.util.ItemClickListener;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -19,10 +21,12 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
 
     private Context context;
     private ArrayList<CatalogItem> cartItemsArrayList;
+    private CartItemClickListener onCartItemClickListener;
 
-    public CartItemAdapter(Context context, ArrayList<CatalogItem> cartItemsArrayList) {
+    public CartItemAdapter(Context context, ArrayList<CatalogItem> cartItemsArrayList, CartItemClickListener cartItemClickListener) {
         this.context = context;
         this.cartItemsArrayList = cartItemsArrayList;
+        this.onCartItemClickListener = cartItemClickListener;
     }
 
     @NonNull
@@ -34,11 +38,22 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        CatalogItem catalogItem = cartItemsArrayList.get(position);
-        holder.cardviewCartItemBinding.tvProductName.setText(catalogItem.getItemName());
-        holder.cardviewCartItemBinding.tvProductPrice.setText(catalogItem.getItemPrice());
-        holder.cardviewCartItemBinding.etQuantity.setText(catalogItem.getItemDescription());
-        Picasso.get().load(catalogItem.getItemImage()).into(holder.cardviewCartItemBinding.ivProductImage);
+        CatalogItem cartItem = cartItemsArrayList.get(position);
+        holder.cardviewCartItemBinding.tvProductName.setText(cartItem.getItemName());
+        holder.cardviewCartItemBinding.tvProductPrice.setText(cartItem.getItemPrice());
+        holder.cardviewCartItemBinding.etQuantity.setText(cartItem.getItemQuantity());
+        Picasso.get().load(cartItem.getItemImage()).into(holder.cardviewCartItemBinding.ivProductImage);
+
+        holder.bind(cartItemsArrayList.get(position),onCartItemClickListener);
+
+//
+//        holder.cardviewCartItemBinding.btnCartItemRemove.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//
+//            }
+//        });
+
 
     }
 
@@ -55,6 +70,45 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
             super(itemView);
 
             cardviewCartItemBinding = DataBindingUtil.bind(itemView);
+        }
+
+
+        public void bind(CatalogItem item, CartItemClickListener listener){
+            cardviewCartItemBinding.btnCartItemRemove.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    cartItemsArrayList.remove(getAdapterPosition());
+                    notifyDataSetChanged();
+                    listener.onItemCLicked(view, item);
+                }
+            });
+
+            cardviewCartItemBinding.btnDecrementCart.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+
+                    if(Integer.parseInt(cardviewCartItemBinding.etQuantity.getText().toString()) > 1)
+                    {
+                        cardviewCartItemBinding.etQuantity.setText(String.valueOf(Integer.parseInt(cardviewCartItemBinding.etQuantity.getText().toString()) - 1));
+                    }
+                    listener.onItemCLicked(view, item);
+                }
+            });
+
+            cardviewCartItemBinding.btnIncrementCart.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    cardviewCartItemBinding.etQuantity.setText(String.valueOf(Integer.parseInt(cardviewCartItemBinding.etQuantity.getText().toString()) + 1));
+                    listener.onItemCLicked(view, item);
+                }
+            });
+//            itemView.setOnClickListener(new View.OnClickListener() {
+//                @Override
+//                public void onClick(View view) {
+//                    if(view== cardviewCartItemBinding.btnCartItemRemove)
+//                        listener.onItemCLicked(item);
+//                }
+//            });
         }
     }
 }

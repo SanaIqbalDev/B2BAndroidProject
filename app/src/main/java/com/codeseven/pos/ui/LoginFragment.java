@@ -85,6 +85,12 @@ public class LoginFragment extends Fragment {
                 });
             }
         });
+        loginObserver.getLoginResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+            }
+        });
         fragmentLoginBinding.executePendingBindings();
         return view;
     }

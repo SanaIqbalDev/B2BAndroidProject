@@ -11,6 +11,8 @@ public class CatalogItem implements Parcelable {
     private String itemPrice;
     private String itemImage;
     private String itemDescription;
+    private String itemQuantity;
+    private String itemUid;
 
     public CatalogItem(String itemSku, String itemName, String itemPrice, String itemImage, String description) {
         this.itemSku = itemSku;
@@ -18,6 +20,15 @@ public class CatalogItem implements Parcelable {
         this.itemPrice = itemPrice;
         this.itemImage = itemImage;
         this.itemDescription = description;
+    }
+    public CatalogItem(String itemSku, String itemName, String itemPrice, String itemImage, String quantity, String uid) {
+        this.itemSku = itemSku;
+        this.itemName = itemName;
+        this.itemPrice = itemPrice;
+        this.itemImage = itemImage;
+        this.itemQuantity = quantity;
+        this.itemUid = uid;
+
     }
 
     protected CatalogItem(Parcel in) {
@@ -83,6 +94,23 @@ public class CatalogItem implements Parcelable {
     @Override
     public int describeContents() {
         return 0;
+    }
+
+
+    public String getItemQuantity() {
+        return itemQuantity;
+    }
+
+    public void setItemQuantity(String itemQuantity) {
+        this.itemQuantity = itemQuantity;
+    }
+
+    public String getItemUid() {
+        return itemUid;
+    }
+
+    public void setItemUid(String itemUid) {
+        this.itemUid = itemUid;
     }
 
     @Override

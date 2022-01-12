@@ -24,11 +24,20 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.RetryPolicy;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.codeseven.pos.R;
 import com.codeseven.pos.databinding.FragmentAudioRecordingBinding;
 import com.codeseven.pos.helper.WavAudioRecorder;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -36,6 +45,11 @@ import com.google.firebase.storage.UploadTask;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.provider.ContactsContract.CommonDataKinds.Website.URL;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,6 +57,10 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AudioRecordingFragment extends Fragment {
 
@@ -101,7 +119,9 @@ public class AudioRecordingFragment extends Fragment {
      * Useful, as no exceptions are thrown.
      *
      * @return recorder state
+     *
      */
+    ProgressDialog progressDialog;
     public WavAudioRecorder.State getState() {
         return state;
     }
@@ -122,6 +142,8 @@ public class AudioRecordingFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        progressDialog = new ProgressDialog(requireActivity());
+
     }
 
     public Context getcontext() {
@@ -146,7 +168,7 @@ public class AudioRecordingFragment extends Fragment {
         else
         {
             //Creating recorrder instance...
-        createAudioRecorder(MediaRecorder.AudioSource.MIC, sampleRates[0], AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+        createAudioRecorder(MediaRecorder.AudioSource.MIC, 48000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
 
         }
 
@@ -155,11 +177,12 @@ public class AudioRecordingFragment extends Fragment {
             public void onClick(View view) {
 
                 mFileName = Environment.getExternalStorageDirectory().getPath();
-                mFileName += "/TempAudioFile.wav";
+                mFileName += "/order"+String.valueOf(System.currentTimeMillis())+".wav";
                 setOutputFile(mFileName);
 
                 prepare();
                 start();
+                fragmentAudioRecordingBinding.tvRecordingStatus.setText("Recording Started");
             }
         });
 
@@ -167,7 +190,9 @@ public class AudioRecordingFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 stop();
-                reset();
+//                reset();
+                fragmentAudioRecordingBinding.tvRecordingStatus.setText("Recording Stopped");
+
 
                 playAudio();
 
@@ -180,6 +205,7 @@ public class AudioRecordingFragment extends Fragment {
             @Override
             public void onClick(View view) {
 //                playAudio();
+                uploadToGCS();
             }
         });
 
@@ -234,7 +260,7 @@ public class AudioRecordingFragment extends Fragment {
                 randomAccessWriter.write(buffer);          // write audio data to file
                 payloadSize += buffer.length;
             } catch (IOException e) {
-                Log.e(WavAudioRecorder.class.getName(), "Error occured in updateListener, recording is aborted");
+                Log.e("Audio Recorder", "Error occured in updateListener, recording is aborted");
                 e.printStackTrace();
             }
         }
@@ -252,11 +278,13 @@ public class AudioRecordingFragment extends Fragment {
                 mBitsPersample = 8;
             }
 
-            if (channelConfig == AudioFormat.CHANNEL_IN_MONO) {
-                nChannels = 1;
-            } else {
-                nChannels = 2;
-            }
+//            if (channelConfig == AudioFormat.CHANNEL_IN_MONO) {
+//                nChannels = 1;
+//            } else {
+//                nChannels = 2;
+//            }
+
+            nChannels = 1;
 
             mAudioSource = audioSource;
             sRate = sampleRate;
@@ -269,7 +297,7 @@ public class AudioRecordingFragment extends Fragment {
                 mBufferSize = AudioRecord.getMinBufferSize(sampleRate, channelConfig, audioFormat);
                 // Set frame period and timer interval accordingly
                 mPeriodInFrames = mBufferSize / (2 * mBitsPersample * nChannels / 8);
-                Log.w(WavAudioRecorder.class.getName(), "Increasing buffer size to " + Integer.toString(mBufferSize));
+                Log.w("Audio Recorder", "Increasing buffer size to " + Integer.toString(mBufferSize));
             }
                 if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
                     // TODO: Consider calling
@@ -295,15 +323,15 @@ public class AudioRecordingFragment extends Fragment {
                 state = WavAudioRecorder.State.INITIALIZING;
 
 
-        mFileName = Environment.getExternalStorageDirectory().getPath();
-        mFileName += "/TempAudioFile.wav";
+//        mFileName = Environment.getExternalStorageDirectory().getPath();
+//            mFileName += "/order"+String.valueOf(System.currentTimeMillis())+".wav";
                 setOutputFile(mFileName);
 
         } catch (Exception e) {
             if (e.getMessage() != null) {
-                Log.e(WavAudioRecorder.class.getName(), e.getMessage());
+                Log.e("Audio Recorder", e.getMessage());
             } else {
-                Log.e(WavAudioRecorder.class.getName(), "Unknown error occured while initializing recording");
+                Log.e("Audio Recorder", "Unknown error occured while initializing recording");
             }
             state = WavAudioRecorder.State.ERROR;
         }
@@ -317,9 +345,9 @@ public class AudioRecordingFragment extends Fragment {
             }
         } catch (Exception e) {
             if (e.getMessage() != null) {
-                Log.e(WavAudioRecorder.class.getName(), e.getMessage());
+                Log.e("Audio Recorder", e.getMessage());
             } else {
-                Log.e(WavAudioRecorder.class.getName(), "Unknown error occured while setting output path");
+                Log.e("Audio Recorder", "Unknown error occured while setting output path");
             }
             state = WavAudioRecorder.State.ERROR;
         }
@@ -357,19 +385,19 @@ public class AudioRecordingFragment extends Fragment {
                     buffer = new byte[mPeriodInFrames * mBitsPersample / 8 * nChannels];
                     state = WavAudioRecorder.State.READY;
                 } else {
-                    Log.e(WavAudioRecorder.class.getName(), "prepare() method called on uninitialized recorder");
+                    Log.e("Audio Recorder", "prepare() method called on uninitialized recorder");
                     state = WavAudioRecorder.State.ERROR;
                 }
             } else {
-                Log.e(WavAudioRecorder.class.getName(), "prepare() method called on illegal state");
+                Log.e("Audio Recorder", "prepare() method called on illegal state");
                 release();
                 state = WavAudioRecorder.State.ERROR;
             }
         } catch (Exception e) {
             if (e.getMessage() != null) {
-                Log.e(WavAudioRecorder.class.getName(), e.getMessage());
+                Log.e("Audio Recorder", e.getMessage());
             } else {
-                Log.e(WavAudioRecorder.class.getName(), "Unknown error occured in prepare()");
+                Log.e("Audio Recorder", "Unknown error occured in prepare()");
             }
             state = WavAudioRecorder.State.ERROR;
         }
@@ -389,7 +417,7 @@ public class AudioRecordingFragment extends Fragment {
                 try {
                     randomAccessWriter.close(); // Remove prepared file
                 } catch (IOException e) {
-                    Log.e(WavAudioRecorder.class.getName(), "I/O exception occured while closing output file");
+                    Log.e("Audio Recorder", "I/O exception occured while closing output file");
                 }
                 (new File(filePath)).delete();
             }
@@ -433,7 +461,7 @@ public class AudioRecordingFragment extends Fragment {
                 state = WavAudioRecorder.State.INITIALIZING;
             }
         }catch (Exception e) {
-            Log.e(WavAudioRecorder.class.getName(), e.getMessage());
+            Log.e("Audio Recorder", e.getMessage());
             state = WavAudioRecorder.State.ERROR;
         }
     }
@@ -452,7 +480,7 @@ public class AudioRecordingFragment extends Fragment {
             audioRecorder.read(buffer, 0, buffer.length);	//[TODO: is this necessary]read the existing data in audio hardware, but don't do anything
             state = WavAudioRecorder.State.RECORDING;
         } else {
-            Log.e(WavAudioRecorder.class.getName(), "start() called on illegal state");
+            Log.e("Audio Recorder", "start() called on illegal state");
             state = WavAudioRecorder.State.ERROR;
         }
     }
@@ -477,12 +505,12 @@ public class AudioRecordingFragment extends Fragment {
 
                 randomAccessWriter.close();
             } catch(IOException e) {
-                Log.e(WavAudioRecorder.class.getName(), "I/O exception occured while closing output file");
+                Log.e("Audio Recorder", "I/O exception occured while closing output file");
                 state = WavAudioRecorder.State.ERROR;
             }
             state = WavAudioRecorder.State.STOPPED;
         } else {
-            Log.e(WavAudioRecorder.class.getName(), "stop() called on illegal state");
+            Log.e("Audio Recorder", "stop() called on illegal state");
             state = WavAudioRecorder.State.ERROR;
         }
     }
@@ -492,8 +520,8 @@ public class AudioRecordingFragment extends Fragment {
     public void playAudio() {
         // for playing our recorded audio
         // we are using media player class.
-        mFileName = Environment.getExternalStorageDirectory().getPath();
-        mFileName += "/TempAudioFile.wav";
+//        mFileName = Environment.getExternalStorageDirectory().getPath();
+//        mFileName += "/order"+String.valueOf(System.currentTimeMillis())+".wav";
 
         MediaPlayer  mPlayer = new MediaPlayer();
         try {
@@ -506,7 +534,7 @@ public class AudioRecordingFragment extends Fragment {
 
             // below method will start our media player.
             mPlayer.start();
-            fragmentAudioRecordingBinding.tvRecordingStatus.setText("Recording Started Playing");
+//            fragmentAudioRecordingBinding.tvRecordingStatus.setText("Recording Started Playing");
         } catch (IOException e) {
             Log.e("TAG", "prepare() failed");
         }
@@ -533,7 +561,7 @@ public class AudioRecordingFragment extends Fragment {
 
         StorageReference storageReference = firebaseStorage.getReference();
 
-        StorageReference audioReference = storageReference.child("TempAudioFile.wav");
+        StorageReference audioReference = storageReference.child("datasets/"+mFileName);
         audioReference.getPath();
 
 // Reference's name is the last segment of the full path: "space.jpg"
@@ -547,26 +575,24 @@ public class AudioRecordingFragment extends Fragment {
 
         UploadTask uploadTask;
 
-        mFileName = Environment.getExternalStorageDirectory().getPath();
-        mFileName += "/TempAudioFile.wav";
         InputStream inputStream;
         try {
             inputStream = new FileInputStream(mFileName);
 
-            Uri returnUri = Uri.fromFile(new File(mFileName));
-            String mimeType = requireContext().getContentResolver().getType(returnUri);
-
-
             uploadTask = audioReference.putStream(inputStream);
+            progressDialog.StartLoadingdialog();
+
             uploadTask.addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-                    mFileName = "";
+//                    mFileName = "";
                 }
             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    mFileName = "";
+//                    mFileName = "";
+                   String audio_ref = taskSnapshot.getMetadata().getReference().toString();
+                   NlpApiCall(audio_ref);
 
                 }
             });
@@ -574,9 +600,97 @@ public class AudioRecordingFragment extends Fragment {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
-
-
-
-
     }
+
+
+
+    public void NlpApiCall(String audioFileGcp)
+    {
+        RequestQueue MyRequestQueue = Volley.newRequestQueue(requireContext());
+
+        String url_ = "https://nlp-iz36ezwfjq-uc.a.run.app/predict/"+ audioFileGcp;
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url_, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                String hjj= "[[{\"Quantity\": [Five kilos], \"item Name\": [\"rice\"], \"Date\": [], \"Time\": []}, {\"Quantity\": [\"Five kilos\"], \"item Name\": [\"rice\"], \"Date\": [], \"Time\": []}],[0.8462377190589905]]";
+                Log.e("NLP response",response);
+                progressDialog.dismissDialog();
+//                Toast.makeText(requireContext(), response, Toast.LENGTH_SHORT).show();
+                Snackbar snackbar = Snackbar
+                        .make(fragmentAudioRecordingBinding.getRoot(), response, Snackbar.LENGTH_INDEFINITE);
+                snackbar.show();
+//                try {
+//                    JSONObject jsonObject = new JSONObject(response);
+//                    JSONArray jArray = jsonObject.getJSONArray("");
+//                    String responseThis ;
+//                    for(int i =0; i <response.length() ; i++){
+//                        responseThis = response;
+//
+//                        Character ab = responseThis.charAt(i);
+//
+//                        if(!ab.toString().equals("{"))
+//                        {
+//                            responseThis = response.substring(1,response.length()-1);
+//                        }
+//                        else
+//                        {
+//
+//                        }
+//                    }
+//
+//                } catch (JSONException e) {
+//                    e.printStackTrace();
+//                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Log.e("NLP response",error.toString());
+            }
+        });
+
+        stringRequest.setRetryPolicy(new RetryPolicy() {
+            @Override
+            public int getCurrentTimeout() {
+                return 50000;
+            }
+
+            @Override
+            public int getCurrentRetryCount() {
+                return 50000;
+            }
+
+            @Override
+            public void retry(VolleyError error) throws VolleyError {
+
+            }
+        });
+        MyRequestQueue.add(stringRequest);
+    }
+
+
+
+//    (
+//            [
+//                    [
+//                            {'Quantity': [Five kilos], 'item Name': ['rice'], 'Date': [], 'Time': []}
+//                    ],
+//                    [
+//                            {'Quantity': [ten], 'item Name': [], 'Date': [], 'Time': []}
+//                    ],
+//                    [
+//                            {'Quantity': [], 'item Name': ['milk'], 'Date': [], 'Time': []}
+//                    ],
+//                    [
+//                            {'Quantity': [ten], 'item Name': ['biscuits'], 'Date': [], 'Time': []}
+//                    ]
+//            ],
+//            [0.8462377190589905]
+//    )
+
+
+
+
+
+
 }

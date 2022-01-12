@@ -88,6 +88,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
+                    android:tag="decrease"
                     android:background="@android:color/transparent"
                     android:src="@drawable/ic_minus_smaller" />
 
@@ -120,6 +121,7 @@
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
+                    android:tag="increase"
                     android:background="@android:color/transparent"
                     android:src="@drawable/ic_plus_smaller" />
             </LinearLayout>
@@ -129,6 +131,7 @@
                 android:layout_width="0dp"
                 android:layout_height="50dp"
                 android:layout_weight="0.75"
+                android:tag="remove"
                 android:src="@drawable/ic_baseline_cancel_24"
                 android:background="@android:color/transparent"
                 />

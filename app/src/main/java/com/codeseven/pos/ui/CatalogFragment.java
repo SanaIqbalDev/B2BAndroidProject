@@ -36,7 +36,7 @@ import apollo.pos.fragment.ProductsFragment;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class CatalogFragment extends Fragment implements ItemClickListener {
+public class CatalogFragment extends Fragment {
 
 
 
@@ -143,9 +143,9 @@ public class CatalogFragment extends Fragment implements ItemClickListener {
         cartObserver.getCartRequestResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String s) {
-                if(s.equals("New cart Created")){
-                    Toast.makeText(requireContext(),s , Toast.LENGTH_SHORT).show();
-                }
+//                if(s.equals("New cart Created")){
+//                    Toast.makeText(requireContext(),s , Toast.LENGTH_SHORT).show();
+//                }
             }
         });
 
@@ -196,9 +196,5 @@ public class CatalogFragment extends Fragment implements ItemClickListener {
             }
         });
         return view;
-    }
-
-    @Override
-    public void onItemClicked(CatalogItem catalogItem) {
     }
 }

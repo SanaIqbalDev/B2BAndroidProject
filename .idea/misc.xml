@@ -4,6 +4,7 @@
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable-v24/border_button.xml" value="0.20319634703196346" />
+        <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable-v24/coupon_button.xml" value="0.20601851851851852" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable-v24/ic_checked_small.xml" value="0.19722222222222222" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable-v24/ic_logo_small.xml" value="0.20319634703196346" />
@@ -13,7 +14,9 @@
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable/cart_icon_smaller.xml" value="0.11944444444444445" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable/checked.xml" value="0.15787037037037038" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable/circular_progress_bar.xml" value="0.20601851851851852" />
+        <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable/coupon_button.xml" value="0.20601851851851852" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable/custom_checkbox.xml" value="0.20601851851851852" />
+        <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable/et_border.xml" value="0.20601851851851852" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable/ic_baseline_cancel_24.xml" value="0.20319634703196346" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable/ic_baseline_mic_24.xml" value="0.20319634703196346" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable/ic_baseline_shopping_cart_24.xml" value="0.20601851851851852" />

@@ -22,6 +22,7 @@ import java.util.List;
 import apollo.pos.CreateCartMutation;
 import apollo.pos.GetCartByIdQuery;
 import apollo.pos.GetCustomerCartQuery;
+import apollo.pos.RemoveItemFromCartMutation;
 import okhttp3.OkHttpClient;
 import okhttp3.internal.http2.Header;
 
@@ -106,6 +107,13 @@ public class ViewCartRepository {
         });
     }
 
+//    public void RemoveItemFromCart(String uid){
+//        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
+//        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
+//
+//        (new ApolloClientClass()).apolloClient.mutate(new RemoveItemFromCartMutation())
+//    }
+
     public MutableLiveData<String> getCartRequestResponse(){
         return cartRequestResponse;
     }
@@ -118,3 +126,4 @@ public class ViewCartRepository {
     }
 
 }
+
