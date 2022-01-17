@@ -3,6 +3,7 @@ package com.codeseven.pos.ui;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -51,8 +52,10 @@ public class CatalogFragment extends Fragment {
     @Inject CartViewModel.CartObserver cartObserver;
     CartPreference cartPreference;
     public String customerCartId;
+    boolean dataFound=false;
 
 
+    ProgressDialog progressDialog;
     @Inject
     public CatalogFragment() {
         // Required empty public constructor
@@ -62,10 +65,12 @@ public class CatalogFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        progressDialog= new ProgressDialog(requireActivity());
         catalogViewModel = new ViewModelProvider(requireActivity()).get(CatalogViewModel.class);
         getMoreProducts = true;
 
         // Getting customer catalog...
+        progressDialog.StartLoadingdialog();
         catalogObserver.getUpdatedcatalog(currentPage,pageSize);
         totalPages= catalogObserver.getPageCount().getValue();
 
@@ -134,9 +139,11 @@ public class CatalogFragment extends Fragment {
         catalogObserver.getCatalogRequestResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String s) {
-                if(s.equals("Failure")){
+                if(s.length()>0){
+                    fragmentCatalogBinding.btnRefresh.setVisibility(View.VISIBLE);
+                    progressDialog.dismissDialog();
                     fragmentCatalogBinding.loadingProgressbar.setVisibility(View.GONE);
-                    Toast.makeText(requireContext(),catalogObserver.getResponseMessage() , Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(),catalogObserver.getCatalogRequestResponse().getValue() , Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -159,7 +166,9 @@ public class CatalogFragment extends Fragment {
 
                 if(getMoreProducts == true) {
                     for (int i = 0; i < items.size(); i++) {
-
+                        progressDialog.dismissDialog();
+                        fragmentCatalogBinding.btnRefresh.setVisibility(View.GONE);
+                        dataFound = true;
                         itemsku = (items.get(i).sku());
                         name = (items.get(i).name());
                         price = (String.valueOf(items.get(i).price().regularPrice().amount().value().intValue())) + " Rs.";
@@ -195,6 +204,31 @@ public class CatalogFragment extends Fragment {
                 }
             }
         });
+
+        fragmentCatalogBinding.btnRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                progressDialog.StartLoadingdialog();
+
+                catalogObserver.getUpdatedcatalog(currentPage,pageSize);
+
+            }
+        });
+
+//        view.setOnTouchListener(new View.OnTouchListener() {
+//            @Override
+//            public boolean onTouch(View view, MotionEvent motionEvent) {
+//                if(motionEvent.getAction() == MotionEvent.ACTION_DOWN){
+//                    if(!dataFound)
+//                    {
+//                        catalogObserver.getUpdatedcatalog(currentPage,pageSize);
+//                    }
+//                }
+//                return false;
+//            }
+//        });
         return view;
     }
+
+
 }

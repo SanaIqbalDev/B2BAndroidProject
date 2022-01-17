@@ -108,7 +108,7 @@
                 android:id="@+id/tv_subtotal_value"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="4800 Rs."
+                android:text="0 Rs."
                 android:textSize="18dp"
                 android:textColor="@color/black"
                 app:layout_constraintTop_toBottomOf="@id/tv_summary"
@@ -143,7 +143,7 @@
                 android:id="@+id/tv_estimated_total_value"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="4800 Rs."
+                android:text="0 Rs."
                 android:textSize="18dp"
                 android:textColor="@color/black"
                 app:layout_constraintTop_toBottomOf="@id/divider_one"
@@ -153,6 +153,7 @@
 
 
             <Button
+                android:id="@+id/btnProceedToCheckout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/border_button"
@@ -162,13 +163,6 @@
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
-
-
-
-
         <TextView
             android:id="@+id/tv_no_items"
             android:layout_width="match_parent"

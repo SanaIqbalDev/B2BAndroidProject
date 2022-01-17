@@ -18,6 +18,11 @@ query getCartById($cart_id: String!){
                             __typename
                         }
                     }
+                    minimalPrice{
+                        amount{
+                            value
+                        }
+                    }
                 }
                 small_image{url}
             }

@@ -1,22 +1,16 @@
 package com.codeseven.pos.ui;
 
+import static android.Manifest.permission.RECORD_AUDIO;
+import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+
 import android.Manifest;
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
-import android.net.Uri;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-import androidx.databinding.DataBindingUtil;
-import androidx.fragment.app.Fragment;
-
 import android.os.Environment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,7 +18,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
+import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.databinding.DataBindingUtil;
+import androidx.fragment.app.Fragment;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -37,19 +36,10 @@ import com.codeseven.pos.databinding.FragmentAudioRecordingBinding;
 import com.codeseven.pos.helper.WavAudioRecorder;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
-
-
-import static android.Manifest.permission.RECORD_AUDIO;
-import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static android.provider.ContactsContract.CommonDataKinds.Website.URL;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.yalantis.waves.util.Horizon;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -57,10 +47,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 public class AudioRecordingFragment extends Fragment {
 
@@ -127,7 +113,10 @@ public class AudioRecordingFragment extends Fragment {
     }
 
 
-    private final static int[] sampleRates = {44100, 22050, 11025, 8000};
+
+
+    Horizon mHorizon;
+
 
     public AudioRecordingFragment() {
         // Required empty public constructor
@@ -158,9 +147,10 @@ public class AudioRecordingFragment extends Fragment {
         fragmentAudioRecordingBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_audio_recording, container, false);
         View view = fragmentAudioRecordingBinding.getRoot();
 //
-        //Creating recorrder instance...
-//        createAudioRecorder(MediaRecorder.AudioSource.MIC, sampleRates[0], AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
-
+        mHorizon = new Horizon(fragmentAudioRecordingBinding.glSurface, getResources().getColor(R.color.primaryColor),
+                48000,1, 16);
+        mHorizon.setMaxVolumeDb(120);
+        
         if(!CheckPermissions())
         {
             RequestPermissions();
@@ -176,39 +166,39 @@ public class AudioRecordingFragment extends Fragment {
             @Override
             public void onClick(View view) {
 
+
                 mFileName = Environment.getExternalStorageDirectory().getPath();
                 mFileName += "/order"+String.valueOf(System.currentTimeMillis())+".wav";
                 setOutputFile(mFileName);
+                fragmentAudioRecordingBinding.btnStart.setVisibility(View.GONE);
+                fragmentAudioRecordingBinding.btnStop.setVisibility(View.VISIBLE);
 
+                if(audioRecorder.getState() == 0)
+                    createAudioRecorder(MediaRecorder.AudioSource.MIC, 48000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
                 prepare();
                 start();
-                fragmentAudioRecordingBinding.tvRecordingStatus.setText("Recording Started");
+//                fragmentAudioRecordingBinding.tvRecordingStatus.setText("Recording Started");
             }
         });
 
         fragmentAudioRecordingBinding.btnStop.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                stop();
-//                reset();
-                fragmentAudioRecordingBinding.tvRecordingStatus.setText("Recording Stopped");
 
+                fragmentAudioRecordingBinding.btnStop.setVisibility(View.GONE);
+                fragmentAudioRecordingBinding.btnStart.setVisibility(View.VISIBLE);
+
+                stop();
+
+                reset();
 
                 playAudio();
 
-                uploadToGCS();
-//                release();
+
+//                uploadToGCS();
+                release();
             }
         });
-
-        fragmentAudioRecordingBinding.btnPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-//                playAudio();
-                uploadToGCS();
-            }
-        });
-
 
         return view;
 
@@ -254,6 +244,10 @@ public class AudioRecordingFragment extends Fragment {
                 Log.d(requireContext().toString(), "recorder stopped");
                 return;
             }
+            if (audioRecorder.getRecordingState() == AudioRecord.RECORDSTATE_RECORDING
+                    && audioRecorder.read(buffer, 0, buffer.length) != -1) {
+                mHorizon.updateView(buffer);
+            }
             int numOfBytes = audioRecorder.read(buffer, 0, buffer.length); // read audio data to buffer
 //			Log.d(WavAudioRecorder.this.getClass().getName(), state + ":" + numOfBytes);
             try {
@@ -278,13 +272,11 @@ public class AudioRecordingFragment extends Fragment {
                 mBitsPersample = 8;
             }
 
-//            if (channelConfig == AudioFormat.CHANNEL_IN_MONO) {
-//                nChannels = 1;
-//            } else {
-//                nChannels = 2;
-//            }
-
-            nChannels = 1;
+            if (channelConfig == AudioFormat.CHANNEL_IN_MONO) {
+                nChannels = 1;
+            } else {
+                nChannels = 2;
+            }
 
             mAudioSource = audioSource;
             sRate = sampleRate;
@@ -477,6 +469,7 @@ public class AudioRecordingFragment extends Fragment {
         if (state == WavAudioRecorder.State.READY) {
             payloadSize = 0;
             audioRecorder.startRecording();
+//            audioRecorder.getAudioSessionId();
             audioRecorder.read(buffer, 0, buffer.length);	//[TODO: is this necessary]read the existing data in audio hardware, but don't do anything
             state = WavAudioRecorder.State.RECORDING;
         } else {
@@ -615,10 +608,10 @@ public class AudioRecordingFragment extends Fragment {
                 String hjj= "[[{\"Quantity\": [Five kilos], \"item Name\": [\"rice\"], \"Date\": [], \"Time\": []}, {\"Quantity\": [\"Five kilos\"], \"item Name\": [\"rice\"], \"Date\": [], \"Time\": []}],[0.8462377190589905]]";
                 Log.e("NLP response",response);
                 progressDialog.dismissDialog();
-//                Toast.makeText(requireContext(), response, Toast.LENGTH_SHORT).show();
-                Snackbar snackbar = Snackbar
-                        .make(fragmentAudioRecordingBinding.getRoot(), response, Snackbar.LENGTH_INDEFINITE);
-                snackbar.show();
+                Toast.makeText(requireContext(), response, Toast.LENGTH_SHORT).show();
+//                Snackbar snackbar = Snackbar
+//                        .make(fragmentAudioRecordingBinding.getRoot(), response, Snackbar.LENGTH_INDEFINITE);
+//                snackbar.show();
 //                try {
 //                    JSONObject jsonObject = new JSONObject(response);
 //                    JSONArray jArray = jsonObject.getJSONArray("");

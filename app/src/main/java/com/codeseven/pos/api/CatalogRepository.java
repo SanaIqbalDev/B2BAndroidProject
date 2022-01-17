@@ -67,7 +67,7 @@ public class CatalogRepository {
             @Override
             public void onFailure(@NonNull ApolloException e) {
                 message = e.getMessage();
-                CatalogRequestResponse.postValue("Failure");
+                CatalogRequestResponse.postValue(e.getLocalizedMessage());
 
             }
         });

@@ -21,7 +21,7 @@ import com.codeseven.pos.model.CatalogItem;
 import com.codeseven.pos.util.CartItemClickListener;
 import com.codeseven.pos.util.CartPreference;
 import com.codeseven.pos.util.CartViewModel;
-import com.codeseven.pos.util.ProcessItemViewModel;
+import com.codeseven.pos.util.ProcessCartViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -43,11 +43,12 @@ public class CartFragment extends Fragment {
     private ArrayList<CatalogItem> cartItemArrayList = new ArrayList<>();
 
 
-    private  int sub_total = 0;
-    ProcessItemViewModel removeItemViewModel;
+    private  Double sub_total = 0.0;
+    ProcessCartViewModel removeItemViewModel;
     @Inject
-    ProcessItemViewModel.ProcessItemObserver processItemObserver;
+    ProcessCartViewModel.ProcessCartObserver processItemObserver;
 
+    FragmentCartBinding fragmentCartBinding ;
     private ProgressDialog progressDialog;
     public CartFragment() {
         // Required empty public constructor
@@ -64,7 +65,7 @@ public class CartFragment extends Fragment {
         progressDialog = new ProgressDialog(requireActivity());
         cartPreference = new CartPreference();
         cartViewModel = new ViewModelProvider(requireActivity()).get(CartViewModel.class);
-        removeItemViewModel = new ViewModelProvider(requireActivity()).get(ProcessItemViewModel.class);
+        removeItemViewModel = new ViewModelProvider(requireActivity()).get(ProcessCartViewModel.class);
         customerCartId = cartPreference.GetCartId("cart_id");
         getMoreProducts = true;
         if(!customerCartId.equals(""))
@@ -78,7 +79,7 @@ public class CartFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
 
-        FragmentCartBinding fragmentCartBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_cart,container,false);
+        fragmentCartBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_cart,container,false);
         View view = fragmentCartBinding.getRoot();
         fragmentCartBinding.setCartViewModel(cartObserver);
         fragmentCartBinding.setLifecycleOwner(getViewLifecycleOwner());
@@ -94,13 +95,15 @@ public class CartFragment extends Fragment {
 
                     Toast.makeText(requireContext(), "remove Button CLicked", Toast.LENGTH_SHORT).show();
                     processItemObserver.RemoveCartItem(catalogItem.getItemUid());
-
+                    ItemRemoved(Integer.parseInt(catalogItem.getItemQuantity()),Double.parseDouble(catalogItem.getItemPrice()));
                 }
                 if(view.getTag().equals("increase")) {
                     Toast.makeText(requireContext(), "increase Button CLicked", Toast.LENGTH_SHORT).show();
-
                     catalogItem.setItemQuantity(String.valueOf(Integer.parseInt(catalogItem.getItemQuantity()) + 1));
                     processItemObserver.UpdateCartItem(catalogItem);
+
+                    updateSubtotal(Double.parseDouble(catalogItem.getItemPrice()),true);
+
                 }
                 if(view.getTag().equals("decrease")) {
                     Toast.makeText(requireContext(), " decrease Button CLicked", Toast.LENGTH_SHORT).show();
@@ -110,6 +113,10 @@ public class CartFragment extends Fragment {
                         catalogItem.setItemQuantity(String.valueOf(Integer.valueOf(catalogItem.getItemQuantity()) - 1));
                     }
                     processItemObserver.UpdateCartItem(catalogItem);
+
+                    updateSubtotal(Double.parseDouble(catalogItem.getItemPrice()),false);
+
+
 
                 }
 
@@ -129,6 +136,18 @@ public class CartFragment extends Fragment {
             }
         });
 
+        fragmentCartBinding.btnApplyCoupon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(fragmentCartBinding.etCouponCode.getText().toString().length()>0) {
+                    progressDialog.StartLoadingdialog();
+                    processItemObserver.ApplyCouponToCart(fragmentCartBinding.etCouponCode.getText().toString());
+                }
+                else {
+                    Toast.makeText(requireContext(), "Please enter coupon code.", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
 
         cartObserver.getCartItemsList().observe(getViewLifecycleOwner(), new Observer<List<GetCartByIdQuery.Item>>() {
             @Override
@@ -136,6 +155,7 @@ public class CartFragment extends Fragment {
                 List<GetCartByIdQuery.Item> ab = items;
 
                 String name, price, image_url, quantity, itemsku, itemUid;
+                Double priceThis;
 
                 if(getMoreProducts == true) {
 
@@ -143,11 +163,24 @@ public class CartFragment extends Fragment {
 
                             itemsku = (items.get(i).product().sku());
                             name = (items.get(i).product().name());
-                            price = (String.valueOf(items.get(i).product().price().regularPrice().amount().value().intValue())) + " Rs.";
+                            if((items.get(i).product().price().minimalPrice().amount().value()!=null) &&
+                                    (items.get(i).product().price().minimalPrice().amount().value()<items.get(i).product().price().regularPrice().amount().value()))
+                            {
+                                price = (String.valueOf(items.get(i).product().price().minimalPrice().amount().value()));
+                                priceThis = items.get(i).product().price().minimalPrice().amount().value();
+
+                            }
+                            else
+                            {
+                                price = (String.valueOf(items.get(i).product().price().regularPrice().amount().value()));
+                                priceThis = items.get(i).product().price().regularPrice().amount().value();
+
+                            }
+//                            price = (String.valueOf(items.get(i).product().price_range().maximum_price().final_price().value())) + " Rs.";
                             image_url = items.get(i).product().small_image().url();
                             quantity = String.valueOf((int) items.get(i).quantity());
                             itemUid = items.get(i).uid();
-                            sub_total += (items.get(i).product().price().regularPrice().amount().value()) * (items.get(i).quantity());
+                            sub_total += (priceThis) * (items.get(i).quantity());
                             cartItemArrayList.add(new CatalogItem(itemsku, name, price, image_url, quantity,itemUid));
 
                         }
@@ -173,7 +206,40 @@ public class CartFragment extends Fragment {
                 Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
             }
         });
+        processItemObserver.getApplyCouponResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                progressDialog.dismissDialog();
+                Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
+            }
+        });
+
+
+        fragmentCartBinding.btnProceedToCheckout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                NavHostFragment.findNavController(CartFragment.this).navigate(R.id.action_cartFragment_to_checkoutFragment);
+            }
+        });
+
         return view;
+
+    }
+
+    private void ItemRemoved(int quantity, double price) {
+        sub_total= sub_total-(price*quantity);
+        fragmentCartBinding.tvSubtotalValue.setText(String.valueOf(sub_total) + " Rs.");
+        fragmentCartBinding.tvEstimatedTotalValue.setText(String.valueOf(sub_total) + " Rs.");
+    }
+
+    public void updateSubtotal(Double item_price,boolean isIncrement){
+        if(isIncrement)
+            sub_total = sub_total+item_price;
+        else
+            sub_total = sub_total-item_price;
+
+        fragmentCartBinding.tvSubtotalValue.setText(String.valueOf(sub_total) + " Rs.");
+        fragmentCartBinding.tvEstimatedTotalValue.setText(String.valueOf(sub_total) + " Rs.");
 
     }
 

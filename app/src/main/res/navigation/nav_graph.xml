@@ -66,12 +66,21 @@
     <fragment
         android:id="@+id/cartFragment"
         android:name="com.codeseven.pos.ui.CartFragment"
-        android:label="CartFragment" />
+        android:label="CartFragment" >
+        <action
+            android:id="@+id/action_cartFragment_to_checkoutFragment"
+            app:destination="@id/checkoutFragment" />
+    </fragment>
     <fragment
         android:id="@+id/audioRecordingFragment"
-        android:name="com.codeseven.pos.ui.AudioRecordingFragment"
+        android:name="com.codeseven.pos.ui.AudioRecordingFragmentTemp"
         android:label="fragment_audio_recording"
         tools:layout="@layout/fragment_audio_recording" />
+    <fragment
+        android:id="@+id/checkoutFragment"
+        android:name="com.codeseven.pos.ui.CheckoutFragment"
+        android:label="fragment_checkout"
+        tools:layout="@layout/fragment_checkout" />
 
 
 </navigation>

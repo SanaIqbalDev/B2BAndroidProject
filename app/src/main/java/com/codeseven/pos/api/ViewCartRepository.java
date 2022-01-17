@@ -106,14 +106,6 @@ public class ViewCartRepository {
             }
         });
     }
-
-//    public void RemoveItemFromCart(String uid){
-//        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-//        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
-//
-//        (new ApolloClientClass()).apolloClient.mutate(new RemoveItemFromCartMutation())
-//    }
-
     public MutableLiveData<String> getCartRequestResponse(){
         return cartRequestResponse;
     }

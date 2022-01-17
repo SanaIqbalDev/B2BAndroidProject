@@ -21,4 +21,6 @@
     <color name="white">#FFFFFFFF</color>
     <color name="light_gray">#F5F5F5</color>
 
+    <color name="transparent">@android:color/transparent</color>
+
 </resources>
