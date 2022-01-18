@@ -1,0 +1,16 @@
+query GetCustomerDetails{
+    customer{
+
+        firstname
+        lastname
+        addresses{
+            telephone
+            city
+            country_code
+            street
+            region{
+                region
+            }
+        }
+    }
+}

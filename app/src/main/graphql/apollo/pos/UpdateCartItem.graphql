@@ -1,0 +1,10 @@
+mutation updateCartItem($removeItem: UpdateCartItemsInput!){
+    updateCartItems(input: $removeItem){
+        cart{
+            items{
+                uid
+            }
+
+        }
+    }
+}

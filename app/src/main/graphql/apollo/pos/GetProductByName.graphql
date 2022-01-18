@@ -1,0 +1,43 @@
+query getAutocompleteResults($inputText:String!){
+    products(search:$inputText currentPage:1 pageSize:3){
+        aggregations{
+            label
+            count
+            attribute_code
+            options{
+                label
+                value
+                __typename
+            }
+            __typename
+        }
+        items{
+            id
+            name
+            sku
+            small_image{
+                url __typename
+            }
+            url_key
+            url_suffix
+            price{
+                regularPrice{
+                    amount{
+                        value
+                        currency
+                        __typename
+                    }
+                    __typename
+                }
+                __typename
+            }
+            __typename
+        }
+        page_info{
+            total_pages
+            __typename
+        }
+        total_count
+        __typename
+    }
+}

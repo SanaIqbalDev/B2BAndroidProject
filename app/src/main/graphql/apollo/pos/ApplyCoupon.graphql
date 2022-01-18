@@ -1,0 +1,7 @@
+mutation applyCouponToCart($coupon_value:ApplyCouponToCartInput!){
+    applyCouponToCart(input: $coupon_value){
+        cart{
+            id
+        }
+    }
+}
