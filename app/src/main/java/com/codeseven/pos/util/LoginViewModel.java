@@ -2,9 +2,13 @@ package com.codeseven.pos.util;
 
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
+//import androidx.databinding.library.baseAdapters.BR;
+//import androidx.databinding.library.baseAdapters.BR;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+//import com.codeseven.pos.BR;
 import com.codeseven.pos.BR;
 import com.codeseven.pos.api.LoginRepository;
 

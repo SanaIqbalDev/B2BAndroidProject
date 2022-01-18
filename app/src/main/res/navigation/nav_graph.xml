@@ -75,12 +75,21 @@
         android:id="@+id/audioRecordingFragment"
         android:name="com.codeseven.pos.ui.AudioRecordingFragmentTemp"
         android:label="fragment_audio_recording"
-        tools:layout="@layout/fragment_audio_recording" />
+        tools:layout="@layout/fragment_audio_recording" >
+        <action
+            android:id="@+id/action_audioRecordingFragment_to_shortListedItemsFragment"
+            app:destination="@id/shortListedItemsFragment" />
+    </fragment>
     <fragment
         android:id="@+id/checkoutFragment"
         android:name="com.codeseven.pos.ui.CheckoutFragment"
         android:label="fragment_checkout"
         tools:layout="@layout/fragment_checkout" />
+    <fragment
+        android:id="@+id/shortListedItemsFragment"
+        android:name="com.codeseven.pos.ui.ShortListedItemsFragment"
+        android:label="fragment_short_listed_items"
+        tools:layout="@layout/fragment_short_listed_items" />
 
 
 </navigation>

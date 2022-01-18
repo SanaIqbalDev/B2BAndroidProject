@@ -156,8 +156,6 @@ public class CatalogFragment extends Fragment {
             }
         });
 
-
-
         catalogObserver.getProductFragments().observe(getViewLifecycleOwner(), new Observer<List<ProductsFragment.Item>>() {
             @Override
             public void onChanged(List<ProductsFragment.Item> items) {
