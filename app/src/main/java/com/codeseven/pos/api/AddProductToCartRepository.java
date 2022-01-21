@@ -46,13 +46,14 @@ public class AddProductToCartRepository {
                     if (response.getErrors()!=null)
                         requestResponse.postValue(response.getErrors().get(0).getMessage());
                     else
-                        requestResponse.postValue("Data Added");
+                        requestResponse.postValue("Item added to cart");
                 }
                 @Override
                 public void onFailure(@NonNull ApolloException e) {
                     requestResponse.postValue("Error");
                 }
             });
+
         }
     }
 

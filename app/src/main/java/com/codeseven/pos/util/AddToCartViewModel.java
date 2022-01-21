@@ -1,40 +1,34 @@
 package com.codeseven.pos.util;
 
-import android.view.inputmethod.InputContentInfo;
-
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
-import com.apollographql.apollo.api.Input;
 import com.codeseven.pos.BR;
 import com.codeseven.pos.api.AddProductToCartRepository;
 
-import java.util.ArrayList;
-
 import javax.inject.Inject;
 
-import apollo.pos.type.CartItemInput;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
-public class ProductDetailViewModel extends ViewModel {
+public class AddToCartViewModel extends ViewModel {
 
     @Inject
-    public ProductObserver productObserver;
+    public AddToCartObsrever productObserver;
 
     @Inject
-    public ProductDetailViewModel(ProductObserver productObserver) {
+    public AddToCartViewModel(AddToCartObsrever productObserver) {
         getProductObserver();
     }
 
-    private ProductObserver getProductObserver() {
-        return new ProductObserver();
+    private AddToCartObsrever getProductObserver() {
+        return new AddToCartObsrever();
     }
 
 
-    public static class ProductObserver extends BaseObservable{
+    public static class AddToCartObsrever extends BaseObservable{
 
 
         private String productSku;
@@ -47,7 +41,7 @@ public class ProductDetailViewModel extends ViewModel {
         private MutableLiveData<String> repositoryResponse;
 
         @Inject
-        public ProductObserver() {
+        public AddToCartObsrever() {
             productSku = "";
             productName = "";
             productPrice = "";
@@ -130,8 +124,12 @@ public class ProductDetailViewModel extends ViewModel {
 
         public void placeOrder()
         {
-//            // calling API for placing order...
             productToCartRepository.addProductToCart(getProductSku(), getProductQuantity());
+
+        }
+        public void placeOrder(String sku, String quantity)
+        {
+            productToCartRepository.addProductToCart(sku, quantity);
 
         }
 

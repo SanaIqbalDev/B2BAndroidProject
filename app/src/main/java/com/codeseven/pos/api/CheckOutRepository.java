@@ -32,6 +32,10 @@ public class CheckOutRepository {
         (new ApolloClientClass()).apolloClient.query(new GetCustomerDetailsQuery()).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetCustomerDetailsQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetCustomerDetailsQuery.Data> response) {
+                if(response.getErrors()!=null) {
+                    if (response.getErrors().size() > 0)
+                        CustomerInfoResponse.postValue(response.getErrors().get(0).getMessage());
+                }
                 responseData.postValue(response.getData().customer());
             }
 

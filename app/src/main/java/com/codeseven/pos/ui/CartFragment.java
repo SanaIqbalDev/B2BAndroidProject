@@ -1,5 +1,7 @@
 package com.codeseven.pos.ui;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.databinding.DataBindingUtil;
@@ -68,9 +70,10 @@ public class CartFragment extends Fragment {
         removeItemViewModel = new ViewModelProvider(requireActivity()).get(ProcessCartViewModel.class);
         customerCartId = cartPreference.GetCartId("cart_id");
         getMoreProducts = true;
-        if(!customerCartId.equals(""))
+        if(!customerCartId.equals("")) {
+            progressDialog.StartLoadingdialog();
             cartObserver.getCartItems(customerCartId);
-
+        }
 
     }
 
@@ -85,7 +88,7 @@ public class CartFragment extends Fragment {
         fragmentCartBinding.setLifecycleOwner(getViewLifecycleOwner());
         fragmentCartBinding.rvCartItems.setHasFixedSize(false);
 
-        progressDialog.StartLoadingdialog();
+//        progressDialog.StartLoadingdialog();
 
         CartItemAdapter cartItemAdapter = new CartItemAdapter(requireContext(), cartItemArrayList, new CartItemClickListener() {
             @Override
@@ -93,12 +96,12 @@ public class CartFragment extends Fragment {
 
                 if(view.getTag().equals("remove")) {
 
-                    Toast.makeText(requireContext(), "remove Button CLicked", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(requireContext(), "remove Button CLicked", Toast.LENGTH_SHORT).show();
                     processItemObserver.RemoveCartItem(catalogItem.getItemUid());
                     ItemRemoved(Integer.parseInt(catalogItem.getItemQuantity()),Double.parseDouble(catalogItem.getItemPrice()));
                 }
                 if(view.getTag().equals("increase")) {
-                    Toast.makeText(requireContext(), "increase Button CLicked", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(requireContext(), "increase Button CLicked", Toast.LENGTH_SHORT).show();
                     catalogItem.setItemQuantity(String.valueOf(Integer.parseInt(catalogItem.getItemQuantity()) + 1));
                     processItemObserver.UpdateCartItem(catalogItem);
 
@@ -106,15 +109,17 @@ public class CartFragment extends Fragment {
 
                 }
                 if(view.getTag().equals("decrease")) {
-                    Toast.makeText(requireContext(), " decrease Button CLicked", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(requireContext(), " decrease Button CLicked", Toast.LENGTH_SHORT).show();
 
                     if((Integer.parseInt(catalogItem.getItemQuantity())) > 1)
                     {
                         catalogItem.setItemQuantity(String.valueOf(Integer.valueOf(catalogItem.getItemQuantity()) - 1));
-                    }
-                    processItemObserver.UpdateCartItem(catalogItem);
 
-                    updateSubtotal(Double.parseDouble(catalogItem.getItemPrice()),false);
+                        processItemObserver.UpdateCartItem(catalogItem);
+
+                        updateSubtotal(Double.parseDouble(catalogItem.getItemPrice()),false);
+
+                    }
 
 
 
@@ -203,7 +208,29 @@ public class CartFragment extends Fragment {
             @Override
             public void onChanged(String s) {
                 progressDialog.dismissDialog();
-                Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "The current user cannot perform operations on cart.", Toast.LENGTH_SHORT).show();
+
+                if(s.contains("The current user cannot perform operations on cart")){
+                    AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
+                    builder1.setMessage("Do you want to sign in again?");
+                    builder1.setCancelable(false);
+                    builder1.setPositiveButton("Ok",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    NavHostFragment.findNavController(CartFragment.this).navigate(R.id.action_cartFragment_to_loginFragment);
+                                    dialog.cancel();
+                                }
+                            });
+                    builder1.setNegativeButton("Cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+
+                    AlertDialog alert11 = builder1.create();
+                    alert11.show();
+                }
             }
         });
         processItemObserver.getApplyCouponResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
@@ -228,8 +255,8 @@ public class CartFragment extends Fragment {
 
     private void ItemRemoved(int quantity, double price) {
         sub_total= sub_total-(price*quantity);
-        fragmentCartBinding.tvSubtotalValue.setText(String.valueOf(sub_total) + " Rs.");
-        fragmentCartBinding.tvEstimatedTotalValue.setText(String.valueOf(sub_total) + " Rs.");
+        fragmentCartBinding.tvSubtotalValue.setText(String.format("%.2f", sub_total) + " Rs.");
+        fragmentCartBinding.tvEstimatedTotalValue.setText(String.format("%.2f", sub_total) + " Rs.");
     }
 
     public void updateSubtotal(Double item_price,boolean isIncrement){
@@ -238,8 +265,8 @@ public class CartFragment extends Fragment {
         else
             sub_total = sub_total-item_price;
 
-        fragmentCartBinding.tvSubtotalValue.setText(String.valueOf(sub_total) + " Rs.");
-        fragmentCartBinding.tvEstimatedTotalValue.setText(String.valueOf(sub_total) + " Rs.");
+        fragmentCartBinding.tvSubtotalValue.setText(String.format("%.2f", sub_total) + " Rs.");
+        fragmentCartBinding.tvEstimatedTotalValue.setText(String.format("%.2f", sub_total) + " Rs.");
 
     }
 

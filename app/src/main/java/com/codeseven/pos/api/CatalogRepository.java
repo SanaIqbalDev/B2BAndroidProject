@@ -53,8 +53,12 @@ public class CatalogRepository {
                 sortOption)).enqueue(new ApolloCall.Callback<GetProductsQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetProductsQuery.Data> response) {
-                CatalogRequestResponse.postValue("Success");
-                message = "success";
+                if(response.getErrors()!=null) {
+                    if (response.getErrors().size() > 0)
+                        CatalogRequestResponse.postValue(response.getErrors().get(0).getMessage());
+                }
+//                message = "success";
+
 
                 if(response.getData().products().fragments().productsFragment().page_info().total_pages()!= null)
                 {

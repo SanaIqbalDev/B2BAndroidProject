@@ -5,7 +5,7 @@
     <data>
         <variable
             name="viewModel"
-            type="com.codeseven.pos.util.ProductDetailViewModel.ProductObserver" />
+            type="com.codeseven.pos.util.AddToCartViewModel.AddToCartObsrever" />
     </data>
 <FrameLayout
     android:layout_width="match_parent"

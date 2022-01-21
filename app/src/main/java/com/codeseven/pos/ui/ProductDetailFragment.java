@@ -17,7 +17,7 @@ import android.widget.Toast;
 import com.codeseven.pos.R;
 import com.codeseven.pos.databinding.FragmentProductDetailBinding;
 import com.codeseven.pos.model.CatalogItem;
-import com.codeseven.pos.util.ProductDetailViewModel;
+import com.codeseven.pos.util.AddToCartViewModel;
 import com.squareup.picasso.Picasso;
 
 import javax.inject.Inject;
@@ -27,11 +27,10 @@ import dagger.hilt.android.AndroidEntryPoint;
 @AndroidEntryPoint
 public class ProductDetailFragment extends Fragment {
 
-    public ProductDetailViewModel productViewModel;
+    public AddToCartViewModel productViewModel;
 
     @Inject
-    public ProductDetailViewModel.ProductObserver productObserver;
-
+    public AddToCartViewModel.AddToCartObsrever productObserver;
 
     CatalogItem catalogItem;
 
@@ -60,7 +59,7 @@ public class ProductDetailFragment extends Fragment {
         View view = fragmentProductDetailBinding.getRoot();
 
         if(productViewModel==null){
-            productViewModel = new ViewModelProvider(requireActivity()).get(ProductDetailViewModel.class);
+            productViewModel = new ViewModelProvider(requireActivity()).get(AddToCartViewModel.class);
         }
 
         productObserver.setProductSku(catalogItem.getItemSku());

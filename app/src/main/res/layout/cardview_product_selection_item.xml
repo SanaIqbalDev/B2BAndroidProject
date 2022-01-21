@@ -6,15 +6,19 @@
 
         android:id="@+id/cardview"
         android:layout_width="match_parent"
-        android:layout_height="200dp"
+        android:layout_height="wrap_content"
         app:strokeWidth="1dp"
         app:cardBackgroundColor="@color/white"
-        app:cardCornerRadius="3dp"
+        app:cardCornerRadius="5dp"
         app:cardElevation="1dp"
-        app:cardMaxElevation="1dp"
-        android:layout_marginBottom="5dp"
+        app:cardMaxElevation="2dp"
         app:cardPreventCornerOverlap="true"
         app:cardUseCompatPadding="true"
+        android:layout_marginLeft="5dp"
+        android:layout_marginRight="5dp"
+        android:layout_marginTop="5dp"
+        android:clickable="true"
+        android:background="@drawable/background_selector"
         >
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -27,30 +31,32 @@
 
             <ImageView
                 android:id="@+id/iv_product_image"
-                android:layout_width="150dp"
-                android:layout_height="match_parent"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:padding="10dp"
+                android:background="@color/transparent"
                 app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:srcCompat="@drawable/product_item_temp"
                 android:scaleType="centerCrop"/>
 
 
                 <TextView
                     android:id="@+id/tv_product_name"
-                    android:layout_width="wrap_content"
+                    android:layout_width="180dp"
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceHeadline6"
-                    android:gravity="left|center_vertical"
+                    android:gravity="right|center_vertical"
                     android:singleLine="false"
                     android:scrollbars="vertical"
-                    android:textSize="34sp"
+                    android:textSize="17sp"
                     android:textColor="@color/black"
-                    android:textStyle="bold"
                     android:text="@string/tomato_ketchup"
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     android:layout_marginRight="10dp"
-                    android:layout_marginTop="50dp"
+                    android:layout_marginTop="20dp"
                     />
 
                 <TextView
@@ -58,17 +64,17 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceBody2"
-                    android:textColor="@color/primaryColor"
+                    android:textColor="@color/primaryDarkColor"
                     android:layout_marginTop="5dp"
                     android:gravity="center_vertical|left"
-                    android:textSize="30sp"
-                    android:textStyle="bold"
+                    android:textSize="16sp"
                     android:text="@string/product_subtitle_temp"
 
                     app:layout_constraintRight_toRightOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/tv_product_name"
                     android:layout_marginRight="10dp"
-                    android:layout_marginBottom="50dp"/>
+                    android:layout_marginBottom="20dp"/>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

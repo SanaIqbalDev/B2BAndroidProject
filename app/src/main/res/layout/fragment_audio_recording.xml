@@ -18,7 +18,7 @@
         style="@style/Widget.MaterialComponents.AppBarLayout.Surface">
 
         <androidx.appcompat.widget.Toolbar
-            android:id="@+id/cart_toolbar"
+            android:id="@+id/audio_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_navigation_back_small"

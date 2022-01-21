@@ -209,9 +209,20 @@ public class AudioRecordingFragmentTemp extends Fragment {
                 fragmentAudioRecordingBinding.btnStop.setVisibility(View.GONE);
                 fragmentAudioRecordingBinding.btnStart.setVisibility(View.VISIBLE);
 
-                playAudio();
+//                playAudio();
 
                 uploadToGCS();
+            }
+        });
+
+
+
+        fragmentAudioRecordingBinding.audioToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                progressDialog.dismissDialog();
+                NavHostFragment.findNavController(AudioRecordingFragmentTemp.this).popBackStack();
             }
         });
 
@@ -637,11 +648,16 @@ public class AudioRecordingFragmentTemp extends Fragment {
                     int length = jsonArray_.length();
 
                     String itemName= jsonArray_.getJSONObject(0).getString("item Name");
-                    Toast.makeText(requireContext(), itemName, Toast.LENGTH_LONG).show();
                     if(itemName.length()>0) {
+                        Toast.makeText(requireContext(), itemName, Toast.LENGTH_LONG).show();
                         Bundle bundle = new Bundle();
                         bundle.putString("itemName", itemName);
                         NavHostFragment.findNavController(AudioRecordingFragmentTemp.this).navigate(R.id.action_audioRecordingFragment_to_shortListedItemsFragment, bundle);
+                    }
+                    else
+                    {
+                        Toast.makeText(requireContext(), "Please speak clearly.", Toast.LENGTH_LONG).show();
+
                     }
 
 //                    JSONObject jsonObject = new JSONObject();

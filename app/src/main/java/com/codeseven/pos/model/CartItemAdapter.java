@@ -23,6 +23,7 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
     private ArrayList<CatalogItem> cartItemsArrayList;
     private CartItemClickListener onCartItemClickListener;
 
+
     public CartItemAdapter(Context context, ArrayList<CatalogItem> cartItemsArrayList, CartItemClickListener cartItemClickListener) {
         this.context = context;
         this.cartItemsArrayList = cartItemsArrayList;
@@ -45,7 +46,6 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
         Picasso.get().load(cartItem.getItemImage()).into(holder.cardviewCartItemBinding.ivProductImage);
 
         holder.bind(cartItemsArrayList.get(position),onCartItemClickListener);
-
 //
 //        holder.cardviewCartItemBinding.btnCartItemRemove.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -53,8 +53,6 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
 //
 //            }
 //        });
-
-
     }
 
     @Override
@@ -102,13 +100,6 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
                     listener.onItemCLicked(view, item);
                 }
             });
-//            itemView.setOnClickListener(new View.OnClickListener() {
-//                @Override
-//                public void onClick(View view) {
-//                    if(view== cardviewCartItemBinding.btnCartItemRemove)
-//                        listener.onItemCLicked(item);
-//                }
-//            });
         }
     }
 }

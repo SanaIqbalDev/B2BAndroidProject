@@ -10,6 +10,7 @@
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable-v24/ic_logo_small.xml" value="0.20319634703196346" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable-v24/ic_minus_small.xml" value="0.20319634703196346" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable-v24/ic_round_start_circle_24.xml" value="0.14629629629629629" />
+        <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable/background_selector.xml" value="0.19722222222222222" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable/border.xml" value="0.20319634703196346" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable/border_button.xml" value="0.20319634703196346" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable/cart_icon_smaller.xml" value="0.11944444444444445" />
@@ -54,7 +55,7 @@
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/layout/fragment_base.xml" value="0.19166666666666668" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/layout/fragment_cart.xml" value="0.19166666666666668" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/layout/fragment_catalog.xml" value="0.12083333333333333" />
-        <entry key="..\:/24Seven/NewFolder/app/src/main/res/layout/fragment_checkout.xml" value="0.1" />
+        <entry key="..\:/24Seven/NewFolder/app/src/main/res/layout/fragment_checkout.xml" value="0.25" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/layout/fragment_home.xml" value="0.1" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/layout/fragment_login.xml" value="0.1" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/layout/fragment_product_detail.xml" value="0.15" />

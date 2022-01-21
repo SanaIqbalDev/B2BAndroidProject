@@ -15,9 +15,13 @@ import apollo.pos.GetAutocompleteResultsQuery;
 
 public class GetProductWithNameRepository {
 
-    MutableLiveData<List<GetAutocompleteResultsQuery.Item>> itemsList = new MutableLiveData<>(new ArrayList<>());
+    private MutableLiveData<List<GetAutocompleteResultsQuery.Item>> itemsList = new MutableLiveData<>(new ArrayList<>());
+    private MutableLiveData<String> responseThis ;
+
+
     public GetProductWithNameRepository() {
         itemsList = new MutableLiveData<>(new ArrayList<>());
+        responseThis = new MutableLiveData<>("");
     }
 
     public void getProducts(String itemName)
@@ -26,14 +30,19 @@ public class GetProductWithNameRepository {
             @Override
             public void onResponse(@NonNull Response<GetAutocompleteResultsQuery.Data> response) {
                 String ab ="";
-
-                itemsList.postValue(response.getData().products().items());
+                if(response.getErrors()!=null) {
+                    if (response.getErrors().size() > 0) {
+                        responseThis.postValue(response.getErrors().get(0).getMessage());
+                    }
+                    }
+                else
+                    itemsList.postValue(response.getData().products().items());
 
             }
 
             @Override
             public void onFailure(@NonNull ApolloException e) {
-                String ab ="";
+                responseThis.postValue(e.getLocalizedMessage());
             }
         });
 

@@ -49,7 +49,12 @@ public class ProcessCartRepository {
         (new ApolloClientClass()).apolloClient.mutate((new RemoveItemFromCartMutation(removeItemFromCartInput))).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<RemoveItemFromCartMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<RemoveItemFromCartMutation.Data> response) {
-                requestResponse.postValue(response.getData().toString());
+                if(response.getErrors()!=null) {
+                    if (response.getErrors().size() > 0)
+                        requestResponse.postValue(response.getErrors().get(0).getMessage());
+                }
+                else
+                    requestResponse.postValue(response.getData().toString());
             }
 
             @Override
@@ -92,8 +97,10 @@ public class ProcessCartRepository {
                 .toBuilder().requestHeaders(RequestHeaders.builder().addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token")).build()).build().enqueue(new ApolloCall.Callback<ApplyCouponToCartMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<ApplyCouponToCartMutation.Data> response) {
-                if(response.getErrors().size()>0)
-                    applyCouponRequestResponse.postValue(response.getErrors().get(0).getMessage());
+                if(response.getErrors()!=null) {
+                    if (response.getErrors().size() > 0)
+                        applyCouponRequestResponse.postValue(response.getErrors().get(0).getMessage());
+                }
                 else
                     applyCouponRequestResponse.postValue("Cart Updated.");
             }

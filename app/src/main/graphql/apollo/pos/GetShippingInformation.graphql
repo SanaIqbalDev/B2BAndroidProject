@@ -1,0 +1,77 @@
+query getSelectedAndAvailableShippingMethods($cartId:String!){
+    cart(cart_id:$cartId){
+    id
+    ...AvailableShippingMethodsCheckoutFragment
+    ...SelectedShippingMethodCheckoutFragment
+    ...ShippingInformationFragment
+    __typename
+}
+}
+fragment AvailableShippingMethodsCheckoutFragment
+on Cart{
+    id
+    shipping_addresses{
+        available_shipping_methods{
+            amount{
+                currency
+                value
+                __typename
+            }
+            available
+            carrier_code
+            carrier_title
+            method_code
+            method_title
+            __typename
+        }
+        street
+        __typename
+    }
+    __typename
+}
+fragment SelectedShippingMethodCheckoutFragment
+on Cart{
+    id
+    shipping_addresses{
+        selected_shipping_method{
+            amount{
+                currency
+                value
+                __typename
+            }
+            carrier_code
+            carrier_title
+            method_code
+            method_title
+            __typename
+        }
+        street
+        __typename
+    }
+    __typename
+}
+fragment ShippingInformationFragment on Cart{
+    id
+    email
+    shipping_addresses{
+        city
+        country{
+            code
+            label
+            __typename
+        }
+        firstname
+        lastname
+        postcode
+        region{
+            code
+            label
+            region_id
+            __typename
+        }
+        street
+        telephone
+        __typename
+    }
+    __typename
+}

@@ -22,7 +22,7 @@
             style="@style/Widget.MaterialComponents.AppBarLayout.Surface">
 
             <androidx.appcompat.widget.Toolbar
-                android:id="@+id/cart_toolbar"
+                android:id="@+id/checkout_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:navigationIcon="@drawable/ic_navigation_back_small"
@@ -57,7 +57,7 @@
                     android:layout_marginTop="10dp"
                     app:layout_constraintTop_toTopOf="parent"
                     android:text="When do you want us to deliver?"
-                    android:textSize="20sp"
+                    android:textSize="18sp"
                     android:layout_marginLeft="18dp"
                     android:textColor="@color/black"
                     />
@@ -87,7 +87,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:text="Select order date"
-                        android:textSize="15sp"
+                        android:textSize="14sp"
                         android:layout_marginLeft="3dp"
                         android:textColor="@color/black"
                         android:gravity="center_vertical"
@@ -118,12 +118,14 @@
                         >
 
                         <ImageView
+                            android:id="@+id/clock_a"
                             android:layout_width="50dp"
                             android:layout_height="match_parent"
                             android:padding="12dp"
                             android:src="@drawable/ic_clock"/>
 
                         <TextView
+                            android:id="@+id/date_a"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="10:00 AM - 02:00 PM"
@@ -144,12 +146,14 @@
                         >
 
                         <ImageView
+                            android:id="@+id/clock_b"
                             android:layout_width="50dp"
                             android:layout_height="match_parent"
                             android:padding="12dp"
                             android:src="@drawable/ic_clock"/>
 
                         <TextView
+                            android:id="@+id/date_b"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="02:00 PM - 06:00 PM"
@@ -170,12 +174,14 @@
                         >
 
                         <ImageView
+                            android:id="@+id/clock_c"
                             android:layout_width="50dp"
                             android:layout_height="match_parent"
                             android:padding="12dp"
                             android:src="@drawable/ic_clock"/>
 
                         <TextView
+                            android:id="@+id/date_c"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="06:00 PM - 09:00 PM"
@@ -197,12 +203,14 @@
                         >
 
                         <ImageView
+                            android:id="@+id/clock_d"
                             android:layout_width="50dp"
                             android:layout_height="match_parent"
                             android:padding="12dp"
                             android:src="@drawable/ic_clock"/>
 
                         <TextView
+                            android:id="@+id/date_d"
                             android:layout_width="match_parent"
                             android:layout_height="match_parent"
                             android:text="09:00 PM - 12:00 PM"
@@ -225,7 +233,7 @@
                     android:layout_marginTop="10dp"
                     app:layout_constraintTop_toBottomOf="@id/ll_two"
                     android:text="Any Comments or Note:"
-                    android:textSize="20sp"
+                    android:textSize="18sp"
                     android:layout_marginLeft="18dp"
                     android:textColor="@color/black"
                     />
@@ -235,7 +243,7 @@
                     android:layout_height="100dp"
                     app:layout_constraintTop_toBottomOf="@id/tv_comments"
                     android:background="@drawable/border"
-                    android:textSize="18sp"
+                    android:textSize="16sp"
                     android:gravity="left|top"
                     android:padding="10dp"
                     android:singleLine="false"
@@ -253,7 +261,7 @@
                     android:layout_marginTop="10dp"
                     app:layout_constraintTop_toBottomOf="@id/et_comments"
                     android:text="Ship To"
-                    android:textSize="20sp"
+                    android:textSize="18sp"
                     android:layout_marginLeft="18dp"
                     android:textColor="@color/black"
                     />
@@ -273,11 +281,11 @@
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
                         android:gravity="center_vertical"
-                        android:paddingLeft="5dp"
+                        android:paddingLeft="10dp"
                         android:text="Default Shipping Address"
                         android:textColor="@color/black"
                         android:textStyle="bold"
-                        android:textSize="20dp"/>
+                        android:textSize="18dp"/>
                     <com.google.android.material.divider.MaterialDivider
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
@@ -285,8 +293,29 @@
                         />
 
                     <TextView
+                        android:id="@+id/tv_shipping_address"
                         android:layout_width="match_parent"
-                        android:layout_height="120dp"/>
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:paddingStart="10dp"
+                        android:paddingTop="10dp"
+                        android:layout_height="wrap_content"
+                        android:singleLine="false"
+
+                        />
+                    <TextView
+                        android:id="@+id/tv_phone_number"
+                        android:layout_width="match_parent"
+                        android:textColor="@color/primaryDarkColor"
+                        android:textSize="16sp"
+                        android:paddingStart="10dp"
+                        android:paddingTop="10dp"
+                        android:paddingBottom="10dp"
+                        android:layout_height="wrap_content"
+
+                        android:singleLine="false"
+
+                        />
 
                     <com.google.android.material.divider.MaterialDivider
                         android:layout_width="match_parent"
@@ -299,11 +328,10 @@
                         android:layout_width="match_parent"
                         android:layout_height="40dp"
                         android:gravity="center_vertical"
-                        android:paddingLeft="5dp"
+                        android:paddingLeft="10dp"
                         android:text="Change Shipping Address"
-                        android:textColor="@color/black"
-                        android:textStyle="bold"
-                        android:textSize="20dp"/>
+                        android:textColor="@color/primaryDarkColor"
+                        android:textSize="18dp"/>
 
                 </LinearLayout>
 
@@ -315,7 +343,7 @@
                     android:layout_marginTop="10dp"
                     app:layout_constraintTop_toBottomOf="@id/layout_b"
                     android:text="Shipping Methods"
-                    android:textSize="20sp"
+                    android:textSize="18sp"
                     android:layout_marginLeft="18dp"
                     android:textColor="@color/black"
                     />

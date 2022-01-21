@@ -50,7 +50,12 @@ public class ViewCartRepository {
         (new ApolloClientClass()).apolloClient.query(new GetCustomerCartQuery()).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetCustomerCartQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetCustomerCartQuery.Data> response) {
-                cartRequestResponse.postValue(response.getData().toString());
+                if(response.getErrors()!=null) {
+                    if (response.getErrors().size() > 0)
+                        cartRequestResponse.postValue(response.getErrors().get(0).getMessage());
+                }
+                else
+                    cartRequestResponse.postValue(response.getData().toString());
                 cartId =  response.getData().customerCart().id();
                 cartPreference.AddCartId("cart_id",cartId);
             }
@@ -95,9 +100,14 @@ public class ViewCartRepository {
         (new ApolloClientClass()).apolloClient.query(new GetCartByIdQuery(cartId)).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetCartByIdQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetCartByIdQuery.Data> response) {
-                cartRequestResponse.postValue("Item Collected");
-                if(response.getData().cart()!=null)
-                    cartItems.postValue(response.getData().cart().items());
+                if(response.getErrors()!=null){
+                    if(response.getErrors().size()>0)
+                        cartRequestResponse.postValue(response.getErrors().get(0).getMessage());
+                }
+                else {
+                    if (response.getData().cart() != null)
+                        cartItems.postValue(response.getData().cart().items());
+                }
             }
 
             @Override
