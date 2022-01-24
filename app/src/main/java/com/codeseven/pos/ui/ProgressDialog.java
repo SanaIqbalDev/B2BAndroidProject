@@ -34,7 +34,10 @@ public class ProgressDialog {
 
     void dismissDialog()
     {
-        alertDialog.dismiss();
+        if(alertDialog!=null) {
+            if (alertDialog.isShowing())
+                alertDialog.dismiss();
+        }
     }
 
 }

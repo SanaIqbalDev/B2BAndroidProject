@@ -36,7 +36,6 @@ import com.android.volley.RetryPolicy;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.chibde.visualizer.CircleBarVisualizer;
 import com.codeseven.pos.R;
 import com.codeseven.pos.databinding.FragmentAudioRecordingBinding;
 import com.codeseven.pos.helper.WavAudioRecorder;

@@ -26,5 +26,7 @@
     <string name="stop_playing">Stop Playing</string>
     <string name="status">Status</string>
 
-
+    <string-array name="planets_array">
+        <item>Pakistan</item>
+    </string-array>
 </resources>

@@ -87,12 +87,24 @@
         android:id="@+id/checkoutFragment"
         android:name="com.codeseven.pos.ui.CheckoutFragment"
         android:label="fragment_checkout"
-        tools:layout="@layout/fragment_checkout" />
+        tools:layout="@layout/fragment_checkout" >
+        <action
+            android:id="@+id/action_checkoutFragment_to_loginFragment"
+            app:destination="@id/loginFragment" />
+        <action
+            android:id="@+id/action_checkoutFragment_to_customerAddressesFragment"
+            app:destination="@id/customerAddressesFragment" />
+    </fragment>
     <fragment
         android:id="@+id/shortListedItemsFragment"
         android:name="com.codeseven.pos.ui.ShortListedItemsFragment"
         android:label="fragment_short_listed_items"
         tools:layout="@layout/fragment_short_listed_items" />
+    <fragment
+        android:id="@+id/customerAddressesFragment"
+        android:name="com.codeseven.pos.ui.CustomerAddressesFragment"
+        android:label="fragment_customer_addresses"
+        tools:layout="@layout/fragment_customer_addresses" />
 
 
 </navigation>

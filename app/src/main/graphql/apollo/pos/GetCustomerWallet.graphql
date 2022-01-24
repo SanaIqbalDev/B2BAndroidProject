@@ -1,0 +1,9 @@
+query GetCustomerWallet{
+    customer{
+        wallet{
+            wallet_amount
+            transferred_amount
+            requested_amount
+        }
+    }
+}

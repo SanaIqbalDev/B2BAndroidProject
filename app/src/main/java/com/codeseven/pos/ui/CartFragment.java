@@ -45,7 +45,7 @@ public class CartFragment extends Fragment {
     private ArrayList<CatalogItem> cartItemArrayList = new ArrayList<>();
 
 
-    private  Double sub_total = 0.0;
+    public static Double sub_total;
     ProcessCartViewModel removeItemViewModel;
     @Inject
     ProcessCartViewModel.ProcessCartObserver processItemObserver;
@@ -74,7 +74,7 @@ public class CartFragment extends Fragment {
             progressDialog.StartLoadingdialog();
             cartObserver.getCartItems(customerCartId);
         }
-
+        sub_total = 0.0;
     }
 
     @Override
@@ -88,7 +88,6 @@ public class CartFragment extends Fragment {
         fragmentCartBinding.setLifecycleOwner(getViewLifecycleOwner());
         fragmentCartBinding.rvCartItems.setHasFixedSize(false);
 
-//        progressDialog.StartLoadingdialog();
 
         CartItemAdapter cartItemAdapter = new CartItemAdapter(requireContext(), cartItemArrayList, new CartItemClickListener() {
             @Override
@@ -101,7 +100,6 @@ public class CartFragment extends Fragment {
                     ItemRemoved(Integer.parseInt(catalogItem.getItemQuantity()),Double.parseDouble(catalogItem.getItemPrice()));
                 }
                 if(view.getTag().equals("increase")) {
-//                    Toast.makeText(requireContext(), "increase Button CLicked", Toast.LENGTH_SHORT).show();
                     catalogItem.setItemQuantity(String.valueOf(Integer.parseInt(catalogItem.getItemQuantity()) + 1));
                     processItemObserver.UpdateCartItem(catalogItem);
 
@@ -109,7 +107,6 @@ public class CartFragment extends Fragment {
 
                 }
                 if(view.getTag().equals("decrease")) {
-//                    Toast.makeText(requireContext(), " decrease Button CLicked", Toast.LENGTH_SHORT).show();
 
                     if((Integer.parseInt(catalogItem.getItemQuantity())) > 1)
                     {
@@ -120,11 +117,7 @@ public class CartFragment extends Fragment {
                         updateSubtotal(Double.parseDouble(catalogItem.getItemPrice()),false);
 
                     }
-
-
-
                 }
-
             }
         });
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireContext(),LinearLayoutManager.VERTICAL,false);
@@ -201,6 +194,9 @@ public class CartFragment extends Fragment {
                         }
 
             }
+                fragmentCartBinding.tvSubtotalValue.setText(String.valueOf(sub_total)+ " Rs.");
+                fragmentCartBinding.tvEstimatedTotalValue.setText(String.valueOf(sub_total) + " Rs.");
+
         }
         });
 
@@ -208,11 +204,17 @@ public class CartFragment extends Fragment {
             @Override
             public void onChanged(String s) {
                 progressDialog.dismissDialog();
-                Toast.makeText(requireContext(), "The current user cannot perform operations on cart.", Toast.LENGTH_SHORT).show();
+                if(s.contains("The cart isn't active."))
+                {
+                    Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
 
+                }
                 if(s.contains("The current user cannot perform operations on cart")){
+
+                    Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+
                     AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
-                    builder1.setMessage("Do you want to sign in again?");
+                    builder1.setMessage("Please sign in again to perform this operation.");
                     builder1.setCancelable(false);
                     builder1.setPositiveButton("Ok",
                             new DialogInterface.OnClickListener() {

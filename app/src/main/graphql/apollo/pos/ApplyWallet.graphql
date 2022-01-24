@@ -1,0 +1,7 @@
+mutation ApplyWalletToCart($applyInput: applyWalletCartInput!){
+    applyWalletCart(input: $applyInput){
+        cart{
+            remaining_wallet_amount
+        }
+    }
+}
