@@ -206,8 +206,8 @@ public class CartFragment extends Fragment {
                 progressDialog.dismissDialog();
                 if(s.contains("The cart isn't active."))
                 {
-                    Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
-
+//                    Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                    cartObserver.GetCustomerCart();
                 }
                 if(s.contains("The current user cannot perform operations on cart")){
 

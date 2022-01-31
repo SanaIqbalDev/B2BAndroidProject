@@ -1,6 +1,9 @@
 query GetCustomerAddresses{
     customer{
+        default_shipping
         addresses{
+            default_shipping
+            id
             firstname
             lastname
             street

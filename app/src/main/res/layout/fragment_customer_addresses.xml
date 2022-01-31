@@ -34,8 +34,15 @@
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_addresses"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
             />
+<!--        <TextView-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="150dp"-->
+<!--            android:text="kjkjkjkj"-->
+<!--            android:background="@color/secondaryDarkColor"-->
+<!--            app:layout_constraintTop_toBottomOf="@id/rv_addresses"/>-->
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

@@ -104,7 +104,16 @@
         android:id="@+id/customerAddressesFragment"
         android:name="com.codeseven.pos.ui.CustomerAddressesFragment"
         android:label="fragment_customer_addresses"
-        tools:layout="@layout/fragment_customer_addresses" />
+        tools:layout="@layout/fragment_customer_addresses" >
+        <action
+            android:id="@+id/action_customerAddressesFragment_to_editAddressFragment"
+            app:destination="@id/editAddressFragment" />
+    </fragment>
+    <dialog
+        android:id="@+id/editAddressFragment"
+        android:name="com.codeseven.pos.ui.EditAddressFragment"
+        android:label="fragment_edit_address"
+        tools:layout="@layout/fragment_edit_address" />
 
 
 </navigation>

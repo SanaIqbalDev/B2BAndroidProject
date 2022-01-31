@@ -12,6 +12,7 @@ import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +26,7 @@ import android.widget.Toast;
 import com.codeseven.pos.R;
 import com.codeseven.pos.databinding.FragmentCheckoutBinding;
 import com.codeseven.pos.util.CheckOutViewModel;
+import com.google.android.gms.common.util.DataUtils;
 
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -49,7 +51,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
     ProgressDialog progressDialog;
     private String timePeriod= "am";
     private int selected_time_frame = 0;
-
+    String selectedDate="";
     public static Context contextCheckOut;
     public CheckoutFragment() {
         // Required empty public constructor
@@ -83,6 +85,9 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         String today = DateFormat.getDateInstance(DateFormat.DATE_FIELD).format(mCalendar.getTime());
 
         fragmentCheckoutBinding.tvDate.setText(today);
+
+        isToday(DateUtils.isToday(mCalendar.getTime().getTime()));
+
         fragmentCheckoutBinding.tvDate.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -119,18 +124,22 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             @Override
             public void onClick(View view) {
                 selected_time_frame = 1;
-                fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
-                fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.primaryDarkColor));
-
-
-                fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.black));
-
-                fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
-
+                if(fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
+                    fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
+                    fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
+                }
+                if(fragmentCheckoutBinding.layoutTimeB.isEnabled()) {
+                    fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if (fragmentCheckoutBinding.layoutTimeC.isEnabled()) {
+                    fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if(fragmentCheckoutBinding.layoutTimeD.isEnabled()){
                 fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
                 fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
             }
         });
 
@@ -139,18 +148,25 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             public void onClick(View view) {
 
                 selected_time_frame = 2;
-                fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.black));
+                if(fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
 
+                    fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if(fragmentCheckoutBinding.layoutTimeB.isEnabled()) {
 
-                fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
-                fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.primaryDarkColor));
+                    fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
+                    fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
+                }
+                if (fragmentCheckoutBinding.layoutTimeC.isEnabled()) {
 
-                fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
-
-                fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if(fragmentCheckoutBinding.layoutTimeD.isEnabled()){
+                    fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
                 fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.black));
+            }
             }
         });
 
@@ -160,18 +176,24 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             public void onClick(View view) {
 
                 selected_time_frame = 3;
-                fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
-                fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.primaryDarkColor));
+                if(fragmentCheckoutBinding.layoutTimeC.isEnabled()) {
 
+                    fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
+                    fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
+                }
+                if(fragmentCheckoutBinding.layoutTimeB.isEnabled()) {
 
-                fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.black));
-
-                fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.black));
-
-                fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.black));
+                    fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if (fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
+                    fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if(fragmentCheckoutBinding.layoutTimeD.isEnabled()) {
+                    fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
             }
         });
 
@@ -181,18 +203,23 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             public void onClick(View view) {
 
                 selected_time_frame = 4;
-                fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
-                fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.primaryDarkColor));
+                if (fragmentCheckoutBinding.layoutTimeD.isEnabled()) {
+                    fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
+                    fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
+                }
+                if (fragmentCheckoutBinding.layoutTimeB.isEnabled()) {
 
-
-                fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.black));
-
-                fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.black));
-
-                fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
+                    fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if (fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
+                    fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if (fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
+                    fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
             }
         });
 
@@ -388,6 +415,9 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         fragmentCheckoutBinding.spinnerCountriesA.setAdapter(adapter);
         fragmentCheckoutBinding.spinnerCountriesB.setAdapter(adapter);
+
+
+//        isToday();
         return fragmentCheckoutBinding.getRoot();
     }
 
@@ -399,9 +429,11 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         mCalendar.set(Calendar.MONTH,i1);
         mCalendar.set(Calendar.DAY_OF_MONTH,i2);
 
-        String selectedDate = DateFormat.getDateInstance(DateFormat.DATE_FIELD).format(mCalendar.getTime());
+        selectedDate = DateFormat.getDateInstance(DateFormat.DATE_FIELD).format(mCalendar.getTime());
+
 
         fragmentCheckoutBinding.tvDate.setText(selectedDate);
+        isToday(DateUtils.isToday(mCalendar.getTime().getTime()));
     }
     public int getTimeNow(){
         Date currentTime = Calendar.getInstance().getTime();
@@ -410,85 +442,83 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         if(hours<13) {
             timePeriod = "am";
             Toast.makeText(requireContext(), String.valueOf(hours) + timePeriod, Toast.LENGTH_SHORT).show();
-            return hours;
         }
         else
         {
             timePeriod = "pm";
             Toast.makeText(requireContext(), String.valueOf(hours-12) + timePeriod, Toast.LENGTH_SHORT).show();
-
-            return hours-12;
         }
 
-
+        return hours;
     }
 
-    public void isToday(){
+    public void isToday(boolean isDateToday){
         int timeNow = getTimeNow();
+        if(isDateToday) {
+            if (timeNow >= 6 && timeNow < 10) {
+                fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
+                fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
+                fragmentCheckoutBinding.layoutTimeA.setEnabled(false);
 
-        if((timeNow<10) &&(timePeriod.equals("am")) )
-        {
-            fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-            fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.black));
+            } else if ((timeNow >= 10) && timeNow < 14) {
+                fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
+                fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
+                fragmentCheckoutBinding.layoutTimeA.setEnabled(false);
 
-            fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-            fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.black));
+                fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
+                fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
+                fragmentCheckoutBinding.layoutTimeB.setEnabled(false);
 
-            fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-            fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
+            } else if ((timeNow >= 14) && timeNow < 18) {
+                fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
+                fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
+                fragmentCheckoutBinding.layoutTimeA.setEnabled(false);
 
-            fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-            fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.black));
-            //all visible...
+                fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
+                fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
+                fragmentCheckoutBinding.layoutTimeB.setEnabled(false);
 
+                fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
+                fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
+                fragmentCheckoutBinding.layoutTimeC.setEnabled(false);
+
+                //last two visible...
+            } else if ((timeNow >= 18)) {
+                fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
+                fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
+                fragmentCheckoutBinding.layoutTimeA.setEnabled(false);
+
+                fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
+                fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
+                fragmentCheckoutBinding.layoutTimeB.setEnabled(false);
+
+                fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
+                fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
+                fragmentCheckoutBinding.layoutTimeC.setEnabled(false);
+
+                fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
+                fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
+                fragmentCheckoutBinding.layoutTimeD.setEnabled(false);
+
+            }
         }
-        else if((timeNow>2) && (timePeriod.equals("pm")))
-        {
-            fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
-            fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
+        else {
+                fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.black));
+                fragmentCheckoutBinding.layoutTimeD.setEnabled(true);
 
-            fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-            fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.black));
+                fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.black));
+                fragmentCheckoutBinding.layoutTimeB.setEnabled(true);
 
-            fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-            fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
+                fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.black));
+                fragmentCheckoutBinding.layoutTimeA.setEnabled(true);
 
-            fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-            fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.black));
+                fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
+                fragmentCheckoutBinding.layoutTimeC.setEnabled(true);
 
-            //last three visible...
-        }
-        else if((timeNow>6) && (timePeriod.equals("pm")))
-        {
-            fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
-            fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
-
-            fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
-            fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
-
-            fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-            fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
-
-            fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-            fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.black));
-
-            //last two visible...
-        }
-        else if((timeNow>9) && (timePeriod.equals("pm")))
-        {
-            fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
-            fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
-
-            fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
-            fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
-
-            fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_disable));
-            fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.dark_gray));
-
-            fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-            fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.black));
-
-            //only last visible...
         }
 
     }

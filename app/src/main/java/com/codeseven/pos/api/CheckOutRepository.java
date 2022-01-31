@@ -8,6 +8,7 @@ import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
 import com.apollographql.apollo.request.RequestHeaders;
 import com.codeseven.pos.ApolloClientClass;
+import com.codeseven.pos.model.AddressItem;
 import com.codeseven.pos.util.CartPreference;
 import com.codeseven.pos.util.LoginPreference;
 
@@ -41,6 +42,11 @@ public class CheckOutRepository {
     private MutableLiveData<List<GetAvailablePaymentMethodsQuery.Available_payment_method>> listAvailablePaymentMethods;
     private MutableLiveData<String> getPaymentMethodResponse;
 
+    private MutableLiveData<List<String>> listOfAddresses;
+    private MutableLiveData<String> getAddressResponse;
+
+    private MutableLiveData<List<AddressItem>> addressObjects;
+
     private CartPreference cartPreference;
 
     public CheckOutRepository() {
@@ -59,7 +65,14 @@ public class CheckOutRepository {
 
         getPaymentMethodResponse = new MutableLiveData<>();
 
+        listOfAddresses = new MutableLiveData<>(new ArrayList<>());
+        getAddressResponse = new MutableLiveData<>();
+
+        addressObjects = new MutableLiveData<>(new ArrayList<>());
+
         cartPreference = new CartPreference();
+
+
     }
 
     public void  getCustomerInfo()
@@ -204,7 +217,41 @@ public class CheckOutRepository {
     }
 
     public void GetCustomerAddresses(){
-//        (new ApolloClientClass()).apolloClient.query(new GetCustomerAddressesQuery()).toBuilder().requestHeaders()
+
+        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
+        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
+
+        (new ApolloClientClass()).apolloClient.query(new GetCustomerAddressesQuery()).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetCustomerAddressesQuery.Data>() {
+            @Override
+            public void onResponse(@NonNull Response<GetCustomerAddressesQuery.Data> response) {
+                if(response.getErrors()!=null){
+                    if(response.getErrors().size()>0)
+                        getAddressResponse.postValue(response.getErrors().get(0).getMessage());
+                }
+                else
+                {
+                    List<String> address= new ArrayList<>();
+                    List<AddressItem> addressObjects_= new ArrayList<>();
+
+                    for(int i=0;i<response.getData().customer().addresses().size();i++){
+                        GetCustomerAddressesQuery.Address a = response.getData().customer().addresses().get(i);
+                        address.add(a.firstname()+" "+a.lastname()+"\n"+a.street().get(0)+"\n"+a.city()+" "+a.region().region_code()+
+                                " "+a.country_code()+"\n\n"+ a.telephone());
+
+                        addressObjects_.add(new AddressItem(a.firstname(),a.lastname(),a.city(),a.country_code().rawValue(),a.street().get(0),"",a.telephone()));
+                    }
+
+                    listOfAddresses.postValue(address);
+                    addressObjects.postValue(addressObjects_);
+                }
+
+            }
+
+            @Override
+            public void onFailure(@NonNull ApolloException e) {
+                getAddressResponse.postValue(e.getLocalizedMessage());
+            }
+        });
     }
 
     public MutableLiveData<String> getCustomerInfoResponse(){
@@ -240,5 +287,15 @@ public class CheckOutRepository {
         return getPaymentMethodResponse;
     }
 
+    public MutableLiveData<List<String>> getListOfAddresses() {
+        return listOfAddresses;
+    }
 
+    public MutableLiveData<String> getAddressResponse() {
+        return getAddressResponse;
+    }
+
+    public MutableLiveData<List<AddressItem>> getAddressObjects() {
+        return addressObjects;
+    }
 }

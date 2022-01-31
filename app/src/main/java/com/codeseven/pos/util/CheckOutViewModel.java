@@ -5,12 +5,14 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.codeseven.pos.api.CheckOutRepository;
+import com.codeseven.pos.model.AddressItem;
 
 import java.util.List;
 
 import javax.inject.Inject;
 
 import apollo.pos.GetAvailablePaymentMethodsQuery;
+import apollo.pos.GetCustomerAddressesQuery;
 import apollo.pos.GetCustomerWalletQuery;
 import apollo.pos.fragment.AvailableShippingMethodsCheckoutFragment;
 import apollo.pos.fragment.ShippingInformationFragment;
@@ -45,6 +47,9 @@ public class CheckOutViewModel extends ViewModel {
         private MutableLiveData<List<GetAvailablePaymentMethodsQuery.Available_payment_method>> GetAvailablePaymentMethods;
         private MutableLiveData<String> GetAvailablePaymentMethodsResponse;
 
+        private MutableLiveData<List<String>> listOfAddresses;
+        private MutableLiveData<String> addressListResponse;
+
 
         @Inject
         public CheckoutObserver(){
@@ -57,6 +62,8 @@ public class CheckOutViewModel extends ViewModel {
             this.applyWalletQueryResponse = checkOutRepository.getApplyWalletQueryResponse();
             GetAvailablePaymentMethods = checkOutRepository.getListAvailablePaymentMethods();
             GetAvailablePaymentMethodsResponse = checkOutRepository.getGetPaymentMethodResponse();
+            this.listOfAddresses = checkOutRepository.getListOfAddresses();
+            this.addressListResponse = checkOutRepository.getAddressResponse();
         }
 
         public void GetCustomerAddressDetails(){
@@ -109,6 +116,23 @@ public class CheckOutViewModel extends ViewModel {
 
         public MutableLiveData<List<GetAvailablePaymentMethodsQuery.Available_payment_method>> getGetAvailablePaymentMethods() {
             return GetAvailablePaymentMethods;
+        }
+
+
+        public void GetCustomerAvailableAddresses(){
+            checkOutRepository.GetCustomerAddresses();
+        }
+
+        public MutableLiveData<List<String>> getListOfAddresses() {
+            return listOfAddresses;
+        }
+        public MutableLiveData<String> getAddressListResponse() {
+            return addressListResponse;
+        }
+
+        public MutableLiveData<List<AddressItem>> getAddressObjects()
+        {
+            return checkOutRepository.getAddressObjects();
         }
     }
 }

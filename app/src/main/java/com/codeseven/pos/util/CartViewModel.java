@@ -59,5 +59,10 @@ public class CartViewModel  extends ViewModel {
         public MutableLiveData<String> getCartRequestResponse(){
             return cartRequestResponse;
         }
+
+        public void GetCustomerCart()
+        {
+            cartRepository.getCustomerExistingCart();
+        }
     }
 }
