@@ -142,6 +142,7 @@ public class CheckOutRepository {
                     }
                 }
                 else {
+                    cartPreference.AddRemainingWalletAmount(response.getData().customer().wallet().wallet_amount());
                     customer_wallet.postValue(response.getData().customer().wallet());
                 }
             }
@@ -170,8 +171,12 @@ public class CheckOutRepository {
                             if(response.getErrors().size()>0)
                                 applyWalletQueryResponse.postValue(response.getErrors().get(0).getMessage());
                         }
-                        else
-                            applyWalletQueryResponse.postValue("Wallet Applied.");
+                        else {
+                            cartPreference.AddRemainingWalletAmount(response.getData().applyWalletCart().cart().remaining_wallet_amount().toString());
+                            cartPreference.AddNeedToPay(String.valueOf(response.getData().applyWalletCart().cart().need_to_pay().doubleValue()));
+                            cartPreference.AddOrderTotal(String.valueOf(response.getData().applyWalletCart().cart().order_total().doubleValue()));
+                            applyWalletQueryResponse.postValue("Success");
+                        }
 
                     }
 
@@ -202,8 +207,10 @@ public class CheckOutRepository {
                         getPaymentMethodResponse.postValue(response.getErrors().get(0).getMessage());
                     }
                 }
-                else
+                else {
                     listAvailablePaymentMethods.postValue(response.getData().cart().available_payment_methods());
+                    cartPreference.SetCartWalletAmount(response.getData().cart().wallet_payment());
+                }
             }
 
             @Override
@@ -238,7 +245,7 @@ public class CheckOutRepository {
                         address.add(a.firstname()+" "+a.lastname()+"\n"+a.street().get(0)+"\n"+a.city()+" "+a.region().region_code()+
                                 " "+a.country_code()+"\n\n"+ a.telephone());
 
-                        addressObjects_.add(new AddressItem(a.firstname(),a.lastname(),a.city(),a.country_code().rawValue(),a.street().get(0),"",a.telephone()));
+                        addressObjects_.add(new AddressItem(a.id(), a.firstname(),a.lastname(),a.city(),a.country_code().rawValue(),a.street().get(0),"",a.telephone()));
                     }
 
                     listOfAddresses.postValue(address);

@@ -41,7 +41,7 @@ public class CartItemAdapter extends RecyclerView.Adapter<CartItemAdapter.ViewHo
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         CatalogItem cartItem = cartItemsArrayList.get(position);
         holder.cardviewCartItemBinding.tvProductName.setText(cartItem.getItemName());
-        holder.cardviewCartItemBinding.tvProductPrice.setText(cartItem.getItemPrice() + " Rs.");
+        holder.cardviewCartItemBinding.tvProductPrice.setText("PKR " + cartItem.getItemPrice());
         holder.cardviewCartItemBinding.etQuantity.setText(cartItem.getItemQuantity());
         Picasso.get().load(cartItem.getItemImage()).into(holder.cardviewCartItemBinding.ivProductImage);
 

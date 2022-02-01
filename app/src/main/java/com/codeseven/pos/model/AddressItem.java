@@ -4,6 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 public class AddressItem implements Parcelable {
+    private Integer id;
     private String firstName;
     private String lastName;
     private String city;
@@ -12,7 +13,8 @@ public class AddressItem implements Parcelable {
     private String address_optional;
     private String telephone;
 
-    public AddressItem(String firstName, String lastName, String city, String country, String address, String address_optional, String telephone) {
+    public AddressItem(Integer id , String firstName, String lastName, String city, String country, String address, String address_optional, String telephone) {
+        this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.city = city;
@@ -22,6 +24,37 @@ public class AddressItem implements Parcelable {
         this.telephone = telephone;
     }
 
+
+    protected AddressItem(Parcel in) {
+        id = in.readInt();
+        firstName = in.readString();
+        lastName = in.readString();
+        city = in.readString();
+        country = in.readString();
+        address = in.readString();
+        address_optional = in.readString();
+        telephone = in.readString();
+    }
+
+    public static final Creator<AddressItem> CREATOR = new Creator<AddressItem>() {
+        @Override
+        public AddressItem createFromParcel(Parcel in) {
+            return new AddressItem(in);
+        }
+
+        @Override
+        public AddressItem[] newArray(int size) {
+            return new AddressItem[size];
+        }
+    };
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public String getFirstName() {
         return firstName;
@@ -86,7 +119,14 @@ public class AddressItem implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
-
+        parcel.writeInt(id);
+        parcel.writeString(firstName);
+        parcel.writeString(lastName);
+        parcel.writeString(city);
+        parcel.writeString(country);
+        parcel.writeString(address);
+        parcel.writeString(address_optional);
+        parcel.writeString(telephone);
     }
 }
 

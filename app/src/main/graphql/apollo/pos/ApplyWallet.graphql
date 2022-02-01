@@ -1,6 +1,9 @@
 mutation ApplyWalletToCart($applyInput: applyWalletCartInput!){
     applyWalletCart(input: $applyInput){
         cart{
+            need_to_pay
+            order_total
+            wallet_action
             remaining_wallet_amount
         }
     }

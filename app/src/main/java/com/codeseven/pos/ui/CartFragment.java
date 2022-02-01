@@ -46,6 +46,7 @@ public class CartFragment extends Fragment {
 
 
     public static Double sub_total;
+    public static Double est_total;
     ProcessCartViewModel removeItemViewModel;
     @Inject
     ProcessCartViewModel.ProcessCartObserver processItemObserver;
@@ -75,6 +76,7 @@ public class CartFragment extends Fragment {
             cartObserver.getCartItems(customerCartId);
         }
         sub_total = 0.0;
+        est_total = 0.0;
     }
 
     @Override
@@ -173,29 +175,28 @@ public class CartFragment extends Fragment {
                                 price = (String.valueOf(items.get(i).product().price().regularPrice().amount().value()));
                                 priceThis = items.get(i).product().price().regularPrice().amount().value();
 
-                            }
-//                            price = (String.valueOf(items.get(i).product().price_range().maximum_price().final_price().value())) + " Rs.";
-                            image_url = items.get(i).product().small_image().url();
+                            }image_url = items.get(i).product().small_image().url();
                             quantity = String.valueOf((int) items.get(i).quantity());
                             itemUid = items.get(i).uid();
                             sub_total += (priceThis) * (items.get(i).quantity());
                             cartItemArrayList.add(new CatalogItem(itemsku, name, price, image_url, quantity,itemUid));
 
                         }
+                        est_total = sub_total+50;
                         if(items.size()>0)
                         {
                             cartItemAdapter.notifyDataSetChanged();
                             getMoreProducts = false;
-                            fragmentCartBinding.tvSubtotalValue.setText(String.valueOf(sub_total)+ " Rs.");
-                            fragmentCartBinding.tvEstimatedTotalValue.setText(String.valueOf(sub_total) + " Rs.");
+                            fragmentCartBinding.tvSubtotalValue.setText("PKR "+String.format("%.2f", sub_total));
+                            fragmentCartBinding.tvEstimatedTotalValue.setText("PKR " +String.format("%.2f", est_total));
                             progressDialog.dismissDialog();
                             fragmentCartBinding.rvCartItems.setVisibility(View.VISIBLE);
                             fragmentCartBinding.tvNoItems.setVisibility(View.GONE);
                         }
 
             }
-                fragmentCartBinding.tvSubtotalValue.setText(String.valueOf(sub_total)+ " Rs.");
-                fragmentCartBinding.tvEstimatedTotalValue.setText(String.valueOf(sub_total) + " Rs.");
+                fragmentCartBinding.tvSubtotalValue.setText("PKR " + String.format("%.2f", sub_total));
+                fragmentCartBinding.tvEstimatedTotalValue.setText("PKR " + String.format("%.2f", est_total));
 
         }
         });
@@ -257,8 +258,9 @@ public class CartFragment extends Fragment {
 
     private void ItemRemoved(int quantity, double price) {
         sub_total= sub_total-(price*quantity);
-        fragmentCartBinding.tvSubtotalValue.setText(String.format("%.2f", sub_total) + " Rs.");
-        fragmentCartBinding.tvEstimatedTotalValue.setText(String.format("%.2f", sub_total) + " Rs.");
+        est_total = sub_total+50;
+        fragmentCartBinding.tvSubtotalValue.setText("PKR " + String.format("%.2f", sub_total));
+        fragmentCartBinding.tvEstimatedTotalValue.setText("PKR " +  String.format("%.2f", est_total));
     }
 
     public void updateSubtotal(Double item_price,boolean isIncrement){
@@ -267,8 +269,10 @@ public class CartFragment extends Fragment {
         else
             sub_total = sub_total-item_price;
 
-        fragmentCartBinding.tvSubtotalValue.setText(String.format("%.2f", sub_total) + " Rs.");
-        fragmentCartBinding.tvEstimatedTotalValue.setText(String.format("%.2f", sub_total) + " Rs.");
+        est_total = sub_total+50;
+
+        fragmentCartBinding.tvSubtotalValue.setText("PKR " + String.format("%.2f", sub_total));
+        fragmentCartBinding.tvEstimatedTotalValue.setText("PKR " + String.format("%.2f", est_total));
 
     }
 

@@ -22,6 +22,7 @@ import com.codeseven.pos.databinding.FragmentCustomerAddressesBinding;
 import com.codeseven.pos.model.AddressItem;
 import com.codeseven.pos.model.AddressItemAdapter;
 import com.codeseven.pos.util.AddressItemClickListener;
+import com.codeseven.pos.util.AddressUpdateListener;
 import com.codeseven.pos.util.CheckOutViewModel;
 
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ import apollo.pos.GetCustomerAddressesQuery;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
-public class CustomerAddressesFragment extends Fragment {
+public class CustomerAddressesFragment extends Fragment   implements AddressUpdateListener {
 
     FragmentCustomerAddressesBinding addressesBinding;
     List<String> addressesList= new ArrayList<>();
@@ -83,7 +84,6 @@ public class CustomerAddressesFragment extends Fragment {
                    }
 
                    if (view.getTag().equals("item")) {
-//                    Toast.makeText(requireContext(), "item", Toast.LENGTH_SHORT).show();
                    }
                }
                else
@@ -142,5 +142,20 @@ public class CustomerAddressesFragment extends Fragment {
             }
         });
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onAddressUpdates(Integer id, AddressItem item) {
+
     }
 }

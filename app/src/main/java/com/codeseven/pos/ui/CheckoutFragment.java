@@ -17,16 +17,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
-import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.DatePicker;
-import android.widget.RadioButton;
 import android.widget.Toast;
 
 import com.codeseven.pos.R;
 import com.codeseven.pos.databinding.FragmentCheckoutBinding;
+import com.codeseven.pos.util.CartPreference;
 import com.codeseven.pos.util.CheckOutViewModel;
-import com.google.android.gms.common.util.DataUtils;
 
 import java.text.DateFormat;
 import java.util.Calendar;
@@ -36,7 +34,6 @@ import java.util.List;
 import javax.inject.Inject;
 
 import apollo.pos.GetAvailablePaymentMethodsQuery;
-import apollo.pos.GetCustomerDetailsQuery;
 import apollo.pos.GetCustomerWalletQuery;
 import apollo.pos.fragment.AvailableShippingMethodsCheckoutFragment;
 import apollo.pos.fragment.ShippingInformationFragment;
@@ -50,9 +47,11 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
     @Inject CheckOutViewModel.CheckoutObserver checkoutObserver;
     ProgressDialog progressDialog;
     private String timePeriod= "am";
-    private int selected_time_frame = 0;
+    private int selected_time_slot = 0;
     String selectedDate="";
     public static Context contextCheckOut;
+    CartPreference cartPreference;
+
     public CheckoutFragment() {
         // Required empty public constructor
     }
@@ -66,6 +65,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         checkOutViewModel = (new ViewModelProvider(requireActivity())).get(CheckOutViewModel.class);
+        cartPreference = new CartPreference();
     }
 
     @Override
@@ -123,7 +123,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         fragmentCheckoutBinding.layoutTimeA.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                selected_time_frame = 1;
+                selected_time_slot = 1;
                 if(fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
                     fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
                     fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
@@ -147,7 +147,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             @Override
             public void onClick(View view) {
 
-                selected_time_frame = 2;
+                selected_time_slot = 2;
                 if(fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
 
                     fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
@@ -175,7 +175,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             @Override
             public void onClick(View view) {
 
-                selected_time_frame = 3;
+                selected_time_slot = 3;
                 if(fragmentCheckoutBinding.layoutTimeC.isEnabled()) {
 
                     fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
@@ -202,7 +202,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             @Override
             public void onClick(View view) {
 
-                selected_time_frame = 4;
+                selected_time_slot = 4;
                 if (fragmentCheckoutBinding.layoutTimeD.isEnabled()) {
                     fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
                     fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
@@ -216,7 +216,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                     fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
                     fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.black));
                 }
-                if (fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
+                if (fragmentCheckoutBinding.layoutTimeC.isEnabled()) {
                     fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
                     fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
                 }
@@ -267,68 +267,111 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                 progressDialog.dismissDialog();
             }
         });
+
+        ///// Payment Method Logic...
+
+        checkoutObserver.GetListOfAvailablePaymentMethods();
         checkoutObserver.getCustomerWallet();
         checkoutObserver.getCustomerWalletData().observe(getViewLifecycleOwner(), new Observer<GetCustomerWalletQuery.Wallet>() {
             @Override
             public void onChanged(GetCustomerWalletQuery.Wallet wallet) {
-                String wallet_amount =  wallet.wallet_amount();
-                fragmentCheckoutBinding.tvWalletValue.setText("Your wallet balance is:"+ " "+ wallet_amount);
+
+                fragmentCheckoutBinding.tvWalletValue.setText("Your wallet balance is:"+ " "+ wallet.wallet_amount());
             }
         });
 
-        fragmentCheckoutBinding.cbApplyWallet.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+
+
+        fragmentCheckoutBinding.cbApplyWallet.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                checkoutObserver.ApplyWallet(b);
+            public void onClick(View view) {
+                progressDialog.StartLoadingdialog();
+                checkoutObserver.ApplyWallet(fragmentCheckoutBinding.cbApplyWallet.isChecked());
             }
         });
         checkoutObserver.getApplyWalletQueryResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String s) {
-                if(s.length()>0)
-                {
-                if(s.contains("The current user cannot perform")){
-                 signInDialog();
+                if(s.length()>0) {
+                    if (s.contains("The current user cannot perform")) {
+
+                        fragmentCheckoutBinding.cbApplyWallet.setChecked(false);
+                        progressDialog.dismissDialog();
+                        signInDialog();
+
+                    } else if(s.contains("Failed to execute HTTP")){
+
+                        fragmentCheckoutBinding.cbApplyWallet.setChecked(false);
+                        progressDialog.dismissDialog();
+                        Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+
+                    }else if (s.equals("Success")) {
+
+                        if(fragmentCheckoutBinding.cbApplyWallet.isChecked()){
+                            String wallet_msg = "Pay amount with wallet : " + cartPreference.GetNeedToPay() +"\n"+"Order amount : "+
+                                    cartPreference.GetOrderTotal() + "\n"+ "Amount left in wallet : "+cartPreference.GetRemainingWalletAmount();
+                            fragmentCheckoutBinding.tvWalletValue.setText(wallet_msg);
+                        }
+                        else {
+                            fragmentCheckoutBinding.tvWalletValue.setText("Your wallet balance is:" + " " + cartPreference.GetRemainingWalletAmount());
+                        }
+
+                        checkoutObserver.GetListOfAvailablePaymentMethods();
+
+                    }else{
+                        progressDialog.dismissDialog();
+                        Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                    }
                 }
-                else {
-                Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
-                }
-                }
+
             }
         });
 
 
 
-
-
-
-        //Get Customer Payment Method...
-
-        checkoutObserver.GetListOfAvailablePaymentMethods();
         checkoutObserver.getGetAvailablePaymentMethods().observe(getViewLifecycleOwner(), new Observer<List<GetAvailablePaymentMethodsQuery.Available_payment_method>>() {
             @Override
             public void onChanged(List<GetAvailablePaymentMethodsQuery.Available_payment_method> available_payment_methods) {
 
-                if(available_payment_methods.size()>0 && available_payment_methods.size()<2)
+
+                boolean showPaymentMethods = true;
+                for(int i=0;i<available_payment_methods.size();i++){
+                    if(available_payment_methods.get(i).title().equals("No Payment Information Required")) {
+                        showPaymentMethods = false;
+                        fragmentCheckoutBinding.cbApplyWallet.setChecked(true);
+                    }
+                }
+
+                if(showPaymentMethods) {
+                    fragmentCheckoutBinding.tvNoPaymentInfoRequired.setVisibility(View.GONE);
+                    fragmentCheckoutBinding.dividerPaymentMethod.setVisibility(View.VISIBLE);
+                    if (available_payment_methods.size() > 0 && available_payment_methods.size() < 2) {
+                        fragmentCheckoutBinding.rbSlectionPaymentMethodA.setText(available_payment_methods.get(0).title());
+                        fragmentCheckoutBinding.layoutPaymentB.setVisibility(View.GONE);
+                        fragmentCheckoutBinding.cbPaymentMethodA.setChecked(true);
+                        fragmentCheckoutBinding.layoutNewAddressA.setVisibility(View.GONE);
+
+                    } else if (available_payment_methods.size() >= 2 && available_payment_methods.size() <= 3) {
+                        fragmentCheckoutBinding.cbPaymentMethodA.setChecked(true);
+                        fragmentCheckoutBinding.layoutPaymentA.setVisibility(View.VISIBLE);fragmentCheckoutBinding.layoutNewAddressA.setVisibility(View.GONE);
+
+                        fragmentCheckoutBinding.layoutPaymentB.setVisibility(View.VISIBLE);
+                        fragmentCheckoutBinding.cbPaymentMethodB.setVisibility(View.GONE);
+                        fragmentCheckoutBinding.layoutNewAddressB.setVisibility(View.GONE);
+
+                        fragmentCheckoutBinding.rbSlectionPaymentMethodA.setText(available_payment_methods.get(0).title());
+                        fragmentCheckoutBinding.rbSlectionPaymentMethodB.setText(available_payment_methods.get(1).title());
+                    }
+                }
+                else
                 {
-                    fragmentCheckoutBinding.rbSlectionPaymentMethodA.setText(available_payment_methods.get(0).title());
+                    fragmentCheckoutBinding.layoutPaymentA.setVisibility(View.GONE);
                     fragmentCheckoutBinding.layoutPaymentB.setVisibility(View.GONE);
-                    fragmentCheckoutBinding.cbPaymentMethodA.setChecked(true);
-                    fragmentCheckoutBinding.layoutNewAddressA.setVisibility(View.GONE);
-
+                    fragmentCheckoutBinding.dividerPaymentMethod.setVisibility(View.GONE);
+                    fragmentCheckoutBinding.tvNoPaymentInfoRequired.setVisibility(View.VISIBLE);
                 }
-                else if(available_payment_methods.size()>=2 &&available_payment_methods.size()<=3)
-                {
-                    fragmentCheckoutBinding.cbPaymentMethodA.setChecked(true);
-                    fragmentCheckoutBinding.layoutNewAddressA.setVisibility(View.GONE);
 
-                    fragmentCheckoutBinding.layoutPaymentB.setVisibility(View.VISIBLE);
-                    fragmentCheckoutBinding.cbPaymentMethodB.setVisibility(View.GONE);
-                    fragmentCheckoutBinding.layoutNewAddressB.setVisibility(View.GONE);
-
-                    fragmentCheckoutBinding.rbSlectionPaymentMethodA.setText(available_payment_methods.get(0).title());
-                    fragmentCheckoutBinding.rbSlectionPaymentMethodB.setText(available_payment_methods.get(1).title());
-                }
+                progressDialog.dismissDialog();
             }
         });
         checkoutObserver.getPaymentMethodsResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
@@ -416,8 +459,6 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         fragmentCheckoutBinding.spinnerCountriesA.setAdapter(adapter);
         fragmentCheckoutBinding.spinnerCountriesB.setAdapter(adapter);
 
-
-//        isToday();
         return fragmentCheckoutBinding.getRoot();
     }
 

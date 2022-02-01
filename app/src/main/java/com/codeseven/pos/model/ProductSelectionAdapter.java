@@ -45,7 +45,7 @@ public class ProductSelectionAdapter extends RecyclerView.Adapter<ProductSelecti
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         GetAutocompleteResultsQuery.Item item = itemsList.get(position);
         holder.binding.tvProductName.setText(item.name());
-        holder.binding.tvProductPrice.setText(item.price().regularPrice().amount().value()+ " Rs.");
+        holder.binding.tvProductPrice.setText("PKR " +  item.price().regularPrice().amount().value());
         Picasso.get().load(item.small_image().url()).into(holder.binding.ivProductImage);
         holder.bind(itemsList.get(position),productSelectionListener);
 

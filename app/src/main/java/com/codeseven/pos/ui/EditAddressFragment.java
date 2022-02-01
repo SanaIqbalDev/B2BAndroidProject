@@ -8,6 +8,7 @@ import androidx.constraintlayout.helper.widget.Layer;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
+import androidx.navigation.fragment.NavHostFragment;
 
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -78,6 +79,8 @@ public class EditAddressFragment extends DialogFragment {
             @Override
             public void onClick(View view) {
                 dismiss();
+
+
             }
         });
         binding.btnClose.setOnClickListener(new View.OnClickListener() {

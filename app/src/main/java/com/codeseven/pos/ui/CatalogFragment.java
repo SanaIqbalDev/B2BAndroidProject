@@ -169,7 +169,7 @@ public class CatalogFragment extends Fragment {
                         dataFound = true;
                         itemsku = (items.get(i).sku());
                         name = (items.get(i).name());
-                        price = (String.valueOf(items.get(i).price().regularPrice().amount().value().intValue())) + " Rs.";
+                        price = ("PKR " + String.valueOf(items.get(i).price().regularPrice().amount().value().intValue()));
                         image_url = items.get(i).small_image().url();
                         description = items.get(i).description().html();
                         catalogItemArrayList.add(new CatalogItem(itemsku, name, price, image_url, description));
