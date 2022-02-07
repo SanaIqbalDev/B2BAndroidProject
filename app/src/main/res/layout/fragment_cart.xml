@@ -144,10 +144,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:dividerColor="@color/secondaryDarkColor"
-                app:dividerInsetStart="25dp"
-                app:dividerInsetEnd="25dp"
+                app:dividerInsetStart="5dp"
+                app:dividerInsetEnd="5dp"
                 app:layout_constraintTop_toBottomOf="@id/tv_est_shipping"
-                android:layout_marginTop="10dp"/>
+                android:layout_marginTop="15dp"/>
 <!--//////////////////////////-->
 
             <TextView
@@ -159,7 +159,7 @@
                 android:textColor="@color/black"
                 app:layout_constraintTop_toBottomOf="@id/divider_one"
                 app:layout_constraintLeft_toLeftOf="parent"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="15dp"
                 />
 
             <TextView
@@ -171,7 +171,7 @@
                 android:textColor="@color/black"
                 app:layout_constraintTop_toBottomOf="@id/divider_one"
                 app:layout_constraintRight_toRightOf="parent"
-                android:layout_marginTop="20dp"/>
+                android:layout_marginTop="15dp"/>
 
 
 

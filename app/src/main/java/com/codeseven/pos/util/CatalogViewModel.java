@@ -10,6 +10,7 @@ import java.util.List;
 
 import javax.inject.Inject;
 
+import apollo.pos.GetMegaMenuQuery;
 import apollo.pos.fragment.ProductsFragment;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
@@ -37,6 +38,8 @@ public class CatalogViewModel extends ViewModel {
         private MutableLiveData<String> catalogRequestResponse;
         private String responseMessage;
         private MutableLiveData<Integer> pageCount;
+        private MutableLiveData<List<GetMegaMenuQuery.CategoryList>> categoryLists;
+
 
         @Inject
         public CatalogObserver() {
@@ -46,11 +49,12 @@ public class CatalogViewModel extends ViewModel {
             productsList = catalogRepository.getProductsFragment();
             pageCount = catalogRepository.getPageCount();
             responseMessage = catalogRepository.getMessage();
+            categoryLists = catalogRepository.getCategoryList();
         }
 
-        public void getUpdatedcatalog(int currentPage, int pageSize)
+        public void getUpdatedcatalog(int currentPage, int pageSize, String category)
         {
-            catalogRepository.getCatalog(currentPage,pageSize);
+            catalogRepository.getCatalog(currentPage,pageSize, category);
         }
 
 
@@ -69,6 +73,15 @@ public class CatalogViewModel extends ViewModel {
 
         public String getResponseMessage(){
             return responseMessage;
+        }
+
+        public void GetCategoryList()
+        {
+            catalogRepository.getCaterogiesList();
+        }
+
+        public MutableLiveData<List<GetMegaMenuQuery.CategoryList>> getCategoryLists() {
+            return categoryLists;
         }
     }
 }

@@ -10,6 +10,7 @@ import android.widget.Toast;
 import androidx.activity.OnBackPressedCallback;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
@@ -88,7 +89,11 @@ public class LoginFragment extends Fragment {
         loginObserver.getLoginResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String s) {
-                Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+                    {
+                        Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                    }
+                }
             }
         });
         fragmentLoginBinding.executePendingBindings();

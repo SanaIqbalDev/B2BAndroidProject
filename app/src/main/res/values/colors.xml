@@ -22,7 +22,7 @@
     <color name="light_gray">#F5F5F5</color>
 <!--    <color name="dark_gray">#9E9C9C</color>-->
     <color name="dark_gray">#808080</color>
-
+    <color name="speaking_color">#0D327E</color>
     <color name="transparent">@android:color/transparent</color>
 
 </resources>

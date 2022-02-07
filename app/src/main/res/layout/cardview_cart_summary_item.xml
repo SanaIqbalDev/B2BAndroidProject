@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <androidx.cardview.widget.CardView
+
+        android:id="@+id/cardview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:strokeWidth="1dp"
+        app:cardBackgroundColor="@color/white"
+        app:cardCornerRadius="3dp"
+        app:cardElevation="1dp"
+        app:cardMaxElevation="1dp"
+        android:layout_marginBottom="5dp"
+        app:cardPreventCornerOverlap="true"
+        app:cardUseCompatPadding="true"
+        >
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:weightSum="5"
+            android:padding="2dp"
+            android:layout_gravity="center_vertical">
+
+            <ImageView
+                android:id="@+id/iv_item_image"
+                android:layout_width="0dp"
+                android:layout_weight="1"
+                android:layout_height="80dp"
+                android:padding="2dp"
+                app:srcCompat="@drawable/product_item_temp"
+                android:scaleType="centerCrop"/>
+
+            <TextView
+                    android:id="@+id/tv_item_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2.5"
+                    android:textAppearance="?attr/textAppearanceHeadline6"
+                    android:gravity="left|center_vertical"
+                    android:singleLine="false"
+                    android:scrollbars="vertical"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:paddingLeft="15dp"
+                    android:text="item name"/>
+
+            <TextView
+                android:id="@+id/tv_item_price"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1.5"
+                android:tag="price"
+                android:textAppearance="?attr/textAppearanceHeadline6"
+                android:gravity="right|center_vertical"
+                android:singleLine="true"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                />
+
+        </LinearLayout>
+
+
+    </androidx.cardview.widget.CardView>
+
+
+</layout>

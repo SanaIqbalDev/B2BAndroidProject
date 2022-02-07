@@ -6,6 +6,7 @@ import android.os.Bundle;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
@@ -47,6 +48,7 @@ public class CartFragment extends Fragment {
 
     public static Double sub_total;
     public static Double est_total;
+    public static Double saved_total;
     ProcessCartViewModel removeItemViewModel;
     @Inject
     ProcessCartViewModel.ProcessCartObserver processItemObserver;
@@ -77,6 +79,7 @@ public class CartFragment extends Fragment {
         }
         sub_total = 0.0;
         est_total = 0.0;
+        saved_total = 0.0;
     }
 
     @Override
@@ -99,13 +102,13 @@ public class CartFragment extends Fragment {
 
 //                    Toast.makeText(requireContext(), "remove Button CLicked", Toast.LENGTH_SHORT).show();
                     processItemObserver.RemoveCartItem(catalogItem.getItemUid());
-                    ItemRemoved(Integer.parseInt(catalogItem.getItemQuantity()),Double.parseDouble(catalogItem.getItemPrice()));
+                    ItemRemoved(Integer.parseInt(catalogItem.getItemQuantity()),Double.parseDouble(catalogItem.getItemMinimalPrice()), Double.parseDouble(catalogItem.getItemRegularPrice()));
                 }
                 if(view.getTag().equals("increase")) {
                     catalogItem.setItemQuantity(String.valueOf(Integer.parseInt(catalogItem.getItemQuantity()) + 1));
                     processItemObserver.UpdateCartItem(catalogItem);
 
-                    updateSubtotal(Double.parseDouble(catalogItem.getItemPrice()),true);
+                    updateSubtotal(Double.parseDouble(catalogItem.getItemMinimalPrice()), Double.parseDouble(catalogItem.getItemRegularPrice()), true);
 
                 }
                 if(view.getTag().equals("decrease")) {
@@ -116,7 +119,7 @@ public class CartFragment extends Fragment {
 
                         processItemObserver.UpdateCartItem(catalogItem);
 
-                        updateSubtotal(Double.parseDouble(catalogItem.getItemPrice()),false);
+                        updateSubtotal(Double.parseDouble(catalogItem.getItemMinimalPrice()), Double.parseDouble(catalogItem.getItemRegularPrice()), false);
 
                     }
                 }
@@ -154,8 +157,8 @@ public class CartFragment extends Fragment {
             public void onChanged(List<GetCartByIdQuery.Item> items) {
                 List<GetCartByIdQuery.Item> ab = items;
 
-                String name, price, image_url, quantity, itemsku, itemUid;
-                Double priceThis;
+                String name, image_url, quantity, itemsku, itemUid;
+                Double priceThis, regular_price;
 
                 if(getMoreProducts == true) {
 
@@ -163,23 +166,24 @@ public class CartFragment extends Fragment {
 
                             itemsku = (items.get(i).product().sku());
                             name = (items.get(i).product().name());
+                            regular_price = items.get(i).product().price().regularPrice().amount().value();
+
                             if((items.get(i).product().price().minimalPrice().amount().value()!=null) &&
                                     (items.get(i).product().price().minimalPrice().amount().value()<items.get(i).product().price().regularPrice().amount().value()))
                             {
-                                price = (String.valueOf(items.get(i).product().price().minimalPrice().amount().value()));
                                 priceThis = items.get(i).product().price().minimalPrice().amount().value();
 
                             }
                             else
                             {
-                                price = (String.valueOf(items.get(i).product().price().regularPrice().amount().value()));
                                 priceThis = items.get(i).product().price().regularPrice().amount().value();
 
                             }image_url = items.get(i).product().small_image().url();
                             quantity = String.valueOf((int) items.get(i).quantity());
                             itemUid = items.get(i).uid();
                             sub_total += (priceThis) * (items.get(i).quantity());
-                            cartItemArrayList.add(new CatalogItem(itemsku, name, price, image_url, quantity,itemUid));
+                            saved_total += (regular_price) * (items.get(i).quantity());
+                            cartItemArrayList.add(new CatalogItem(itemsku, name, String.valueOf(priceThis),String.valueOf(regular_price), image_url, quantity,itemUid));
 
                         }
                         est_total = sub_total+50;
@@ -207,7 +211,6 @@ public class CartFragment extends Fragment {
                 progressDialog.dismissDialog();
                 if(s.contains("The cart isn't active."))
                 {
-//                    Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
                     cartObserver.GetCustomerCart();
                 }
                 if(s.contains("The current user cannot perform operations on cart")){
@@ -240,15 +243,20 @@ public class CartFragment extends Fragment {
             @Override
             public void onChanged(String s) {
                 progressDialog.dismissDialog();
-                Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
+                if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+                    {
+                        Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
+                    }
             }
-        });
+        }});
 
 
         fragmentCartBinding.btnProceedToCheckout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                NavHostFragment.findNavController(CartFragment.this).navigate(R.id.action_cartFragment_to_checkoutFragment);
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList("cart_items", cartItemArrayList);
+                NavHostFragment.findNavController(CartFragment.this).navigate(R.id.action_cartFragment_to_checkoutFragment,bundle);
             }
         });
 
@@ -256,18 +264,27 @@ public class CartFragment extends Fragment {
 
     }
 
-    private void ItemRemoved(int quantity, double price) {
+    private void ItemRemoved(int quantity, double price, double regular_price) {
         sub_total= sub_total-(price*quantity);
         est_total = sub_total+50;
+
+        saved_total = saved_total - (regular_price*quantity);
         fragmentCartBinding.tvSubtotalValue.setText("PKR " + String.format("%.2f", sub_total));
         fragmentCartBinding.tvEstimatedTotalValue.setText("PKR " +  String.format("%.2f", est_total));
+
     }
 
-    public void updateSubtotal(Double item_price,boolean isIncrement){
+    public void updateSubtotal(Double item_price,Double regular_price, boolean isIncrement){
         if(isIncrement)
+        {
             sub_total = sub_total+item_price;
+            saved_total= saved_total + regular_price;
+        }
         else
+        {
             sub_total = sub_total-item_price;
+            saved_total = saved_total -regular_price;
+        }
 
         est_total = sub_total+50;
 

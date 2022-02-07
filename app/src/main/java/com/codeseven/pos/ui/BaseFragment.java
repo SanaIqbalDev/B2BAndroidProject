@@ -1,6 +1,7 @@
 package com.codeseven.pos.ui;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.databinding.DataBindingUtil;
@@ -8,6 +9,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -53,12 +55,18 @@ public class BaseFragment extends Fragment {
         View view = fragmentBaseBinding.getRoot();
         fragmentBaseBinding.executePendingBindings();
 
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //Checking user Login state.
+                if(!loginObserver.getPhoneNumberPreference().equals("") && !loginObserver.getPasswordPreference().equals("") && loginObserver.getPreferenceLoginState())
+                    NavHostFragment.findNavController(BaseFragment.this).navigate(R.id.action_baseFragment_to_homeFragment);
+                else
+                    NavHostFragment.findNavController(BaseFragment.this).navigate(R.id.action_baseFragment_to_loginFragment);
 
-        //Checking user Login state.
-        if(!loginObserver.getPhoneNumberPreference().equals("") && !loginObserver.getPasswordPreference().equals("") && loginObserver.getPreferenceLoginState())
-            NavHostFragment.findNavController(BaseFragment.this).navigate(R.id.action_baseFragment_to_homeFragment);
-        else
-            NavHostFragment.findNavController(BaseFragment.this).navigate(R.id.action_baseFragment_to_loginFragment);
+            }
+        }, 2000);
+
 
 
 

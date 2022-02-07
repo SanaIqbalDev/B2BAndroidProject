@@ -29,6 +29,7 @@ public class ProgressDialog {
 
         alertDialog = builder.create();
         alertDialog.setCancelable(false);
+
         alertDialog.show();
     }
 

@@ -29,6 +29,10 @@ public class CatalogItemAdapter extends RecyclerView.Adapter<CatalogItemAdapter.
         onItemClickListenerThis = onItemClickListener;
     }
 
+    public void setCatalogItemsArrayList(ArrayList<CatalogItem> ab )
+    {
+        catalogItemsArrayList = ab;
+    }
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -43,7 +47,7 @@ public class CatalogItemAdapter extends RecyclerView.Adapter<CatalogItemAdapter.
 
         CatalogItem catalogItem = catalogItemsArrayList.get(position);
         holder.cardviewItemsBinding.tvProductName.setText(catalogItem.getItemName());
-        holder.cardviewItemsBinding.tvProductPrice.setText(catalogItem.getItemPrice());
+        holder.cardviewItemsBinding.tvProductPrice.setText(catalogItem.getItemMinimalPrice());
         Picasso.get().load(catalogItem.getItemImage()).into(holder.cardviewItemsBinding.ivProductImage);
 
         holder.bind(catalogItemsArrayList.get(position), onItemClickListenerThis);

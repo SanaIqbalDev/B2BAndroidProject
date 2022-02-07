@@ -12,6 +12,7 @@ import com.codeseven.pos.ApolloClientClass;
 import java.util.ArrayList;
 import java.util.List;
 
+import apollo.pos.GetMegaMenuQuery;
 import apollo.pos.GetProductsQuery;
 import apollo.pos.fragment.ProductsFragment;
 import apollo.pos.type.FilterEqualTypeInput;
@@ -26,7 +27,7 @@ public class CatalogRepository {
     private String message;
     private MutableLiveData<List<ProductsFragment.Item>> productsFragment;
     private MutableLiveData<Integer> pageCount;
-
+    private MutableLiveData<List<GetMegaMenuQuery.CategoryList>> categoryLists;
 
 
 
@@ -34,12 +35,14 @@ public class CatalogRepository {
         CatalogRequestResponse = new MutableLiveData<>("");
         productsFragment = new MutableLiveData<>();
         pageCount = new MutableLiveData<>(0);
+        categoryLists = new MutableLiveData<>();
+
     }
 
-    public void getCatalog(int currentPage, int pageSize){
+    public void getCatalog(int currentPage, int pageSize, String category){
 
         ArrayList<String> category_id = new ArrayList<>();
-        category_id.add("2");
+        category_id.add(category);
         Input<List<String>> in = new Input<List<String>>(category_id, true);
         Input<FilterEqualTypeInput> ab = new Input<>(FilterEqualTypeInput.builder().inInput(in).build(),true);
 
@@ -57,14 +60,20 @@ public class CatalogRepository {
                     if (response.getErrors().size() > 0)
                         CatalogRequestResponse.postValue(response.getErrors().get(0).getMessage());
                 }
-//                message = "success";
-
-
-                if(response.getData().products().fragments().productsFragment().page_info().total_pages()!= null)
+                else
                 {
-                    pageCount.postValue(response.getData().products().fragments().productsFragment().page_info().total_pages());
+                    try {
+                        if (response.getData().products().fragments().productsFragment().page_info().total_pages() != null) {
+                            pageCount.postValue(response.getData().products().fragments().productsFragment().page_info().total_pages());
+                        }
+                        productsFragment.postValue(response.getData().products().fragments().productsFragment().items());
+                    }
+                    catch (NullPointerException nullPointerException)
+                    {
+
+                    }
                 }
-                productsFragment.postValue(response.getData().products().fragments().productsFragment().items());
+
 
             }
 
@@ -73,6 +82,20 @@ public class CatalogRepository {
                 message = e.getMessage();
                 CatalogRequestResponse.postValue(e.getLocalizedMessage());
 
+            }
+        });
+    }
+    public void getCaterogiesList(){
+        (new ApolloClientClass()).apolloClient.query(new GetMegaMenuQuery()).enqueue(new ApolloCall.Callback<GetMegaMenuQuery.Data>() {
+            @Override
+            public void onResponse(@NonNull Response<GetMegaMenuQuery.Data> response) {
+                String ab ="";
+                categoryLists.postValue(response.getData().categoryList());
+            }
+
+            @Override
+            public void onFailure(@NonNull ApolloException e) {
+                String ab ="";
             }
         });
     }
@@ -91,6 +114,10 @@ public class CatalogRepository {
 
     public String getMessage(){
         return message;
+    }
+
+    public MutableLiveData<List<GetMegaMenuQuery.CategoryList>> getCategoryList(){
+        return categoryLists;
     }
 
 }

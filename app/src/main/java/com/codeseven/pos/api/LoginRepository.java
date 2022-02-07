@@ -30,7 +30,7 @@ public class LoginRepository {
             public void onResponse(@NonNull Response<GenerateCustomerTokenByPhoneMutation.Data> response) {
                if(response.getData().generateCustomerTokenByPhone()!= null)
                {
-                   loginResponse.postValue("Generated Token:" + response.getData().generateCustomerTokenByPhone().token());
+//                   loginResponse.postValue("Generated Token:" + response.getData().generateCustomerTokenByPhone().token());
                    loginPreference.AddLoginPreferences("token",response.getData().generateCustomerTokenByPhone().token());
                }
                else

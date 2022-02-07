@@ -4,6 +4,7 @@ import android.os.Bundle;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
@@ -64,7 +65,7 @@ public class ProductDetailFragment extends Fragment {
 
         productObserver.setProductSku(catalogItem.getItemSku());
         productObserver.setProductName(catalogItem.getItemName());
-        productObserver.setProductPrice(catalogItem.getItemPrice());
+        productObserver.setProductPrice(catalogItem.getItemMinimalPrice());
         productObserver.setProductDescription(catalogItem.getItemDescription());
         fragmentProductDetailBinding.setViewModel(productObserver);
 
@@ -83,10 +84,12 @@ public class ProductDetailFragment extends Fragment {
         productObserver.getRepositoryResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String s) {
-                if(s.equals("Error"))
-                    Toast.makeText(requireContext(), "Item not added to cart, please check your network connection.", Toast.LENGTH_SHORT).show();
-                else if(!s.equals(""))
-                    Toast.makeText(requireContext(), "Item is added to cart.", Toast.LENGTH_SHORT).show();
+
+                    if (s.equals("Error"))
+                        Toast.makeText(requireContext(), "Item not added to cart, please check your network connection.", Toast.LENGTH_SHORT).show();
+                    else if (!s.equals(""))
+                        Toast.makeText(requireContext(), "Item is added to cart.", Toast.LENGTH_SHORT).show();
+
             }
         });
         

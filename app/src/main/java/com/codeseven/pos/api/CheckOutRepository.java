@@ -142,7 +142,7 @@ public class CheckOutRepository {
                     }
                 }
                 else {
-                    cartPreference.AddRemainingWalletAmount(response.getData().customer().wallet().wallet_amount());
+//                    cartPreference.AddRemainingWalletAmount(response.getData().customer().wallet().wallet_amount());
                     customer_wallet.postValue(response.getData().customer().wallet());
                 }
             }

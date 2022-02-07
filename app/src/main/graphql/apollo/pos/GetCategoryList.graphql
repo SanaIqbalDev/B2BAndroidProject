@@ -1,0 +1,38 @@
+query getMegaMenu {
+    categoryList {
+        id
+        name
+
+        children {
+            id
+            include_in_menu
+            name
+            position
+            url_path
+            url_suffix
+            image
+            image_mobile
+            thumbnail
+            children {
+                id
+                include_in_menu
+                name
+                position
+                url_path
+                url_suffix
+                children {
+                    id
+                    include_in_menu
+                    name
+                    position
+                    url_path
+                    url_suffix
+                    __typename
+                }
+                __typename
+            }
+            __typename
+        }
+        __typename
+    }
+}

@@ -1,5 +1,7 @@
 package com.codeseven.pos.ui;
 
+import static com.codeseven.pos.ui.CartFragment.saved_total;
+
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
@@ -11,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import android.text.format.DateUtils;
 import android.view.LayoutInflater;
@@ -23,10 +26,13 @@ import android.widget.Toast;
 
 import com.codeseven.pos.R;
 import com.codeseven.pos.databinding.FragmentCheckoutBinding;
+import com.codeseven.pos.model.CartSummaryAdapter;
+import com.codeseven.pos.model.CatalogItem;
 import com.codeseven.pos.util.CartPreference;
 import com.codeseven.pos.util.CheckOutViewModel;
 
 import java.text.DateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -51,9 +57,9 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
     String selectedDate="";
     public static Context contextCheckOut;
     CartPreference cartPreference;
+    private ArrayList<CatalogItem> cartItemsList = new ArrayList<>();
 
     public CheckoutFragment() {
-        // Required empty public constructor
     }
 
     public static CheckoutFragment newInstance(String param1, String param2) {
@@ -66,6 +72,12 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         super.onCreate(savedInstanceState);
         checkOutViewModel = (new ViewModelProvider(requireActivity())).get(CheckOutViewModel.class);
         cartPreference = new CartPreference();
+        progressDialog = new ProgressDialog(requireActivity());
+        contextCheckOut = requireContext();
+        Bundle bundle = this.getArguments();
+        cartItemsList = bundle.getParcelableArrayList("cart_items");
+
+
     }
 
     @Override
@@ -74,13 +86,55 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
 
 
         fragmentCheckoutBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_checkout,container,false );
-
-        contextCheckOut = requireContext();
         fragmentCheckoutBinding.setCheckOutviewModel(checkoutObserver);
         fragmentCheckoutBinding.setLifecycleOwner(getViewLifecycleOwner());
-        progressDialog = new ProgressDialog(requireActivity());
-//        progressDialog.StartLoadingdialog();
-        //Set Date...
+
+
+        // Toolbar handling...
+        fragmentCheckoutBinding.checkoutToolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                NavHostFragment.findNavController(CheckoutFragment.this).popBackStack();
+            }
+        });
+
+
+
+        //Set Calender...
+
+        setCalenderLayout();
+
+
+        // Timeframe Input...
+
+        setTimeFrame();
+
+
+        // Shipping Address...
+
+        setShippingDetails();
+
+
+        ///// Payment Method Logic...
+
+        setPaymentMethod();
+
+//        Toast.makeText(requireContext(),String.valueOf(saved_total),Toast.LENGTH_SHORT).show();
+
+        CartSummaryAdapter cartSummaryAdapter = new CartSummaryAdapter(requireContext(),cartItemsList);
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireContext(),LinearLayoutManager.VERTICAL,false);
+        fragmentCheckoutBinding.rvCartSummaryItems.setLayoutManager(linearLayoutManager);
+        fragmentCheckoutBinding.rvCartSummaryItems.setAdapter(cartSummaryAdapter);
+        fragmentCheckoutBinding.tvSavedAmount.setText(String.valueOf(saved_total));
+
+
+
+        return fragmentCheckoutBinding.getRoot();
+    }
+
+    private void setCalenderLayout() {
+
         Calendar mCalendar = Calendar.getInstance();
         String today = DateFormat.getDateInstance(DateFormat.DATE_FIELD).format(mCalendar.getTime());
 
@@ -108,168 +162,18 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             }
         });
 
+    }
 
-        // Toolbar handling...
-        fragmentCheckoutBinding.checkoutToolbar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+    private void setPaymentMethod() {
 
-                NavHostFragment.findNavController(CheckoutFragment.this).popBackStack();
-            }
-        });
-
-
-        // Timeframe Input...
-        fragmentCheckoutBinding.layoutTimeA.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                selected_time_slot = 1;
-                if(fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
-                    fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
-                    fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
-                }
-                if(fragmentCheckoutBinding.layoutTimeB.isEnabled()) {
-                    fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                    fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.black));
-                }
-                if (fragmentCheckoutBinding.layoutTimeC.isEnabled()) {
-                    fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                    fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
-                }
-                if(fragmentCheckoutBinding.layoutTimeD.isEnabled()){
-                fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.black));
-                }
-            }
-        });
-
-        fragmentCheckoutBinding.layoutTimeB.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                selected_time_slot = 2;
-                if(fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
-
-                    fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                    fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.black));
-                }
-                if(fragmentCheckoutBinding.layoutTimeB.isEnabled()) {
-
-                    fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
-                    fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
-                }
-                if (fragmentCheckoutBinding.layoutTimeC.isEnabled()) {
-
-                    fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                    fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
-                }
-                if(fragmentCheckoutBinding.layoutTimeD.isEnabled()){
-                    fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.black));
-            }
-            }
-        });
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(requireContext(),
+                R.array.planets_array, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        fragmentCheckoutBinding.spinnerCountriesA.setAdapter(adapter);
+        fragmentCheckoutBinding.spinnerCountriesB.setAdapter(adapter);
 
 
-        fragmentCheckoutBinding.layoutTimeC.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                selected_time_slot = 3;
-                if(fragmentCheckoutBinding.layoutTimeC.isEnabled()) {
-
-                    fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
-                    fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
-                }
-                if(fragmentCheckoutBinding.layoutTimeB.isEnabled()) {
-
-                    fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                    fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.black));
-                }
-                if (fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
-                    fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                    fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.black));
-                }
-                if(fragmentCheckoutBinding.layoutTimeD.isEnabled()) {
-                    fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                    fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.black));
-                }
-            }
-        });
-
-
-        fragmentCheckoutBinding.layoutTimeD.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-
-                selected_time_slot = 4;
-                if (fragmentCheckoutBinding.layoutTimeD.isEnabled()) {
-                    fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
-                    fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
-                }
-                if (fragmentCheckoutBinding.layoutTimeB.isEnabled()) {
-
-                    fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                    fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.black));
-                }
-                if (fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
-                    fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                    fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.black));
-                }
-                if (fragmentCheckoutBinding.layoutTimeC.isEnabled()) {
-                    fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
-                    fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
-                }
-            }
-        });
-
-
-        progressDialog.StartLoadingdialog();
-        // Shipping Address...
-        checkoutObserver.GetCustomerAddressDetails();
-
-        checkoutObserver.getCustomerInfoResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                if(s.length()>0){
-                    if(s.contains("The current user cannot perform")){
-                        signInDialog();
-                    }
-                    else
-                        Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
-                }
-
-            }
-        });
-
-        checkoutObserver.getCustomerShippingData().observe(getViewLifecycleOwner(), new Observer<ShippingInformationFragment.Shipping_address>() {
-            @Override
-            public void onChanged(ShippingInformationFragment.Shipping_address customer) {
-
-                String shipping_address = customer.firstname() + " " + customer.lastname() + "\n" +
-                        customer.street().get(0) + "\n" +
-                        customer.city() + ", " + customer.region().label() + " " +  customer.country().code()
-                        ;
-
-
-                fragmentCheckoutBinding.tvShippingAddress.setText(shipping_address);
-                fragmentCheckoutBinding.tvPhoneNumber.setText(customer.telephone());
-
-                progressDialog.dismissDialog();
-            }
-        });
-        checkoutObserver.GetShippingMethod().observe(getViewLifecycleOwner(), new Observer<AvailableShippingMethodsCheckoutFragment.Available_shipping_method>() {
-            @Override
-            public void onChanged(AvailableShippingMethodsCheckoutFragment.Available_shipping_method available_shipping_method) {
-
-                fragmentCheckoutBinding.tvShippingMethod.setText(available_shipping_method.carrier_title()+" "+available_shipping_method.amount().currency()+" "+
-                        available_shipping_method.amount().value().intValue());
-                progressDialog.dismissDialog();
-            }
-        });
-
-        ///// Payment Method Logic...
-
+        //
         checkoutObserver.GetListOfAvailablePaymentMethods();
         checkoutObserver.getCustomerWallet();
         checkoutObserver.getCustomerWalletData().observe(getViewLifecycleOwner(), new Observer<GetCustomerWalletQuery.Wallet>() {
@@ -311,9 +215,13 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                             String wallet_msg = "Pay amount with wallet : " + cartPreference.GetNeedToPay() +"\n"+"Order amount : "+
                                     cartPreference.GetOrderTotal() + "\n"+ "Amount left in wallet : "+cartPreference.GetRemainingWalletAmount();
                             fragmentCheckoutBinding.tvWalletValue.setText(wallet_msg);
+                            fragmentCheckoutBinding.tvWalletValueS.setText("PKR " + cartPreference.GetNeedToPay());
+
                         }
                         else {
                             fragmentCheckoutBinding.tvWalletValue.setText("Your wallet balance is:" + " " + cartPreference.GetRemainingWalletAmount());
+                            fragmentCheckoutBinding.tvWalletValueS.setText("PKR 0.0");
+
                         }
 
                         checkoutObserver.GetListOfAvailablePaymentMethods();
@@ -339,6 +247,12 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                     if(available_payment_methods.get(i).title().equals("No Payment Information Required")) {
                         showPaymentMethods = false;
                         fragmentCheckoutBinding.cbApplyWallet.setChecked(true);
+                        fragmentCheckoutBinding.tvWalletValueS.setText(cartPreference.GetNeedToPay());
+
+                        String wallet_msg = "Pay amount with wallet : " + cartPreference.GetNeedToPay() +"\n"+"Order amount : "+
+                                cartPreference.GetOrderTotal() + "\n"+ "Amount left in wallet : "+cartPreference.GetRemainingWalletAmount();
+                        fragmentCheckoutBinding.tvWalletValue.setText(wallet_msg);
+
                     }
                 }
 
@@ -445,6 +359,51 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             }
         });
 
+    }
+
+    private void setShippingDetails() {
+        progressDialog.StartLoadingdialog();
+        checkoutObserver.GetCustomerAddressDetails();
+
+        checkoutObserver.getCustomerInfoResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                if(s.length()>0){
+                    if(s.contains("The current user cannot perform")){
+                        signInDialog();
+                    }
+                    else
+                        Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        });
+
+        checkoutObserver.getCustomerShippingData().observe(getViewLifecycleOwner(), new Observer<ShippingInformationFragment.Shipping_address>() {
+            @Override
+            public void onChanged(ShippingInformationFragment.Shipping_address customer) {
+
+                String shipping_address = customer.firstname() + " " + customer.lastname() + "\n" +
+                        customer.street().get(0) + "\n" +
+                        customer.city() + ", " + customer.region().label() + " " +  customer.country().code()
+                        ;
+
+
+                fragmentCheckoutBinding.tvShippingAddress.setText(shipping_address);
+                fragmentCheckoutBinding.tvPhoneNumber.setText(customer.telephone());
+
+                progressDialog.dismissDialog();
+            }
+        });
+        checkoutObserver.GetShippingMethod().observe(getViewLifecycleOwner(), new Observer<AvailableShippingMethodsCheckoutFragment.Available_shipping_method>() {
+            @Override
+            public void onChanged(AvailableShippingMethodsCheckoutFragment.Available_shipping_method available_shipping_method) {
+
+                fragmentCheckoutBinding.tvShippingMethod.setText(available_shipping_method.carrier_title()+" "+available_shipping_method.amount().currency()+" "+
+                        available_shipping_method.amount().value().intValue());
+                progressDialog.dismissDialog();
+            }
+        });
 
         fragmentCheckoutBinding.tvChangeShippingAddress.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -453,13 +412,112 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             }
         });
 
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(requireContext(),
-                R.array.planets_array, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        fragmentCheckoutBinding.spinnerCountriesA.setAdapter(adapter);
-        fragmentCheckoutBinding.spinnerCountriesB.setAdapter(adapter);
+    }
 
-        return fragmentCheckoutBinding.getRoot();
+    private void setTimeFrame() {
+        fragmentCheckoutBinding.layoutTimeA.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                selected_time_slot = 1;
+                if(fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
+                    fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
+                    fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
+                }
+                if(fragmentCheckoutBinding.layoutTimeB.isEnabled()) {
+                    fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if (fragmentCheckoutBinding.layoutTimeC.isEnabled()) {
+                    fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if(fragmentCheckoutBinding.layoutTimeD.isEnabled()){
+                    fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+            }
+        });
+
+        fragmentCheckoutBinding.layoutTimeB.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                selected_time_slot = 2;
+                if(fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
+
+                    fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if(fragmentCheckoutBinding.layoutTimeB.isEnabled()) {
+
+                    fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
+                    fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
+                }
+                if (fragmentCheckoutBinding.layoutTimeC.isEnabled()) {
+
+                    fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if(fragmentCheckoutBinding.layoutTimeD.isEnabled()){
+                    fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+            }
+        });
+
+
+        fragmentCheckoutBinding.layoutTimeC.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                selected_time_slot = 3;
+                if(fragmentCheckoutBinding.layoutTimeC.isEnabled()) {
+
+                    fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
+                    fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
+                }
+                if(fragmentCheckoutBinding.layoutTimeB.isEnabled()) {
+
+                    fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if (fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
+                    fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if(fragmentCheckoutBinding.layoutTimeD.isEnabled()) {
+                    fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+            }
+        });
+
+
+        fragmentCheckoutBinding.layoutTimeD.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                selected_time_slot = 4;
+                if (fragmentCheckoutBinding.layoutTimeD.isEnabled()) {
+                    fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
+                    fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
+                }
+                if (fragmentCheckoutBinding.layoutTimeB.isEnabled()) {
+
+                    fragmentCheckoutBinding.clockB.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateB.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if (fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
+                    fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+                if (fragmentCheckoutBinding.layoutTimeC.isEnabled()) {
+                    fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
+                    fragmentCheckoutBinding.dateC.setTextColor(requireContext().getResources().getColor(R.color.black));
+                }
+            }
+        });
+
     }
 
     @Override
