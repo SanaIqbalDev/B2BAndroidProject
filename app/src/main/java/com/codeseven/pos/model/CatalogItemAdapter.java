@@ -29,10 +29,6 @@ public class CatalogItemAdapter extends RecyclerView.Adapter<CatalogItemAdapter.
         onItemClickListenerThis = onItemClickListener;
     }
 
-    public void setCatalogItemsArrayList(ArrayList<CatalogItem> ab )
-    {
-        catalogItemsArrayList = ab;
-    }
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {

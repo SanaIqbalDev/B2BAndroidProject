@@ -30,7 +30,6 @@ public class CatalogRepository {
     private MutableLiveData<List<GetMegaMenuQuery.CategoryList>> categoryLists;
 
 
-
     public CatalogRepository() {
         CatalogRequestResponse = new MutableLiveData<>("");
         productsFragment = new MutableLiveData<>();

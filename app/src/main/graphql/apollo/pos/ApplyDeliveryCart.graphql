@@ -1,0 +1,9 @@
+mutation applyDeliveryCart($value: applyDeliveryCartInput!){
+    applyDeliveryCart(input: $value) {
+        cart {
+            shipping_arrival_comments
+            shipping_arrival_date
+            shipping_arrival_timeslot
+        }
+    }
+}

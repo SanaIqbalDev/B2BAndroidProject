@@ -10,6 +10,7 @@ query GetCustomerAddresses{
             city
             region{
                 region_code
+                region
             }
             country_code
             telephone

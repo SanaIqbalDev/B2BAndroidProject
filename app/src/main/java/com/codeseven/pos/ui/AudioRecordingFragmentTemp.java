@@ -176,9 +176,14 @@ public class AudioRecordingFragmentTemp extends Fragment {
 
                 setOutputFile(mFileName);
 
-                if(audioRecorder!=null )
-                    if(audioRecorder.getState() == 0)
-                        createAudioRecorder(MediaRecorder.AudioSource.MIC, 48000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+                if(audioRecorder!=null && (audioRecorder.getState() == 0) )
+                {
+                    createAudioRecorder(MediaRecorder.AudioSource.MIC, 48000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+                }
+                if(audioRecorder == null)
+                {
+                    createAudioRecorder(MediaRecorder.AudioSource.MIC, 48000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
+                }
 
 
                 prepare();

@@ -54,10 +54,11 @@ public class ViewCartRepository {
                     if (response.getErrors().size() > 0)
                         cartRequestResponse.postValue(response.getErrors().get(0).getMessage());
                 }
-                else
+                else {
                     cartRequestResponse.postValue(response.getData().toString());
-                cartId =  response.getData().customerCart().id();
-                cartPreference.AddCartId("cart_id",cartId);
+                    cartId = response.getData().customerCart().id();
+                    cartPreference.AddCartId("cart_id", cartId);
+                }
             }
 
             @Override

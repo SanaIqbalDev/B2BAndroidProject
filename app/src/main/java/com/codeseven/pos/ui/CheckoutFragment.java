@@ -1,6 +1,9 @@
 package com.codeseven.pos.ui;
 
 import static com.codeseven.pos.ui.CartFragment.saved_total;
+import static com.codeseven.pos.ui.CustomerAddressesFragment.telephone;
+
+
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
@@ -10,6 +13,7 @@ import android.os.Bundle;
 
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
@@ -24,8 +28,10 @@ import android.widget.CompoundButton;
 import android.widget.DatePicker;
 import android.widget.Toast;
 
+import com.apollographql.apollo.api.Input;
 import com.codeseven.pos.R;
 import com.codeseven.pos.databinding.FragmentCheckoutBinding;
+import com.codeseven.pos.model.AddressItem;
 import com.codeseven.pos.model.CartSummaryAdapter;
 import com.codeseven.pos.model.CatalogItem;
 import com.codeseven.pos.util.CartPreference;
@@ -40,9 +46,11 @@ import java.util.List;
 import javax.inject.Inject;
 
 import apollo.pos.GetAvailablePaymentMethodsQuery;
+import apollo.pos.GetCustomerAddressesQuery;
 import apollo.pos.GetCustomerWalletQuery;
 import apollo.pos.fragment.AvailableShippingMethodsCheckoutFragment;
 import apollo.pos.fragment.ShippingInformationFragment;
+import apollo.pos.type.CartAddressInput;
 import dagger.hilt.android.AndroidEntryPoint;
 
 @AndroidEntryPoint
@@ -53,12 +61,18 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
     @Inject CheckOutViewModel.CheckoutObserver checkoutObserver;
     ProgressDialog progressDialog;
     private String timePeriod= "am";
-    private int selected_time_slot = 0;
+    private String selected_time_slot = "";
     String selectedDate="";
     public static Context contextCheckOut;
     CartPreference cartPreference;
     private ArrayList<CatalogItem> cartItemsList = new ArrayList<>();
-
+    CartAddressInput addressInput;
+    public static String selected_shipping_id;
+    public static String selected_shipping_id_original;
+    public static  boolean is_address_changed = false;
+    public static String shipping_address = "";
+    private ShippingInformationFragment.Shipping_address customer_shipping_address;
+    private  boolean is_time_slot_selected = false;
     public CheckoutFragment() {
     }
 
@@ -120,25 +134,62 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
 
         setPaymentMethod();
 
-//        Toast.makeText(requireContext(),String.valueOf(saved_total),Toast.LENGTH_SHORT).show();
+        setCartSummary();
+
+        fragmentCheckoutBinding.btnPlaceOrder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //Setting Shipping Address...
+                CartAddressInput.Builder ab   = CartAddressInput.builder().city(customer_shipping_address.city()).companyInput(new Input<>("",true))
+                        .country_code(customer_shipping_address.country().code()).firstname(customer_shipping_address.firstname()).lastname(customer_shipping_address.lastname())
+                        .postcode(customer_shipping_address.postcode()).region(customer_shipping_address.region().code())
+                        .region_id(customer_shipping_address.region().region_id()).save_in_address_book(false)
+                        .street(customer_shipping_address.street()).telephone(customer_shipping_address.telephone());
+
+                CartAddressInput bb = ab.build();
+//                checkoutObserver.SetCustomerShippingAddress(new Input<>(bb,true),Integer.parseInt(selected_shipping_id),"","");
+
+                //Apply Delivery Date...
+
+                String comments_ = fragmentCheckoutBinding.etComments.getText().toString();
+                String date_ = fragmentCheckoutBinding.tvDate.getText().toString();
+                String time_slot_ = selected_time_slot;
+
+                if(is_time_slot_selected)
+                    checkoutObserver.applyDeliveryCart(comments_, date_, time_slot_);
+                else
+                    Toast.makeText(requireContext(),"select a time slot",Toast.LENGTH_SHORT).show();
+
+
+            }
+        });
+
+        return fragmentCheckoutBinding.getRoot();
+    }
+
+    private void setCartSummary() {
 
         CartSummaryAdapter cartSummaryAdapter = new CartSummaryAdapter(requireContext(),cartItemsList);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireContext(),LinearLayoutManager.VERTICAL,false);
         fragmentCheckoutBinding.rvCartSummaryItems.setLayoutManager(linearLayoutManager);
         fragmentCheckoutBinding.rvCartSummaryItems.setAdapter(cartSummaryAdapter);
-        fragmentCheckoutBinding.tvSavedAmount.setText(String.valueOf(saved_total));
+        fragmentCheckoutBinding.tvSavedAmount.setText("PKR " + String.format("%.2f", saved_total));
 
-
-
-        return fragmentCheckoutBinding.getRoot();
     }
 
     private void setCalenderLayout() {
 
         Calendar mCalendar = Calendar.getInstance();
-        String today = DateFormat.getDateInstance(DateFormat.DATE_FIELD).format(mCalendar.getTime());
+//        String today = DateFormat.getDateInstance(DateFormat.DATE_FIELD).format(mCalendar.getTime());
 
-        fragmentCheckoutBinding.tvDate.setText(today);
+        int year = mCalendar.get(Calendar.YEAR);
+
+        int month = mCalendar.get(Calendar.MONTH);
+
+        int dayOfMonth = mCalendar.get(Calendar.DAY_OF_MONTH);
+
+
+        fragmentCheckoutBinding.tvDate.setText(month+"/"+dayOfMonth+"/"+year);
 
         isToday(DateUtils.isToday(mCalendar.getTime().getTime()));
 
@@ -174,13 +225,14 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
 
 
         //
-        checkoutObserver.GetListOfAvailablePaymentMethods();
+//        checkoutObserver.GetListOfAvailablePaymentMethods();
         checkoutObserver.getCustomerWallet();
         checkoutObserver.getCustomerWalletData().observe(getViewLifecycleOwner(), new Observer<GetCustomerWalletQuery.Wallet>() {
             @Override
             public void onChanged(GetCustomerWalletQuery.Wallet wallet) {
 
-                fragmentCheckoutBinding.tvWalletValue.setText("Your wallet balance is:"+ " "+ wallet.wallet_amount());
+                progressDialog.dismissDialog();
+                fragmentCheckoutBinding.tvWalletValue.setText("Your credit is: "+ wallet.wallet_amount());
             }
         });
 
@@ -197,16 +249,16 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             @Override
             public void onChanged(String s) {
                 if(s.length()>0) {
+                    progressDialog.dismissDialog();
+
                     if (s.contains("The current user cannot perform")) {
 
                         fragmentCheckoutBinding.cbApplyWallet.setChecked(false);
-                        progressDialog.dismissDialog();
                         signInDialog();
 
                     } else if(s.contains("Failed to execute HTTP")){
 
                         fragmentCheckoutBinding.cbApplyWallet.setChecked(false);
-                        progressDialog.dismissDialog();
                         Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
 
                     }else if (s.equals("Success")) {
@@ -219,7 +271,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
 
                         }
                         else {
-                            fragmentCheckoutBinding.tvWalletValue.setText("Your wallet balance is:" + " " + cartPreference.GetRemainingWalletAmount());
+                            fragmentCheckoutBinding.tvWalletValue.setText("Your credit is:" + " " + cartPreference.GetRemainingWalletAmount());
                             fragmentCheckoutBinding.tvWalletValueS.setText("PKR 0.0");
 
                         }
@@ -227,7 +279,6 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                         checkoutObserver.GetListOfAvailablePaymentMethods();
 
                     }else{
-                        progressDialog.dismissDialog();
                         Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
                     }
                 }
@@ -292,12 +343,27 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             @Override
             public void onChanged(String s) {
                 if(s.length()>0){
+                    progressDialog.dismissDialog();
                     if(s.contains("The current user cannot perform")){
                         signInDialog();
                     }
                     else {
                         Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
                     }
+                }
+            }
+        });
+        fragmentCheckoutBinding.cbPaymentMethod.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
+                if(!b)
+                {
+                    fragmentCheckoutBinding.layoutNewAddress.setVisibility(View.VISIBLE);
+                }
+                else
+                {
+                    fragmentCheckoutBinding.layoutNewAddress.setVisibility(View.GONE);
+
                 }
             }
         });
@@ -362,63 +428,101 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
     }
 
     private void setShippingDetails() {
-        progressDialog.StartLoadingdialog();
-        checkoutObserver.GetCustomerAddressDetails();
+        if(is_address_changed && !(selected_shipping_id_original.equals(selected_shipping_id)))
+        {
+            fragmentCheckoutBinding.tvShippingAddress.setText(shipping_address);
+            fragmentCheckoutBinding.tvPhoneNumber.setText(telephone);
+            Toast.makeText(requireContext(), String.valueOf(is_address_changed),Toast.LENGTH_SHORT).show();
 
-        checkoutObserver.getCustomerInfoResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                if(s.length()>0){
-                    if(s.contains("The current user cannot perform")){
-                        signInDialog();
+            selected_shipping_id_original = selected_shipping_id;
+        }
+        else {
+            progressDialog.StartLoadingdialog();
+            checkoutObserver.GetCustomerAddressDetails();
+            checkoutObserver.GetCustomerAvailableAddresses();
+        }
+            checkoutObserver.getCustomerInfoResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
+                @Override
+                public void onChanged(String s) {
+                    progressDialog.dismissDialog();
+                    if (s.length() > 0) {
+                        if (s.contains("The current user cannot perform")) {
+                            signInDialog();
+                        } else
+                            Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
                     }
-                    else
-                        Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+
                 }
+            });
 
-            }
-        });
+            checkoutObserver.getCustomerShippingData().observe(getViewLifecycleOwner(), new Observer<ShippingInformationFragment.Shipping_address>() {
+                @Override
+                public void onChanged(ShippingInformationFragment.Shipping_address customer) {
 
-        checkoutObserver.getCustomerShippingData().observe(getViewLifecycleOwner(), new Observer<ShippingInformationFragment.Shipping_address>() {
-            @Override
-            public void onChanged(ShippingInformationFragment.Shipping_address customer) {
+                    customer_shipping_address = customer;
+//                String shipping_address = customer.firstname() + " " + customer.lastname() + "\n" +
+//                        customer.street().get(0) + "\n" +
+//                        customer.city() + ", " + customer.region().label() + " " +  customer.country().code()
+//                        ;
+//
+//
+//                fragmentCheckoutBinding.tvShippingAddress.setText(shipping_address);
+//                fragmentCheckoutBinding.tvPhoneNumber.setText(customer.telephone());
 
-                String shipping_address = customer.firstname() + " " + customer.lastname() + "\n" +
-                        customer.street().get(0) + "\n" +
-                        customer.city() + ", " + customer.region().label() + " " +  customer.country().code()
+                    progressDialog.dismissDialog();
+                }
+            });
+            checkoutObserver.GetShippingMethod().observe(getViewLifecycleOwner(), new Observer<AvailableShippingMethodsCheckoutFragment.Available_shipping_method>() {
+                @Override
+                public void onChanged(AvailableShippingMethodsCheckoutFragment.Available_shipping_method available_shipping_method) {
+
+                    fragmentCheckoutBinding.tvShippingMethod.setText(available_shipping_method.carrier_title() + " " + available_shipping_method.amount().currency() + " " +
+                            available_shipping_method.amount().value().intValue());
+                    progressDialog.dismissDialog();
+                }
+            });
+
+            fragmentCheckoutBinding.tvChangeShippingAddress.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    NavHostFragment.findNavController(CheckoutFragment.this).navigate(R.id.action_checkoutFragment_to_customerAddressesFragment);
+                }
+            });
+
+
+            checkoutObserver.getDefault_shipping_id().observe(getViewLifecycleOwner(), new Observer<String>() {
+                @Override
+                public void onChanged(String s) {
+                    if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED) {
+                        selected_shipping_id = s;
+                        selected_shipping_id_original = s;
+                    }
+                }
+            });
+
+            checkoutObserver.getDefault_shipping_Address().observe(getViewLifecycleOwner(), new Observer<GetCustomerAddressesQuery.Address>() {
+                @Override
+                public void onChanged(GetCustomerAddressesQuery.Address address) {
+                    if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED) {
+
+                        shipping_address = address.firstname() + " " + address.lastname() + "\n" +
+                                address.street().get(0) + "\n" +
+                                address.city() + ", " + address.region().region_code() + " " + address.country_code()
                         ;
 
-
-                fragmentCheckoutBinding.tvShippingAddress.setText(shipping_address);
-                fragmentCheckoutBinding.tvPhoneNumber.setText(customer.telephone());
-
-                progressDialog.dismissDialog();
-            }
-        });
-        checkoutObserver.GetShippingMethod().observe(getViewLifecycleOwner(), new Observer<AvailableShippingMethodsCheckoutFragment.Available_shipping_method>() {
-            @Override
-            public void onChanged(AvailableShippingMethodsCheckoutFragment.Available_shipping_method available_shipping_method) {
-
-                fragmentCheckoutBinding.tvShippingMethod.setText(available_shipping_method.carrier_title()+" "+available_shipping_method.amount().currency()+" "+
-                        available_shipping_method.amount().value().intValue());
-                progressDialog.dismissDialog();
-            }
-        });
-
-        fragmentCheckoutBinding.tvChangeShippingAddress.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                NavHostFragment.findNavController(CheckoutFragment.this).navigate(R.id.action_checkoutFragment_to_customerAddressesFragment);
-            }
-        });
-
+                        fragmentCheckoutBinding.tvShippingAddress.setText(shipping_address);
+                        fragmentCheckoutBinding.tvPhoneNumber.setText(address.telephone());
+                    }
+                }
+            });
     }
 
     private void setTimeFrame() {
         fragmentCheckoutBinding.layoutTimeA.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                selected_time_slot = 1;
+                selected_time_slot = fragmentCheckoutBinding.dateA.getText().toString();
+                is_time_slot_selected = true;
                 if(fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
                     fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
                     fragmentCheckoutBinding.dateA.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
@@ -442,7 +546,9 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             @Override
             public void onClick(View view) {
 
-                selected_time_slot = 2;
+                selected_time_slot = fragmentCheckoutBinding.dateB.getText().toString();
+                is_time_slot_selected = true;
+
                 if(fragmentCheckoutBinding.layoutTimeA.isEnabled()) {
 
                     fragmentCheckoutBinding.clockA.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock));
@@ -470,7 +576,9 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             @Override
             public void onClick(View view) {
 
-                selected_time_slot = 3;
+                selected_time_slot = fragmentCheckoutBinding.dateC.getText().toString();
+                is_time_slot_selected = true;
+
                 if(fragmentCheckoutBinding.layoutTimeC.isEnabled()) {
 
                     fragmentCheckoutBinding.clockC.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
@@ -497,7 +605,9 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             @Override
             public void onClick(View view) {
 
-                selected_time_slot = 4;
+                selected_time_slot = fragmentCheckoutBinding.dateD.getText().toString();
+                is_time_slot_selected = true;
+
                 if (fragmentCheckoutBinding.layoutTimeD.isEnabled()) {
                     fragmentCheckoutBinding.clockD.setImageDrawable(requireContext().getResources().getDrawable(R.drawable.ic_clock_enable));
                     fragmentCheckoutBinding.dateD.setTextColor(requireContext().getResources().getColor(R.color.primaryColor));
@@ -528,8 +638,8 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         mCalendar.set(Calendar.MONTH,i1);
         mCalendar.set(Calendar.DAY_OF_MONTH,i2);
 
-        selectedDate = DateFormat.getDateInstance(DateFormat.DATE_FIELD).format(mCalendar.getTime());
-
+//        selectedDate = DateFormat.getDateInstance(DateFormat.DATE_FIELD).format(mCalendar.getTime());
+        selectedDate = i1+"/"+i2+"/"+i;
 
         fragmentCheckoutBinding.tvDate.setText(selectedDate);
         isToday(DateUtils.isToday(mCalendar.getTime().getTime()));
@@ -540,12 +650,12 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
 
         if(hours<13) {
             timePeriod = "am";
-            Toast.makeText(requireContext(), String.valueOf(hours) + timePeriod, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(requireContext(), String.valueOf(hours) + timePeriod, Toast.LENGTH_SHORT).show();
         }
         else
         {
             timePeriod = "pm";
-            Toast.makeText(requireContext(), String.valueOf(hours-12) + timePeriod, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(requireContext(), String.valueOf(hours-12) + timePeriod, Toast.LENGTH_SHORT).show();
         }
 
         return hours;

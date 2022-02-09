@@ -49,6 +49,7 @@ public class CartFragment extends Fragment {
     public static Double sub_total;
     public static Double est_total;
     public static Double saved_total;
+    public int total_items_in_cart = 0;
     ProcessCartViewModel removeItemViewModel;
     @Inject
     ProcessCartViewModel.ProcessCartObserver processItemObserver;
@@ -155,54 +156,61 @@ public class CartFragment extends Fragment {
         cartObserver.getCartItemsList().observe(getViewLifecycleOwner(), new Observer<List<GetCartByIdQuery.Item>>() {
             @Override
             public void onChanged(List<GetCartByIdQuery.Item> items) {
-                List<GetCartByIdQuery.Item> ab = items;
+                if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
 
+                List<GetCartByIdQuery.Item> ab = items;
+                total_items_in_cart = items.size();
                 String name, image_url, quantity, itemsku, itemUid;
                 Double priceThis, regular_price;
 
+                progressDialog.dismissDialog();
                 if(getMoreProducts == true) {
+                    if (items.size() < 1) {
+                        fragmentCartBinding.topLayout.setVisibility(View.GONE);
+                        fragmentCartBinding.tvNoItems.setVisibility(View.VISIBLE);
+                    } else
+                    {
+                        fragmentCartBinding.topLayout.setVisibility(View.VISIBLE);
+                        fragmentCartBinding.tvNoItems.setVisibility(View.GONE);
 
+                    }
                         for (int i = 0; i < items.size(); i++) {
 
                             itemsku = (items.get(i).product().sku());
                             name = (items.get(i).product().name());
                             regular_price = items.get(i).product().price().regularPrice().amount().value();
 
-                            if((items.get(i).product().price().minimalPrice().amount().value()!=null) &&
-                                    (items.get(i).product().price().minimalPrice().amount().value()<items.get(i).product().price().regularPrice().amount().value()))
-                            {
+                            if ((items.get(i).product().price().minimalPrice().amount().value() != null) &&
+                                    (items.get(i).product().price().minimalPrice().amount().value() < items.get(i).product().price().regularPrice().amount().value())) {
                                 priceThis = items.get(i).product().price().minimalPrice().amount().value();
-
-                            }
-                            else
-                            {
+                            } else {
                                 priceThis = items.get(i).product().price().regularPrice().amount().value();
 
-                            }image_url = items.get(i).product().small_image().url();
+                            }
+                            image_url = items.get(i).product().small_image().url();
                             quantity = String.valueOf((int) items.get(i).quantity());
                             itemUid = items.get(i).uid();
                             sub_total += (priceThis) * (items.get(i).quantity());
-                            saved_total += (regular_price) * (items.get(i).quantity());
-                            cartItemArrayList.add(new CatalogItem(itemsku, name, String.valueOf(priceThis),String.valueOf(regular_price), image_url, quantity,itemUid));
+                            saved_total += (regular_price - priceThis) * (items.get(i).quantity());
+                            cartItemArrayList.add(new CatalogItem(itemsku, name, String.valueOf(priceThis), String.valueOf(regular_price), image_url, quantity, itemUid));
 
                         }
-                        est_total = sub_total+50;
-                        if(items.size()>0)
-                        {
+                        est_total = sub_total + 50;
+                        if (items.size() > 0) {
                             cartItemAdapter.notifyDataSetChanged();
                             getMoreProducts = false;
-                            fragmentCartBinding.tvSubtotalValue.setText("PKR "+String.format("%.2f", sub_total));
-                            fragmentCartBinding.tvEstimatedTotalValue.setText("PKR " +String.format("%.2f", est_total));
+                            fragmentCartBinding.tvSubtotalValue.setText("PKR " + String.format("%.2f", sub_total));
+                            fragmentCartBinding.tvEstimatedTotalValue.setText("PKR " + String.format("%.2f", est_total));
                             progressDialog.dismissDialog();
                             fragmentCartBinding.rvCartItems.setVisibility(View.VISIBLE);
                             fragmentCartBinding.tvNoItems.setVisibility(View.GONE);
                         }
-
-            }
+                }
                 fragmentCartBinding.tvSubtotalValue.setText("PKR " + String.format("%.2f", sub_total));
                 fragmentCartBinding.tvEstimatedTotalValue.setText("PKR " + String.format("%.2f", est_total));
 
-        }
+                }
+            }
         });
 
         cartObserver.getCartRequestResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
@@ -265,25 +273,32 @@ public class CartFragment extends Fragment {
     }
 
     private void ItemRemoved(int quantity, double price, double regular_price) {
+
+
         sub_total= sub_total-(price*quantity);
         est_total = sub_total+50;
 
-        saved_total = saved_total - (regular_price*quantity);
+        saved_total = saved_total - ((regular_price-price)*quantity);
         fragmentCartBinding.tvSubtotalValue.setText("PKR " + String.format("%.2f", sub_total));
         fragmentCartBinding.tvEstimatedTotalValue.setText("PKR " +  String.format("%.2f", est_total));
+        total_items_in_cart--;
 
+        if(total_items_in_cart == 0){
+         fragmentCartBinding.tvNoItems.setVisibility(View.VISIBLE);
+         fragmentCartBinding.topLayout.setVisibility(View.GONE);
+        }
     }
 
     public void updateSubtotal(Double item_price,Double regular_price, boolean isIncrement){
         if(isIncrement)
         {
             sub_total = sub_total+item_price;
-            saved_total= saved_total + regular_price;
+            saved_total= saved_total + (regular_price-item_price);
         }
         else
         {
             sub_total = sub_total-item_price;
-            saved_total = saved_total -regular_price;
+            saved_total = saved_total - (regular_price - item_price);
         }
 
         est_total = sub_total+50;

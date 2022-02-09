@@ -257,7 +257,11 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                 progressDialog.StartLoadingdialog();
 
                 catalogObserver.getUpdatedcatalog(currentPage,pageSize, selected_category);
-                catalogObserver.GetCategoryList();
+
+//                headerList = new ArrayList<>();
+//                childList = new HashMap<>();
+//
+//                catalogObserver.GetCategoryList();
 
             }
         });
@@ -288,6 +292,8 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
 
     private void prepareMenuData(List<GetMegaMenuQuery.CategoryList> categoryList) {
 
+        headerList = new ArrayList<>();
+        childList  = new HashMap<>();
         String menu_name,category_id;
         boolean has_children,is_group;
         NavMenuItem menuModel = new NavMenuItem("All Categories","2",false,false,""); //Menu of Android Tutorial. No sub menus
@@ -346,7 +352,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
 //                    }
                 if(selected_category == headerList.get(groupPosition).category_id)
                 {
-                    fragmentCatalogBinding.drawerLayout.close();
+//                    fragmentCatalogBinding.drawerLayout.close();
                 }
                 else {
                     selected_category = headerList.get(groupPosition).category_id;

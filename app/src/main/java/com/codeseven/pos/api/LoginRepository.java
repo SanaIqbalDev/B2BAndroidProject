@@ -19,8 +19,6 @@ public class LoginRepository {
     public LoginRepository() {
         loginResponse = new MutableLiveData<>();
         loginPreference = new LoginPreference();
-
-
     }
 
     public void generateCustomerTokenByPhone(String phoneNumber, String password)
@@ -30,7 +28,7 @@ public class LoginRepository {
             public void onResponse(@NonNull Response<GenerateCustomerTokenByPhoneMutation.Data> response) {
                if(response.getData().generateCustomerTokenByPhone()!= null)
                {
-//                   loginResponse.postValue("Generated Token:" + response.getData().generateCustomerTokenByPhone().token());
+                   loginResponse.postValue("Generated Token:" + response.getData().generateCustomerTokenByPhone().token());
                    loginPreference.AddLoginPreferences("token",response.getData().generateCustomerTokenByPhone().token());
                }
                else
@@ -49,10 +47,6 @@ public class LoginRepository {
 
     public MutableLiveData<String> getLoginResponse()
     {
-        if(loginResponse ==null)
-        {
-            loginResponse = new MutableLiveData<>();
-        }
         return loginResponse;
     }
 }

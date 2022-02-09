@@ -4,6 +4,7 @@ import androidx.databinding.BaseObservable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
+import com.apollographql.apollo.api.Input;
 import com.codeseven.pos.api.CheckOutRepository;
 import com.codeseven.pos.model.AddressItem;
 
@@ -16,6 +17,7 @@ import apollo.pos.GetCustomerAddressesQuery;
 import apollo.pos.GetCustomerWalletQuery;
 import apollo.pos.fragment.AvailableShippingMethodsCheckoutFragment;
 import apollo.pos.fragment.ShippingInformationFragment;
+import apollo.pos.type.CartAddressInput;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
@@ -50,6 +52,11 @@ public class CheckOutViewModel extends ViewModel {
         private MutableLiveData<List<String>> listOfAddresses;
         private MutableLiveData<String> addressListResponse;
 
+        private MutableLiveData<String> default_shipping_id;
+        private MutableLiveData<GetCustomerAddressesQuery.Address> default_shipping_Address;
+
+        private MutableLiveData<String> getApplyDeliveryCartResponse;
+
 
         @Inject
         public CheckoutObserver(){
@@ -64,6 +71,9 @@ public class CheckOutViewModel extends ViewModel {
             GetAvailablePaymentMethodsResponse = checkOutRepository.getGetPaymentMethodResponse();
             this.listOfAddresses = checkOutRepository.getListOfAddresses();
             this.addressListResponse = checkOutRepository.getAddressResponse();
+            default_shipping_id = checkOutRepository.getDefault_shipping_id();
+            default_shipping_Address = checkOutRepository.getDefault_shipping_address();
+            getApplyDeliveryCartResponse = checkOutRepository.getGetApplyDeliveryCartResponse();
         }
 
         public void GetCustomerAddressDetails(){
@@ -109,6 +119,10 @@ public class CheckOutViewModel extends ViewModel {
             checkOutRepository.getAvailablePaymentMethods();
         }
 
+        public void SetCustomerShippingAddress(Input<CartAddressInput> cartAddressInput, int customer_address_id,String customer_notes,
+                                               String pickup_location_code ){
+            checkOutRepository.SetCustomerShippingAddress(cartAddressInput,customer_address_id,customer_notes,pickup_location_code);
+        }
         public MutableLiveData<String> getPaymentMethodsResponse(){
             return GetAvailablePaymentMethodsResponse;
         }
@@ -134,5 +148,20 @@ public class CheckOutViewModel extends ViewModel {
         {
             return checkOutRepository.getAddressObjects();
         }
+
+        public MutableLiveData<String> getDefault_shipping_id() {
+            return default_shipping_id;
+        }
+
+        public MutableLiveData<GetCustomerAddressesQuery.Address> getDefault_shipping_Address() {
+            return default_shipping_Address;
+        }
+
+        public void applyDeliveryCart(String comments, String date, String timeslot)
+        {
+            checkOutRepository.ApplyDeliveryCart(comments,date,timeslot);
+        }
+
+
     }
 }

@@ -1,7 +1,13 @@
 package com.codeseven.pos.ui;
 
+import static com.codeseven.pos.ui.CheckoutFragment.is_address_changed;
+import static com.codeseven.pos.ui.CheckoutFragment.selected_shipping_id;
+import static com.codeseven.pos.ui.CheckoutFragment.selected_shipping_id_original;
+import static com.codeseven.pos.ui.CheckoutFragment.shipping_address;
+
 import android.os.Bundle;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
@@ -42,8 +48,11 @@ public class CustomerAddressesFragment extends Fragment   implements AddressUpda
 
     List<AddressItem> addressList = new ArrayList<>();
     CheckOutViewModel checkOutViewModel;
+
+    public int selected_position = 0;
     @Inject
     CheckOutViewModel.CheckoutObserver checkoutObserver;
+    public static String telephone = "";
 
 
     public CustomerAddressesFragment() {
@@ -74,24 +83,13 @@ public class CustomerAddressesFragment extends Fragment   implements AddressUpda
         AddressItemAdapter addressItemAdapter = new AddressItemAdapter(requireContext(), addressesList, new AddressItemClickListener() {
             @Override
             public void onItemClicked(View view, boolean isAddNew, int position) {
-               if(!isAddNew) {
-                   if (view.getTag().equals("edit")) {
                        Bundle bundle = new Bundle();
                        if (addressList != null) {
                            bundle.putParcelable("address", addressList.get(position));
-                           NavHostFragment.findNavController(CustomerAddressesFragment.this).navigate(R.id.action_customerAddressesFragment_to_editAddressFragment, bundle);
+                           selected_shipping_id = String.valueOf(addressList.get(position).getId());
+                           selected_position = position;
+                           telephone =  addressesList.get(position).substring(addressesList.get(position).lastIndexOf("\n")+1);
                        }
-                   }
-
-                   if (view.getTag().equals("item")) {
-                   }
-               }
-               else
-               {
-                   Bundle bundle = new Bundle();
-//                   bundle.putParcelable("address", "addressList.get(position)");
-                   NavHostFragment.findNavController(CustomerAddressesFragment.this).navigate(R.id.action_customerAddressesFragment_to_editAddressFragment,bundle);
-               }
             }
         });
 
@@ -105,8 +103,7 @@ public class CustomerAddressesFragment extends Fragment   implements AddressUpda
             @Override
             public void onClick(View view) {
 
-                progressDialog.dismissDialog();
-                NavHostFragment.findNavController(CustomerAddressesFragment.this).popBackStack();
+                onBackCalled();
             }
         });
 
@@ -141,7 +138,38 @@ public class CustomerAddressesFragment extends Fragment   implements AddressUpda
 
             }
         });
+
+
+
+        //////////////////
+
+
+        // This callback will only be called when MyFragment is at least Started.
+        OnBackPressedCallback callback = new OnBackPressedCallback(true /* enabled by default */) {
+            @Override
+            public void handleOnBackPressed() {
+                onBackCalled();
+            }
+        };
+        requireActivity().getOnBackPressedDispatcher().addCallback(getViewLifecycleOwner(), callback);
+
+
         return view;
+    }
+
+    private void onBackCalled() {
+        progressDialog.dismissDialog();
+        if(!selected_shipping_id.equals(selected_shipping_id_original))
+        {
+            is_address_changed = true;
+            shipping_address = addressesList.get(selected_position);
+        }
+        else
+        {
+            is_address_changed = false;
+        }
+        NavHostFragment.findNavController(CustomerAddressesFragment.this).popBackStack();
+
     }
 
     @Override
@@ -158,4 +186,5 @@ public class CustomerAddressesFragment extends Fragment   implements AddressUpda
     public void onAddressUpdates(Integer id, AddressItem item) {
 
     }
+
 }

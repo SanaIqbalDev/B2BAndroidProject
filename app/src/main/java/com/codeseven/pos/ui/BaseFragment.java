@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -54,6 +55,12 @@ public class BaseFragment extends Fragment {
         fragmentBaseBinding.setViewModel(loginObserver);
         View view = fragmentBaseBinding.getRoot();
         fragmentBaseBinding.executePendingBindings();
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        requireActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int height = displayMetrics.heightPixels;
+        int width = displayMetrics.widthPixels;
+
 
         new Handler().postDelayed(new Runnable() {
             @Override

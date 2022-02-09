@@ -68,34 +68,33 @@ public class LoginFragment extends Fragment {
                 loginObserver.getLoginResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
                     @Override
                     public void onChanged(String s) {
-                        if(s.contains("Generated Token:"))
-                        {
-                            loginObserver.saveLoginData();
-                            loginObserver.savePreferenceLoginState();
+                        if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
+                            if (s.contains("Generated Token:")) {
+                                loginObserver.saveLoginData();
+                                loginObserver.savePreferenceLoginState();
 
-                            progressDialog.dismissDialog();
-                            NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_loginFragment_to_homeFragment);
-                            loginObserver.getLoginResponse().removeObservers(getViewLifecycleOwner());
-                        }
-                        else if(!s.equals(""))
-                        {
-                            progressDialog.dismissDialog();
-                            Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                                progressDialog.dismissDialog();
+                                NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_loginFragment_to_homeFragment);
+                                loginObserver.getLoginResponse().removeObservers(getViewLifecycleOwner());
+                            } else if (!s.equals("")) {
+                                progressDialog.dismissDialog();
+                                Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                            }
                         }
                     }
                 });
             }
         });
-        loginObserver.getLoginResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
-                    {
-                        Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }
-        });
+//        loginObserver.getLoginResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
+//            @Override
+//            public void onChanged(String s) {
+//                if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+//                    {
+//                        Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+//                    }
+//                }
+//            }
+//        });
         fragmentLoginBinding.executePendingBindings();
         return view;
     }

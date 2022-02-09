@@ -39,8 +39,8 @@ public class NavigationDrawerAdapter extends BaseExpandableListAdapter {
         if (this.listDataChild.get(this.listDataHeader.get(groupPosition)) == null)
             return 0;
         else
-            return this.listDataChild.get(this.listDataHeader.get(groupPosition))
-                    .size();    }
+            return this.listDataChild.get(this.listDataHeader.get(groupPosition)).size();
+    }
 
     @Override
     public NavMenuItem getGroup(int i) {
@@ -82,7 +82,7 @@ public class NavigationDrawerAdapter extends BaseExpandableListAdapter {
 
         ImageView ivItem = convertView.findViewById(R.id.iv_item_image);
 
-        if((getGroup(groupPosition).imageurl).length()>0)
+        if(!(getGroup(groupPosition).imageurl).equals(""))
         {
             Picasso.get().load(getGroup(groupPosition).imageurl).into(ivItem);
         }
@@ -110,4 +110,6 @@ public class NavigationDrawerAdapter extends BaseExpandableListAdapter {
     public boolean isChildSelectable(int i, int i1) {
         return true;
     }
+
+
 }
