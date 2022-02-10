@@ -73,6 +73,11 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
     public static String shipping_address = "";
     private ShippingInformationFragment.Shipping_address customer_shipping_address;
     private  boolean is_time_slot_selected = false;
+    private String carrier_code = "";
+    private String method_code = "";
+    private CartAddressInput.Builder shipping_address_selected;
+    private CartAddressInput.Builder shipping_address_new;
+
     public CheckoutFragment() {
     }
 
@@ -139,17 +144,62 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         fragmentCheckoutBinding.btnPlaceOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //Setting Shipping Address...
-                CartAddressInput.Builder ab   = CartAddressInput.builder().city(customer_shipping_address.city()).companyInput(new Input<>("",true))
+                // 1. Setting Shipping Address...
+                shipping_address_selected   = CartAddressInput.builder().city(customer_shipping_address.city()).companyInput(new Input<>("",true))
                         .country_code(customer_shipping_address.country().code()).firstname(customer_shipping_address.firstname()).lastname(customer_shipping_address.lastname())
                         .postcode(customer_shipping_address.postcode()).region(customer_shipping_address.region().code())
                         .region_id(customer_shipping_address.region().region_id()).save_in_address_book(false)
                         .street(customer_shipping_address.street()).telephone(customer_shipping_address.telephone());
 
-                CartAddressInput bb = ab.build();
-//                checkoutObserver.SetCustomerShippingAddress(new Input<>(bb,true),Integer.parseInt(selected_shipping_id),"","");
+                CartAddressInput bb = shipping_address_selected.build();
+                checkoutObserver.SetCustomerShippingAddress(new Input<>(bb,true),Integer.parseInt(selected_shipping_id),"","");
 
-                //Apply Delivery Date...
+
+                // 2. Apply Shipping Method on Cart...
+
+                checkoutObserver.SetShippingMethodOnCart(method_code,carrier_code);
+
+                // 3. Apply Payment Method...
+                //Only one payment method cashondelivery is offered as of now...
+
+                checkoutObserver.SetPaymentMethodOnCart("cashondelivery");
+
+                // 4. Apply Billing Address...
+
+                if(fragmentCheckoutBinding.layoutPayment.getVisibility() == View.VISIBLE )
+                {
+                    if(fragmentCheckoutBinding.cbPaymentMethod.isChecked())
+                        checkoutObserver.SetBillingAddress(shipping_address_selected.build(),Integer.parseInt(selected_shipping_id_original),true);
+                    else{
+                        List<String> address_list = new ArrayList<>();
+                        address_list.add(fragmentCheckoutBinding.etStreetAddress.getText().toString());
+                        if(!fragmentCheckoutBinding.etStreetAddressOptional.getText().toString().equals(""))
+                            address_list.add(fragmentCheckoutBinding.etStreetAddressOptional.getText().toString());
+
+
+                        shipping_address_new   = CartAddressInput.builder().city(fragmentCheckoutBinding.etCity.getText().toString())
+                                .companyInput(new Input<>("",true))
+                                .country_code(fragmentCheckoutBinding.spinnerCountries.getSelectedItem().toString())
+                                .firstname(fragmentCheckoutBinding.etFirstName.getText().toString())
+                                .lastname(fragmentCheckoutBinding.etLastName.getText().toString())
+                                .postcode("")
+                                .region("")
+                                .region_id(null)
+                                .save_in_address_book(false)
+                                .street(address_list)
+                                .telephone(fragmentCheckoutBinding.etPhoneNumber.getText().toString());
+
+                        checkoutObserver.SetBillingAddress(shipping_address_new.build(),Integer.parseInt(selected_shipping_id_original),false);
+
+
+                    }
+
+                }
+                else {
+                    checkoutObserver.SetBillingAddress(shipping_address_selected.build(),Integer.parseInt(selected_shipping_id_original),true);
+                }
+
+                // 5. Apply Delivery Date...
 
                 String comments_ = fragmentCheckoutBinding.etComments.getText().toString();
                 String date_ = fragmentCheckoutBinding.tvDate.getText().toString();
@@ -159,6 +209,13 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                     checkoutObserver.applyDeliveryCart(comments_, date_, time_slot_);
                 else
                     Toast.makeText(requireContext(),"select a time slot",Toast.LENGTH_SHORT).show();
+
+
+
+                // . Place Order...
+                checkoutObserver.placeOrder();
+
+
 
 
             }
@@ -222,6 +279,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         fragmentCheckoutBinding.spinnerCountriesA.setAdapter(adapter);
         fragmentCheckoutBinding.spinnerCountriesB.setAdapter(adapter);
+        fragmentCheckoutBinding.spinnerCountries.setAdapter(adapter);
 
 
         //
@@ -308,7 +366,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                 }
 
                 if(showPaymentMethods) {
-                    fragmentCheckoutBinding.tvNoPaymentInfoRequired.setVisibility(View.GONE);
+//                    fragmentCheckoutBinding.tvNoPaymentInfoRequired.setVisibility(View.GONE);
                     fragmentCheckoutBinding.dividerPaymentMethod.setVisibility(View.VISIBLE);
                     if (available_payment_methods.size() > 0 && available_payment_methods.size() < 2) {
                         fragmentCheckoutBinding.rbSlectionPaymentMethodA.setText(available_payment_methods.get(0).title());
@@ -316,7 +374,8 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                         fragmentCheckoutBinding.cbPaymentMethodA.setChecked(true);
                         fragmentCheckoutBinding.layoutNewAddressA.setVisibility(View.GONE);
 
-                    } else if (available_payment_methods.size() >= 2 && available_payment_methods.size() <= 3) {
+                    }
+                    else if (available_payment_methods.size() >= 2 && available_payment_methods.size() <= 3) {
                         fragmentCheckoutBinding.cbPaymentMethodA.setChecked(true);
                         fragmentCheckoutBinding.layoutPaymentA.setVisibility(View.VISIBLE);fragmentCheckoutBinding.layoutNewAddressA.setVisibility(View.GONE);
 
@@ -330,10 +389,11 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                 }
                 else
                 {
+                    fragmentCheckoutBinding.layoutPayment.setVisibility(View.GONE);
                     fragmentCheckoutBinding.layoutPaymentA.setVisibility(View.GONE);
                     fragmentCheckoutBinding.layoutPaymentB.setVisibility(View.GONE);
                     fragmentCheckoutBinding.dividerPaymentMethod.setVisibility(View.GONE);
-                    fragmentCheckoutBinding.tvNoPaymentInfoRequired.setVisibility(View.VISIBLE);
+//                    fragmentCheckoutBinding.tvNoPaymentInfoRequired.setVisibility(View.VISIBLE);
                 }
 
                 progressDialog.dismissDialog();
@@ -478,6 +538,10 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
 
                     fragmentCheckoutBinding.tvShippingMethod.setText(available_shipping_method.carrier_title() + " " + available_shipping_method.amount().currency() + " " +
                             available_shipping_method.amount().value().intValue());
+
+                    carrier_code = available_shipping_method.carrier_code();
+                    method_code = available_shipping_method.method_code();
+
                     progressDialog.dismissDialog();
                 }
             });

@@ -8,6 +8,7 @@ import com.apollographql.apollo.api.Input;
 import com.codeseven.pos.api.CheckOutRepository;
 import com.codeseven.pos.model.AddressItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -18,6 +19,7 @@ import apollo.pos.GetCustomerWalletQuery;
 import apollo.pos.fragment.AvailableShippingMethodsCheckoutFragment;
 import apollo.pos.fragment.ShippingInformationFragment;
 import apollo.pos.type.CartAddressInput;
+import apollo.pos.type.ShippingMethodInput;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
@@ -119,10 +121,7 @@ public class CheckOutViewModel extends ViewModel {
             checkOutRepository.getAvailablePaymentMethods();
         }
 
-        public void SetCustomerShippingAddress(Input<CartAddressInput> cartAddressInput, int customer_address_id,String customer_notes,
-                                               String pickup_location_code ){
-            checkOutRepository.SetCustomerShippingAddress(cartAddressInput,customer_address_id,customer_notes,pickup_location_code);
-        }
+
         public MutableLiveData<String> getPaymentMethodsResponse(){
             return GetAvailablePaymentMethodsResponse;
         }
@@ -162,6 +161,29 @@ public class CheckOutViewModel extends ViewModel {
             checkOutRepository.ApplyDeliveryCart(comments,date,timeslot);
         }
 
+        public void SetCustomerShippingAddress(Input<CartAddressInput> cartAddressInput, int customer_address_id,String customer_notes,
+                                               String pickup_location_code ){
+            checkOutRepository.SetCustomerShippingAddress(cartAddressInput,customer_address_id,customer_notes,pickup_location_code);
+        }
+
+        public void SetShippingMethodOnCart(String method_code, String carrier_code)
+        {
+            ShippingMethodInput ab = ShippingMethodInput.builder().method_code(method_code).carrier_code(carrier_code).build();
+            List<ShippingMethodInput> list = new ArrayList<>();
+            list.add(ab);
+            checkOutRepository.SetShippingMethodOnCart(list);
+        }
+
+        public void  SetPaymentMethodOnCart(String code){
+            checkOutRepository.SetPaymentMethodOnCart(code);
+        }
+        public void SetBillingAddress(CartAddressInput input, int address_id, boolean same_as_shipping)
+        {
+            checkOutRepository.SetBillingAddress(input,address_id,same_as_shipping);
+        }
+        public void placeOrder(){
+            checkOutRepository.PlaceOrder();
+        }
 
     }
 }

@@ -24,7 +24,11 @@ import apollo.pos.GetCustomerAddressesQuery;
 import apollo.pos.GetCustomerDetailsQuery;
 import apollo.pos.GetCustomerWalletQuery;
 import apollo.pos.GetSelectedAndAvailableShippingMethodsQuery;
+import apollo.pos.PlaceOrderMutation;
+import apollo.pos.SetBillingAddressOnCartMutation;
+import apollo.pos.SetPaymentMethodOnCartMutation;
 import apollo.pos.SetShippingMutation;
+import apollo.pos.SetShippingmethodOnCartMutation;
 import apollo.pos.fragment.AvailableShippingMethodsCheckoutFragment;
 import apollo.pos.fragment.ShippingInformationFragment;
 import apollo.pos.type.ApplyDeliveryCartInput;
@@ -32,6 +36,7 @@ import apollo.pos.type.ApplyWalletCartInput;
 import apollo.pos.type.CartAddressInput;
 import apollo.pos.type.SetShippingAddressesOnCartInput;
 import apollo.pos.type.ShippingAddressInput;
+import apollo.pos.type.ShippingMethodInput;
 
 public class CheckOutRepository {
 
@@ -278,6 +283,7 @@ public class CheckOutRepository {
             }
         });
     }
+
     public void SetCustomerShippingAddress(Input<CartAddressInput> address, int customer_address_id,String customer_notes,
                                            String pickup_location_code){
 
@@ -301,7 +307,67 @@ public class CheckOutRepository {
 
 
     }
+    public void SetShippingMethodOnCart(List<ShippingMethodInput> shippingMethodInput){
 
+        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
+        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
+
+
+        (new ApolloClientClass()).apolloClient.mutate(new SetShippingmethodOnCartMutation(cartPreference.GetCartId("cart_id"), shippingMethodInput)).toBuilder()
+                .requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<SetShippingmethodOnCartMutation.Data>() {
+            @Override
+            public void onResponse(@NonNull Response<SetShippingmethodOnCartMutation.Data> response) {
+
+                String ab = "";
+            }
+
+            @Override
+            public void onFailure(@NonNull ApolloException e) {
+                String ab = "";
+            }
+        });
+
+
+    }
+
+    public void SetPaymentMethodOnCart(String payment_method_code){
+
+        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
+        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
+
+
+        (new ApolloClientClass()).apolloClient.mutate(new SetPaymentMethodOnCartMutation(cartPreference.GetCartId("cart_id"), payment_method_code))
+                .toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<SetPaymentMethodOnCartMutation.Data>() {
+            @Override
+            public void onResponse(@NonNull Response<SetPaymentMethodOnCartMutation.Data> response) {
+                String ab = "";
+            }
+
+            @Override
+            public void onFailure(@NonNull ApolloException e) {
+                String ab = "";
+            }
+        });
+    }
+
+    public void SetBillingAddress(CartAddressInput addressInput, int address_id, boolean same_as_shipping)
+    {
+        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
+        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
+
+        (new ApolloClientClass()).apolloClient.mutate(new SetBillingAddressOnCartMutation(addressInput,address_id,same_as_shipping,cartPreference.GetCartId("cart_id")))
+                .toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<SetBillingAddressOnCartMutation.Data>() {
+            @Override
+            public void onResponse(@NonNull Response<SetBillingAddressOnCartMutation.Data> response) {
+
+            }
+
+            @Override
+            public void onFailure(@NonNull ApolloException e) {
+
+            }
+        });
+    }
     public void ApplyDeliveryCart(String comments, String date, String timeslot)
     {
         ApplyDeliveryCartInput applyDeliveryCartInput = ApplyDeliveryCartInput.builder().cart_id(cartPreference.GetCartId("cart_id")).shipping_arrival_comments(comments)
@@ -328,6 +394,26 @@ public class CheckOutRepository {
             @Override
             public void onFailure(@NonNull ApolloException e) {
                 getApplyDeliveryCartResponse.postValue("Error applying delivery cart.");
+
+            }
+        });
+    }
+    public void PlaceOrder()
+    {
+        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
+        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
+
+        (new ApolloClientClass()).apolloClient.mutate(new PlaceOrderMutation(cartPreference.GetCartId("cart_id"))).toBuilder().
+        build().enqueue(new ApolloCall.Callback<PlaceOrderMutation.Data>() {
+            @Override
+            public void onResponse(@NonNull Response<PlaceOrderMutation.Data> response) {
+                String ab = "";
+
+            }
+
+            @Override
+            public void onFailure(@NonNull ApolloException e) {
+                String ab = "";
 
             }
         });

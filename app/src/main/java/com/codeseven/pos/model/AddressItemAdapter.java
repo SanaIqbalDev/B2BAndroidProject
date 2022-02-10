@@ -111,9 +111,9 @@ public class AddressItemAdapter extends RecyclerView.Adapter<RecyclerView.ViewHo
     @Override
     public int getItemViewType(int position) {
 
-        if(position >= (addressesArrayList.size()-1))
-            return viewTypeTwo;
-        else
+//        if(position >= (addressesArrayList.size()-1))
+//            return viewTypeTwo;
+//        else
             return viewTypeOne;
     }
 
