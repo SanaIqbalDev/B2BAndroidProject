@@ -1,0 +1,142 @@
+query GetCartDetails($cartId: String!) {
+    cart(cart_id: $cartId) {
+        id
+        wallet_payment
+        avail_discount
+        selected_payment_method{
+            title
+        }
+        ...CartPageFragment
+        __typename
+    }
+}
+fragment CartPageFragment on Cart {
+    id
+    total_quantity
+    ...ProductListingFragment
+    ...PriceSummaryFragment
+    __typename
+}
+
+
+fragment ProductListingFragment on Cart {
+    id
+    items {
+        id
+        product {
+            id
+            name
+            sku
+            url_key
+            url_suffix
+            thumbnail {
+                url
+                __typename
+            }
+            small_image {
+                url
+                __typename
+            }
+            stock_status
+            ... on ConfigurableProduct {
+                variants {
+                    attributes {
+                        uid
+                        __typename
+                    }
+                    product {
+                        id
+                        small_image {
+                            url
+                            __typename
+                        }
+                        __typename
+                    }
+                    __typename
+                }
+                __typename
+            }
+            __typename
+        }
+        prices {
+            price {
+                currency
+                value
+                __typename
+            }
+            __typename
+        }
+        quantity
+        ... on ConfigurableCartItem {
+            configurable_options {
+                id
+                configurable_product_option_value_uid
+                option_label
+                value_id
+                value_label
+                __typename
+            }
+            __typename
+        }
+        __typename
+    }
+    __typename
+}
+fragment PriceSummaryFragment on Cart {
+    id
+    items {
+        id
+        quantity
+        __typename
+    }
+    ...ShippingSummaryFragment
+    prices {
+        ...DiscountSummaryFragment
+        ...GrandTotalFragment
+        subtotal_excluding_tax {
+            currency
+            value
+            __typename
+        }
+        __typename
+    }
+    __typename
+}
+fragment DiscountSummaryFragment on CartPrices {
+    discounts {
+        amount {
+            currency
+            value
+            __typename
+        }
+        label
+        __typename
+    }
+    __typename
+}
+
+
+fragment GrandTotalFragment on CartPrices {
+    grand_total {
+        currency
+        value
+        __typename
+    }
+    __typename
+}
+fragment ShippingSummaryFragment on Cart {
+    id
+    shipping_addresses {
+        selected_shipping_method {
+            amount {
+                currency
+                value
+                __typename
+            }
+            __typename
+        }
+        street
+        __typename
+    }
+    __typename
+}

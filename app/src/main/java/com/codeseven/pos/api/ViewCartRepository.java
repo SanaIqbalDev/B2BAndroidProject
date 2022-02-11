@@ -51,8 +51,12 @@ public class ViewCartRepository {
             @Override
             public void onResponse(@NonNull Response<GetCustomerCartQuery.Data> response) {
                 if(response.getErrors()!=null) {
-                    if (response.getErrors().size() > 0)
+                    if (response.getErrors().size() > 0) {
                         cartRequestResponse.postValue(response.getErrors().get(0).getMessage());
+                        if (response.getErrors().get(0).getMessage().contains("The request is allowed for logged in customer")){
+                            cartRequestResponse.postValue("Log in again.");
+                        }
+                    }
                 }
                 else {
                     cartRequestResponse.postValue(response.getData().toString());
@@ -102,8 +106,14 @@ public class ViewCartRepository {
             @Override
             public void onResponse(@NonNull Response<GetCartByIdQuery.Data> response) {
                 if(response.getErrors()!=null){
-                    if(response.getErrors().size()>0)
+                    if(response.getErrors().size()>0) {
+                        if (response.getErrors().get(0).getMessage().contains("The cart isn't active."))
+                        {
+                            getCustomerExistingCart();
+                        }
                         cartRequestResponse.postValue(response.getErrors().get(0).getMessage());
+
+                    }
                 }
                 else {
                     if (response.getData().cart() != null)

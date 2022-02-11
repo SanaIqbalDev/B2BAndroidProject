@@ -35,7 +35,9 @@ import com.codeseven.pos.model.AddressItem;
 import com.codeseven.pos.model.CartSummaryAdapter;
 import com.codeseven.pos.model.CatalogItem;
 import com.codeseven.pos.util.CartPreference;
+import com.codeseven.pos.util.CartViewModel;
 import com.codeseven.pos.util.CheckOutViewModel;
+import com.codeseven.pos.util.ProcessCartViewModel;
 
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -77,6 +79,10 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
     private String method_code = "";
     private CartAddressInput.Builder shipping_address_selected;
     private CartAddressInput.Builder shipping_address_new;
+
+    CartViewModel cartViewModel;
+    @Inject CartViewModel.CartObserver cartObserver;
+    public String customerCartId;
 
     public CheckoutFragment() {
     }
@@ -144,6 +150,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         fragmentCheckoutBinding.btnPlaceOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                progressDialog.StartLoadingdialog();
                 // 1. Setting Shipping Address...
                 shipping_address_selected   = CartAddressInput.builder().city(customer_shipping_address.city()).companyInput(new Input<>("",true))
                         .country_code(customer_shipping_address.country().code()).firstname(customer_shipping_address.firstname()).lastname(customer_shipping_address.lastname())
@@ -158,6 +165,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                 // 2. Apply Shipping Method on Cart...
 
                 checkoutObserver.SetShippingMethodOnCart(method_code,carrier_code);
+                checkoutObserver.GetCartDetails();
 
                 // 3. Apply Payment Method...
                 //Only one payment method cashondelivery is offered as of now...
@@ -168,9 +176,9 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
 
                 if(fragmentCheckoutBinding.layoutPayment.getVisibility() == View.VISIBLE )
                 {
-                    if(fragmentCheckoutBinding.cbPaymentMethod.isChecked())
+                    if(fragmentCheckoutBinding.cbPaymentMethod.isChecked()) {
                         checkoutObserver.SetBillingAddress(shipping_address_selected.build(),Integer.parseInt(selected_shipping_id_original),true);
-                    else{
+                    }else{
                         List<String> address_list = new ArrayList<>();
                         address_list.add(fragmentCheckoutBinding.etStreetAddress.getText().toString());
                         if(!fragmentCheckoutBinding.etStreetAddressOptional.getText().toString().equals(""))
@@ -205,17 +213,64 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                 String date_ = fragmentCheckoutBinding.tvDate.getText().toString();
                 String time_slot_ = selected_time_slot;
 
-                if(is_time_slot_selected)
+                if(is_time_slot_selected) {
                     checkoutObserver.applyDeliveryCart(comments_, date_, time_slot_);
+                }
                 else
                     Toast.makeText(requireContext(),"select a time slot",Toast.LENGTH_SHORT).show();
 
 
 
                 // . Place Order...
+
+//                checkoutObserver.GetCartDetails();
                 checkoutObserver.placeOrder();
 
 
+                checkoutObserver.getGetPlaceOrderResponseMessage().observe(getViewLifecycleOwner(), new Observer<String>() {
+                    @Override
+                    public void onChanged(String s) {
+                        if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED)
+                        {
+                            Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                        }
+                            if(s.contains("shipping method is missing")){
+                                checkoutObserver.SetShippingMethodOnCart(method_code,carrier_code);
+                                progressDialog.dismissDialog();
+                            }
+                            else if(s.contains("The cart isn't active")){
+
+                                cartViewModel = new ViewModelProvider(requireActivity()).get(CartViewModel.class);
+                                customerCartId = cartPreference.GetCartId("cart_id");
+                                cartObserver.getCartItems(customerCartId);
+
+                                cartObserver.getCartRequestResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
+                                    @Override
+                                    public void onChanged(String s) {
+                                        if(s.contains("Log in again.")){
+                                            progressDialog.dismissDialog();
+                                            NavHostFragment.findNavController(CheckoutFragment.this).navigate(R.id.action_checkoutFragment_to_loginFragment);
+                                        }
+                                    }
+                                });
+
+
+//                                AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
+//                                builder1.setMessage("Your order has been placed successfully.");
+//                                builder1.setCancelable(false);
+//                                builder1.setPositiveButton("Ok",
+//                                        new DialogInterface.OnClickListener() {
+//                                            public void onClick(DialogInterface dialog, int id) {
+//                                                NavHostFragment.findNavController(CheckoutFragment.this).navigate(R.id.action_checkoutFragment_to_homeFragment);
+//                                                dialog.cancel();
+//                                            }
+//                                        });
+//                                AlertDialog alert11 = builder1.create();
+//                                alert11.show();
+                            }
+
+                    }
+                });
 
 
             }

@@ -94,6 +94,9 @@
         <action
             android:id="@+id/action_checkoutFragment_to_customerAddressesFragment"
             app:destination="@id/customerAddressesFragment" />
+        <action
+            android:id="@+id/action_checkoutFragment_to_homeFragment"
+            app:destination="@id/homeFragment" />
     </fragment>
     <fragment
         android:id="@+id/shortListedItemsFragment"

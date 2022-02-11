@@ -1,5 +1,7 @@
 package com.codeseven.pos.api;
 
+import android.util.Log;
+
 import androidx.annotation.NonNull;
 import androidx.lifecycle.MutableLiveData;
 
@@ -20,6 +22,7 @@ import java.util.Objects;
 import apollo.pos.ApplyDeliveryCartMutation;
 import apollo.pos.ApplyWalletToCartMutation;
 import apollo.pos.GetAvailablePaymentMethodsQuery;
+import apollo.pos.GetCartDetailsQuery;
 import apollo.pos.GetCustomerAddressesQuery;
 import apollo.pos.GetCustomerDetailsQuery;
 import apollo.pos.GetCustomerWalletQuery;
@@ -63,6 +66,8 @@ public class CheckOutRepository {
 
     private CartPreference cartPreference;
 
+    private MutableLiveData<String> placeOrderResponseMessage;
+
     public CheckOutRepository() {
         this.loginPreference = new LoginPreference();
 
@@ -89,6 +94,7 @@ public class CheckOutRepository {
 
         getApplyDeliveryCartResponse = new MutableLiveData<>();
 
+        placeOrderResponseMessage =  new MutableLiveData<>();
         cartPreference = new CartPreference();
 
 
@@ -130,9 +136,26 @@ public class CheckOutRepository {
                         CustomerInfoResponse.postValue(response.getErrors().get(0).getMessage());
                 }
                 else {
-                    customerShippingDetails.postValue(response.getData().cart().fragments().shippingInformationFragment().shipping_addresses().get(0));
-                    availableShippingMethod.postValue(Objects.requireNonNull(Objects.requireNonNull(response.getData().cart()).fragments().availableShippingMethodsCheckoutFragment().shipping_addresses().get(0).available_shipping_methods()).get(0));
-
+                    try {
+                        if(response.getData().cart().fragments().shippingInformationFragment().shipping_addresses()!=null) {
+                            if (response.getData().cart().fragments().shippingInformationFragment().shipping_addresses().size() > 0)
+                            {
+                                customerShippingDetails.postValue(response.getData().cart().fragments().shippingInformationFragment().shipping_addresses().get(0));
+                            }
+                            if(response.getData().cart().fragments().availableShippingMethodsCheckoutFragment().shipping_addresses() != null) {
+                                if(response.getData().cart().fragments().availableShippingMethodsCheckoutFragment().shipping_addresses().size()>0)
+                                {
+                                    if(response.getData().cart().fragments().availableShippingMethodsCheckoutFragment().shipping_addresses().get(0).available_shipping_methods() != null) {
+                                        if(response.getData().cart().fragments().availableShippingMethodsCheckoutFragment().shipping_addresses().get(0).available_shipping_methods().size() >0)
+                                            availableShippingMethod.postValue(Objects.requireNonNull(Objects.requireNonNull(response.getData().cart()).fragments().availableShippingMethodsCheckoutFragment().shipping_addresses().get(0).available_shipping_methods()).get(0));
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (NullPointerException e){
+                        Log.e("error",e.getLocalizedMessage());
+                    }
                 }
             }
 
@@ -319,11 +342,18 @@ public class CheckOutRepository {
             public void onResponse(@NonNull Response<SetShippingmethodOnCartMutation.Data> response) {
 
                 String ab = "";
+                placeOrderResponseMessage.postValue("Shipping Method is set on cart.");
             }
 
             @Override
             public void onFailure(@NonNull ApolloException e) {
                 String ab = "";
+                if(e.getCause().getLocalizedMessage().equals("timeout"))
+                {
+                    placeOrderResponseMessage.postValue(e.getCause().getMessage());
+                    SetShippingMethodOnCart(shippingMethodInput);
+                }
+
             }
         });
 
@@ -398,22 +428,49 @@ public class CheckOutRepository {
             }
         });
     }
+    public void GetCartDetail(){
+
+        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
+        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
+
+        (new ApolloClientClass()).apolloClient.query(new GetCartDetailsQuery(cartPreference.GetCartId("cart_id"))).
+                toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetCartDetailsQuery.Data>() {
+            @Override
+            public void onResponse(@NonNull Response<GetCartDetailsQuery.Data> response) {
+                String ab = "";
+            }
+
+            @Override
+            public void onFailure(@NonNull ApolloException e) {
+                String ab = "";
+            }
+        });
+    }
     public void PlaceOrder()
     {
         RequestHeaders.Builder requestHeader = RequestHeaders.builder();
         requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
 
-        (new ApolloClientClass()).apolloClient.mutate(new PlaceOrderMutation(cartPreference.GetCartId("cart_id"))).toBuilder().
-        build().enqueue(new ApolloCall.Callback<PlaceOrderMutation.Data>() {
+        (new ApolloClientClass()).apolloClient.mutate(new PlaceOrderMutation(cartPreference.GetCartId("cart_id"))).toBuilder().requestHeaders(requestHeader.build())
+                .build().enqueue(new ApolloCall.Callback<PlaceOrderMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<PlaceOrderMutation.Data> response) {
                 String ab = "";
+                if(response.hasErrors())
+                {
+                    placeOrderResponseMessage.postValue(response.getErrors().get(0).getMessage());
+                }
 
             }
 
             @Override
             public void onFailure(@NonNull ApolloException e) {
                 String ab = "";
+                if(e.getCause().getLocalizedMessage().equals("timeout"))
+                {
+                    placeOrderResponseMessage.postValue(e.getCause().getMessage());
+                    PlaceOrder();
+                }
 
             }
         });
@@ -464,5 +521,9 @@ public class CheckOutRepository {
 
     public MutableLiveData<String> getGetApplyDeliveryCartResponse() {
         return getApplyDeliveryCartResponse;
+    }
+
+    public MutableLiveData<String> getPlaceOrderResponseMessage() {
+        return placeOrderResponseMessage;
     }
 }

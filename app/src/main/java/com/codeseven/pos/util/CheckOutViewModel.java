@@ -58,6 +58,7 @@ public class CheckOutViewModel extends ViewModel {
         private MutableLiveData<GetCustomerAddressesQuery.Address> default_shipping_Address;
 
         private MutableLiveData<String> getApplyDeliveryCartResponse;
+        private MutableLiveData<String> getPlaceOrderResponseMessage;
 
 
         @Inject
@@ -76,6 +77,7 @@ public class CheckOutViewModel extends ViewModel {
             default_shipping_id = checkOutRepository.getDefault_shipping_id();
             default_shipping_Address = checkOutRepository.getDefault_shipping_address();
             getApplyDeliveryCartResponse = checkOutRepository.getGetApplyDeliveryCartResponse();
+            getPlaceOrderResponseMessage = checkOutRepository.getPlaceOrderResponseMessage();
         }
 
         public void GetCustomerAddressDetails(){
@@ -184,6 +186,13 @@ public class CheckOutViewModel extends ViewModel {
         public void placeOrder(){
             checkOutRepository.PlaceOrder();
         }
+        public void GetCartDetails(){
+            checkOutRepository.GetCartDetail();
+        }
 
+
+        public MutableLiveData<String> getGetPlaceOrderResponseMessage() {
+            return getPlaceOrderResponseMessage;
+        }
     }
 }
