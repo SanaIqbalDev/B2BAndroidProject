@@ -86,7 +86,7 @@ public class ShortListedItemsFragment extends Fragment {
         fragmentShortListedItemsBinding.setProductByNameViewModel(getProductsByNameObserver);
 
         progressDialog.StartLoadingdialog();
-        getProductsByNameObserver.getProductsByName(itemName);
+        getProductsByNameObserver.getProductsByName(itemName,1,12);
 
 
         adapter = new ProductSelectionAdapter(requireContext(), itemList, new ProductSelectionListener() {

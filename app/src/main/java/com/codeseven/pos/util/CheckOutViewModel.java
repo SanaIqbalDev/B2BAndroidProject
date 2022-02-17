@@ -19,7 +19,6 @@ import apollo.pos.GetCustomerWalletQuery;
 import apollo.pos.fragment.AvailableShippingMethodsCheckoutFragment;
 import apollo.pos.fragment.ShippingInformationFragment;
 import apollo.pos.type.CartAddressInput;
-import apollo.pos.type.ShippingMethodInput;
 import dagger.hilt.android.lifecycle.HiltViewModel;
 
 @HiltViewModel
@@ -60,6 +59,8 @@ public class CheckOutViewModel extends ViewModel {
         private MutableLiveData<String> getApplyDeliveryCartResponse;
         private MutableLiveData<String> getPlaceOrderResponseMessage;
 
+        private MutableLiveData<Boolean> getShouldPlaceOrder;
+
 
         @Inject
         public CheckoutObserver(){
@@ -74,6 +75,7 @@ public class CheckOutViewModel extends ViewModel {
             GetAvailablePaymentMethodsResponse = checkOutRepository.getGetPaymentMethodResponse();
             this.listOfAddresses = checkOutRepository.getListOfAddresses();
             this.addressListResponse = checkOutRepository.getAddressResponse();
+            this.getShouldPlaceOrder = checkOutRepository.getIstruePlaceOrder();
             default_shipping_id = checkOutRepository.getDefault_shipping_id();
             default_shipping_Address = checkOutRepository.getDefault_shipping_address();
             getApplyDeliveryCartResponse = checkOutRepository.getGetApplyDeliveryCartResponse();
@@ -94,6 +96,7 @@ public class CheckOutViewModel extends ViewModel {
         public MutableLiveData<AvailableShippingMethodsCheckoutFragment.Available_shipping_method> GetShippingMethod(){
             return AvailableShippingMethod;
         }
+
 
 
         public MutableLiveData<GetCustomerWalletQuery.Wallet> getCustomerWalletData() {
@@ -163,17 +166,17 @@ public class CheckOutViewModel extends ViewModel {
             checkOutRepository.ApplyDeliveryCart(comments,date,timeslot);
         }
 
-        public void SetCustomerShippingAddress(Input<CartAddressInput> cartAddressInput, int customer_address_id,String customer_notes,
+        public void SetCustomerShippingAddress(int customer_address_id,String customer_notes,
                                                String pickup_location_code ){
-            checkOutRepository.SetCustomerShippingAddress(cartAddressInput,customer_address_id,customer_notes,pickup_location_code);
+            checkOutRepository.SetCustomerShippingAddress(customer_address_id,customer_notes,pickup_location_code);
         }
 
         public void SetShippingMethodOnCart(String method_code, String carrier_code)
         {
-            ShippingMethodInput ab = ShippingMethodInput.builder().method_code(method_code).carrier_code(carrier_code).build();
-            List<ShippingMethodInput> list = new ArrayList<>();
-            list.add(ab);
-            checkOutRepository.SetShippingMethodOnCart(list);
+//            ShippingMethodInput ab = ShippingMethodInput.builder().method_code(method_code).carrier_code(carrier_code).build();
+//            List<ShippingMethodInput> list = new ArrayList<>();
+//            list.add(ab);
+            checkOutRepository.SetShippingMethodOnCart();
         }
 
         public void  SetPaymentMethodOnCart(String code){
@@ -193,6 +196,15 @@ public class CheckOutViewModel extends ViewModel {
 
         public MutableLiveData<String> getGetPlaceOrderResponseMessage() {
             return getPlaceOrderResponseMessage;
+        }
+
+        public MutableLiveData<Boolean> getGetShouldPlaceOrder(){
+            return getShouldPlaceOrder;
+        }
+
+        public void checkCount()
+        {
+            checkOutRepository.checkCount();
         }
     }
 }

@@ -217,16 +217,41 @@ public class CartFragment extends Fragment {
             @Override
             public void onChanged(String s) {
                 progressDialog.dismissDialog();
-                if(s.contains("The cart isn't active."))
+                if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+
+                    if(s.contains("The cart isn't active."))
                 {
                     cartObserver.GetCustomerCart();
+                }
+                if(s.contains("Log in again.")){
+                    progressDialog.dismissDialog();
+                    Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                    AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
+                    builder1.setMessage(requireContext().getResources().getString(R.string.sign_in_again));
+                    builder1.setCancelable(false);
+                    builder1.setPositiveButton("Ok",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                    NavHostFragment.findNavController(CartFragment.this).navigate(R.id.action_cartFragment_to_loginFragment);
+                                }
+                            });
+                    builder1.setNegativeButton("Cancel",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    dialog.cancel();
+                                }
+                            });
+
+                    AlertDialog alert11 = builder1.create();
+                    alert11.show();
                 }
                 if(s.contains("The current user cannot perform operations on cart")){
 
                     Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
 
                     AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
-                    builder1.setMessage("Please sign in again to perform this operation.");
+                    builder1.setMessage(requireContext().getResources().getString(R.string.sign_in_again));
                     builder1.setCancelable(false);
                     builder1.setPositiveButton("Ok",
                             new DialogInterface.OnClickListener() {
@@ -244,6 +269,7 @@ public class CartFragment extends Fragment {
 
                     AlertDialog alert11 = builder1.create();
                     alert11.show();
+                }
                 }
             }
         });

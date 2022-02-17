@@ -3,6 +3,7 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable-v24/border_black.xml" value="0.101" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable-v24/border_button.xml" value="0.20319634703196346" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable-v24/coupon_button.xml" value="0.20601851851851852" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/drawable-v24/ic_checked_small.xml" value="0.19722222222222222" />
@@ -85,8 +86,10 @@
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/menu/navigation_drawer.xml" value="0.19166666666666668" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/menu/search_menu.xml" value="0.19166666666666668" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/menu/search_menu_catalog.xml" value="0.19166666666666668" />
+        <entry key="..\:/24Seven/NewFolder/app/src/main/res/menu/search_menu_detail.xml" value="0.19166666666666668" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/menu/top_app_bar.xml" value="0.1" />
         <entry key="..\:/24Seven/NewFolder/app/src/main/res/mipmap-anydpi-v26/ic_launcher.xml" value="0.19212962962962962" />
+        <entry key="..\:/24Seven/NewFolder/app/src/main/res/xml/searchable.xml" value="0.125" />
         <entry key="..\:/NewFolder/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.12037037037037036" />
         <entry key="..\:/NewFolder/app/src/main/res/drawable/ic_launcher_background.xml" value="0.12037037037037036" />
         <entry key="..\:/NewFolder/app/src/main/res/layout-land/fragment_login.xml" value="0.18253968253968253" />

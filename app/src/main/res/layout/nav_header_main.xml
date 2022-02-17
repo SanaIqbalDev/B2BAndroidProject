@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="200dp"
-    android:background="@color/primaryDarkColor"
+    android:background="@color/white"
     android:gravity="bottom"
     android:orientation="vertical"
     android:paddingBottom="10dp"
@@ -12,13 +12,17 @@
     android:paddingTop="10dp"
     android:theme="@style/ThemeOverlay.AppCompat.Dark">
 
+    <LinearLayout
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:padding="10dp"
+        android:background="@drawable/border_black">
     <ImageView
         android:id="@+id/imageView"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:paddingTop="10dp"
-        app:srcCompat="@mipmap/ic_launcher" />
-
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:srcCompat="@drawable/apni_dukan_logo" />
+    </LinearLayout>
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

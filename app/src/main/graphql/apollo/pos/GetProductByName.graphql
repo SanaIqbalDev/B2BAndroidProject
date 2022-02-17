@@ -1,5 +1,5 @@
-query getAutocompleteResults($inputText:String!){
-    products(search:$inputText currentPage:1 pageSize:3){
+query getAutocompleteResults($inputText:String!, $currentPage: Int!, $pageSize: Int!){
+    products(search:$inputText, currentPage:$currentPage, pageSize:$pageSize){
         aggregations{
             label
             count
@@ -15,6 +15,9 @@ query getAutocompleteResults($inputText:String!){
             id
             name
             sku
+            description{
+                html
+            }
             small_image{
                 url __typename
             }

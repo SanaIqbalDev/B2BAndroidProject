@@ -50,17 +50,21 @@ public class ViewCartRepository {
         (new ApolloClientClass()).apolloClient.query(new GetCustomerCartQuery()).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetCustomerCartQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetCustomerCartQuery.Data> response) {
-                if(response.getErrors()!=null) {
-                    if (response.getErrors().size() > 0) {
-                        cartRequestResponse.postValue(response.getErrors().get(0).getMessage());
+                if(response.hasErrors()) {
+
                         if (response.getErrors().get(0).getMessage().contains("The request is allowed for logged in customer")){
                             cartRequestResponse.postValue("Log in again.");
                         }
-                    }
+                        else
+                        {
+                            cartRequestResponse.postValue(response.getErrors().get(0).getMessage());
+                        }
+
                 }
                 else {
                     cartRequestResponse.postValue(response.getData().toString());
                     cartId = response.getData().customerCart().id();
+                    GetCartById(cartId);
                     cartPreference.AddCartId("cart_id", cartId);
                 }
             }
@@ -105,15 +109,12 @@ public class ViewCartRepository {
         (new ApolloClientClass()).apolloClient.query(new GetCartByIdQuery(cartId)).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetCartByIdQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetCartByIdQuery.Data> response) {
-                if(response.getErrors()!=null){
-                    if(response.getErrors().size()>0) {
-                        if (response.getErrors().get(0).getMessage().contains("The cart isn't active."))
-                        {
-                            getCustomerExistingCart();
-                        }
+                if(response.hasErrors()){
+//                        if (response.getErrors().get(0).getMessage().contains("The cart isn't active."))
+//                        {
+//                            getCustomerExistingCart();
+//                        }
                         cartRequestResponse.postValue(response.getErrors().get(0).getMessage());
-
-                    }
                 }
                 else {
                     if (response.getData().cart() != null)

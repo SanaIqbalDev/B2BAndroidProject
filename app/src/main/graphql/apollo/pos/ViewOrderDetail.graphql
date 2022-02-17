@@ -1,3 +1,4 @@
+
 query GetCartDetails($cartId: String!) {
     cart(cart_id: $cartId) {
         id
@@ -128,6 +129,8 @@ fragment ShippingSummaryFragment on Cart {
     id
     shipping_addresses {
         selected_shipping_method {
+            method_code
+            carrier_code
             amount {
                 currency
                 value

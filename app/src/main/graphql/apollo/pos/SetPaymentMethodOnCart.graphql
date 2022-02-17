@@ -1,7 +1,7 @@
 mutation setPaymentMethodOnCart($cart_id: String!, $payment_method: String! ){
     setPaymentMethodOnCart(input: { cart_id: $cart_id, payment_method: { code: $payment_method } }) {
         cart {
-            id
+            __typename
         }
     }
 }

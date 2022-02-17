@@ -31,18 +31,25 @@ public class GetProductByNameViewModel extends ViewModel {
 
         private GetProductWithNameRepository repository;
         private MutableLiveData<List<GetAutocompleteResultsQuery.Item>> itemsList = new MutableLiveData<>();
+        private MutableLiveData<Integer> pages_count = new MutableLiveData<>();
 
         @Inject
         public GetProductsByNameObserver() {
             this.repository = new GetProductWithNameRepository();
             this.itemsList = repository.GetItems();
+            this.pages_count = repository.GetPagesCount();
         }
         public MutableLiveData<List<GetAutocompleteResultsQuery.Item>> getItemsList() {
             return itemsList;
         }
 
-        public void getProductsByName(String itemName){
-            repository.getProducts(itemName);
+        public void getProductsByName(String itemName, int currentPage, int pageSize){
+            repository.getProducts(itemName, currentPage, pageSize);
+        }
+
+
+        public MutableLiveData<Integer> getPages_count() {
+            return pages_count;
         }
     }
 }

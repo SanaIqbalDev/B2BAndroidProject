@@ -2,7 +2,7 @@ mutation setShipping($ab : SetShippingAddressesOnCartInput!) {
   setShippingAddressesOnCart(
     input: $ab ) {
     cart {
-      id
+      __typename
     }
   }
 }

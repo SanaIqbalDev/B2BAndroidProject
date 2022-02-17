@@ -16,27 +16,29 @@ import apollo.pos.GetAutocompleteResultsQuery;
 public class GetProductWithNameRepository {
 
     private MutableLiveData<List<GetAutocompleteResultsQuery.Item>> itemsList = new MutableLiveData<>(new ArrayList<>());
+    private MutableLiveData<Integer> total_pages;
     private MutableLiveData<String> responseThis ;
 
 
     public GetProductWithNameRepository() {
         itemsList = new MutableLiveData<>(new ArrayList<>());
         responseThis = new MutableLiveData<>("");
+        total_pages = new MutableLiveData<>(0);
     }
 
-    public void getProducts(String itemName)
+    public void getProducts(String itemName, int currentPage, int pageSize)
     {
-        (new ApolloClientClass()).apolloClient.query(new GetAutocompleteResultsQuery(itemName)).enqueue(new ApolloCall.Callback<GetAutocompleteResultsQuery.Data>() {
+        (new ApolloClientClass()).apolloClient.query(new GetAutocompleteResultsQuery(itemName,currentPage,pageSize)).enqueue(new ApolloCall.Callback<GetAutocompleteResultsQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetAutocompleteResultsQuery.Data> response) {
                 String ab ="";
-                if(response.getErrors()!=null) {
-                    if (response.getErrors().size() > 0) {
-                        responseThis.postValue(response.getErrors().get(0).getMessage());
-                    }
-                    }
-                else
+                if(response.hasErrors()) {
+                    responseThis.postValue(response.getErrors().get(0).getMessage());
+                }
+                else {
                     itemsList.postValue(response.getData().products().items());
+                    total_pages.postValue(response.getData().products().page_info().total_pages());
+                }
 
             }
 
@@ -53,4 +55,7 @@ public class GetProductWithNameRepository {
         return  itemsList;
     }
 
+    public MutableLiveData<Integer> GetPagesCount(){
+        return total_pages;
+    }
 }

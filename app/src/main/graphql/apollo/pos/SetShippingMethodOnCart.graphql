@@ -1,7 +1,7 @@
 mutation setShippingmethodOnCart($cart_id: String!, $shipping_method: [ShippingMethodInput]!){
     setShippingMethodsOnCart(input: { cart_id: $cart_id, shipping_methods: $shipping_method }) {
         cart {
-            id
+            __typename
         }
     }
 }

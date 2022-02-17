@@ -1,11 +1,7 @@
-mutation setBillingAddressOnCart($address: CartAddressInput!, $address_id: Int!,
-    $same_as_shipping: Boolean! , $cart_id: String! ){
-    setBillingAddressOnCart(input: { billing_address: {address: $address,
-        customer_address_id: $address_id, same_as_shipping: $same_as_shipping},
-        cart_id: $cart_id }) {
+mutation setBillingAddres($billing_address: BillingAddressInput!, $cart_id: String!){
+    setBillingAddressOnCart(input: { billing_address: $billing_address , cart_id: $cart_id }) {
         cart {
             id
         }
     }
 }
-

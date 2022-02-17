@@ -7,6 +7,7 @@ import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.api.Input;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
+import com.apollographql.apollo.request.RequestHeaders;
 import com.codeseven.pos.ApolloClientClass;
 
 import java.util.ArrayList;
@@ -51,8 +52,8 @@ public class CatalogRepository {
 
 
         (new ApolloClientClass()).apolloClient.query(new GetProductsQuery(pageSize,currentPage,
-                ProductAttributeFilterInput.builder().category_id(FilterEqualTypeInput.builder().build()).category_idInput(ab).build(),
-                sortOption)).enqueue(new ApolloCall.Callback<GetProductsQuery.Data>() {
+                ProductAttributeFilterInput.builder().category_id(FilterEqualTypeInput.builder().eq(category).build()).build()
+                , sortOption)).enqueue(new ApolloCall.Callback<GetProductsQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetProductsQuery.Data> response) {
                 if(response.getErrors()!=null) {
@@ -85,7 +86,11 @@ public class CatalogRepository {
         });
     }
     public void getCaterogiesList(){
-        (new ApolloClientClass()).apolloClient.query(new GetMegaMenuQuery()).enqueue(new ApolloCall.Callback<GetMegaMenuQuery.Data>() {
+
+        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
+        requestHeader.addHeader("store","ur");
+
+        (new ApolloClientClass()).apolloClient.query(new GetMegaMenuQuery()).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetMegaMenuQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetMegaMenuQuery.Data> response) {
                 String ab ="";

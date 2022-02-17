@@ -28,7 +28,7 @@ import apollo.pos.GetCustomerDetailsQuery;
 import apollo.pos.GetCustomerWalletQuery;
 import apollo.pos.GetSelectedAndAvailableShippingMethodsQuery;
 import apollo.pos.PlaceOrderMutation;
-import apollo.pos.SetBillingAddressOnCartMutation;
+import apollo.pos.SetBillingAddresMutation;
 import apollo.pos.SetPaymentMethodOnCartMutation;
 import apollo.pos.SetShippingMutation;
 import apollo.pos.SetShippingmethodOnCartMutation;
@@ -36,10 +36,12 @@ import apollo.pos.fragment.AvailableShippingMethodsCheckoutFragment;
 import apollo.pos.fragment.ShippingInformationFragment;
 import apollo.pos.type.ApplyDeliveryCartInput;
 import apollo.pos.type.ApplyWalletCartInput;
+import apollo.pos.type.BillingAddressInput;
 import apollo.pos.type.CartAddressInput;
 import apollo.pos.type.SetShippingAddressesOnCartInput;
 import apollo.pos.type.ShippingAddressInput;
 import apollo.pos.type.ShippingMethodInput;
+//import apollo.pos.type.ShippingMethodInput;
 
 public class CheckOutRepository {
 
@@ -68,6 +70,12 @@ public class CheckOutRepository {
 
     private MutableLiveData<String> placeOrderResponseMessage;
 
+    private  MutableLiveData<Boolean> istrue;
+
+    //    private MutableLiveData<List<Boolean>> shouldPlaceOrder;
+    private List<Boolean> counter;
+
+
     public CheckOutRepository() {
         this.loginPreference = new LoginPreference();
 
@@ -95,6 +103,13 @@ public class CheckOutRepository {
         getApplyDeliveryCartResponse = new MutableLiveData<>();
 
         placeOrderResponseMessage =  new MutableLiveData<>();
+
+        istrue = new MutableLiveData<>();
+        istrue.postValue(true);
+//        shouldPlaceOrder = new MutableLiveData<>(new ArrayList<>());
+
+        counter = new ArrayList<>();
+
         cartPreference = new CartPreference();
 
 
@@ -269,7 +284,7 @@ public class CheckOutRepository {
             public void onResponse(@NonNull Response<GetCustomerAddressesQuery.Data> response) {
                 if(response.getErrors()!=null){
                     if(response.getErrors().size()>0)
-                        getAddressResponse.postValue(response.getErrors().get(0).getMessage());
+                       getAddressResponse.postValue(response.getErrors().get(0).getMessage());
                 }
                 else
                 {
@@ -307,7 +322,7 @@ public class CheckOutRepository {
         });
     }
 
-    public void SetCustomerShippingAddress(Input<CartAddressInput> address, int customer_address_id,String customer_notes,
+    public void SetCustomerShippingAddress(int customer_address_id,String customer_notes,
                                            String pickup_location_code){
 
         ShippingAddressInput input = ShippingAddressInput.builder().customer_address_id(customer_address_id).build();
@@ -321,37 +336,70 @@ public class CheckOutRepository {
         (new ApolloClientClass()).apolloClient.mutate(new SetShippingMutation(ab)).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<SetShippingMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<SetShippingMutation.Data> response) {
+                if(!response.hasErrors())
+                {
+                    counter.add(0,true);
+                    placeOrderResponseMessage.postValue("Shipping Address success");
+
+                }
+                else
+                {
+                    counter.add(0, false);
+                    placeOrderResponseMessage.postValue("Shipping Address failure");
+
+                }
+
             }
 
             @Override
             public void onFailure(@NonNull ApolloException e) {
+                counter.add(0, false);
+                placeOrderResponseMessage.postValue("Shipping Address failure");
+
             }
         });
 
 
     }
-    public void SetShippingMethodOnCart(List<ShippingMethodInput> shippingMethodInput){
+    public void SetShippingMethodOnCart(){
 
         RequestHeaders.Builder requestHeader = RequestHeaders.builder();
         requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
 
+        List<ShippingMethodInput> list = new ArrayList<>();
+        list.add(ShippingMethodInput.builder().method_code("flatrate").carrier_code("flatrate").build());
 
-        (new ApolloClientClass()).apolloClient.mutate(new SetShippingmethodOnCartMutation(cartPreference.GetCartId("cart_id"), shippingMethodInput)).toBuilder()
+
+        (new ApolloClientClass()).apolloClient.mutate(new SetShippingmethodOnCartMutation(cartPreference.GetCartId("cart_id"),list)).toBuilder()
                 .requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<SetShippingmethodOnCartMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<SetShippingmethodOnCartMutation.Data> response) {
 
-                String ab = "";
-                placeOrderResponseMessage.postValue("Shipping Method is set on cart.");
+                if(!response.hasErrors()) {
+                    String ab = "";
+                    placeOrderResponseMessage.postValue("Shipping Method success");
+                    counter.add(1, true);
+                    if(counter.size()==5){
+                        checkCount();
+                    }
+                }
+                else {
+                    counter.add(1, false);
+                    placeOrderResponseMessage.postValue("Shipping Method failure");
+
+                }
             }
 
             @Override
             public void onFailure(@NonNull ApolloException e) {
                 String ab = "";
+                counter.add(1, false);
+                placeOrderResponseMessage.postValue("Shipping Method failure");
+
                 if(e.getCause().getLocalizedMessage().equals("timeout"))
                 {
                     placeOrderResponseMessage.postValue(e.getCause().getMessage());
-                    SetShippingMethodOnCart(shippingMethodInput);
+                    SetShippingMethodOnCart();
                 }
 
             }
@@ -370,11 +418,21 @@ public class CheckOutRepository {
                 .toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<SetPaymentMethodOnCartMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<SetPaymentMethodOnCartMutation.Data> response) {
-                String ab = "";
+                if(!response.hasErrors())
+                {
+                    counter.add(4,true);
+                    placeOrderResponseMessage.postValue("Payment Method success");
+                }
+                else{
+                    counter.add(4,false);
+                    placeOrderResponseMessage.postValue("Payment Method failure");
+                }
             }
 
             @Override
             public void onFailure(@NonNull ApolloException e) {
+                counter.add(4,false);
+                placeOrderResponseMessage.postValue("Payment Method failure");
                 String ab = "";
             }
         });
@@ -385,18 +443,52 @@ public class CheckOutRepository {
         RequestHeaders.Builder requestHeader = RequestHeaders.builder();
         requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
 
-        (new ApolloClientClass()).apolloClient.mutate(new SetBillingAddressOnCartMutation(addressInput,address_id,same_as_shipping,cartPreference.GetCartId("cart_id")))
-                .toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<SetBillingAddressOnCartMutation.Data>() {
-            @Override
-            public void onResponse(@NonNull Response<SetBillingAddressOnCartMutation.Data> response) {
 
+        (new ApolloClientClass()).apolloClient.mutate(new SetBillingAddresMutation(BillingAddressInput.builder()
+                .customer_address_id(address_id).build() , cartPreference.GetCartId("cart_id") )).toBuilder()
+                .requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<SetBillingAddresMutation.Data>() {
+            @Override
+            public void onResponse(@NonNull Response<SetBillingAddresMutation.Data> response) {
+                if(!response.hasErrors()){
+                    counter.add(2,true);
+                    placeOrderResponseMessage.postValue("Billing Address Success");
+
+                }
+                else
+                {
+                    counter.add(2,false);
+                    placeOrderResponseMessage.postValue("Billing Address failure");
+                }
             }
 
             @Override
             public void onFailure(@NonNull ApolloException e) {
-
+                counter.add(2, false);
+                placeOrderResponseMessage.postValue("Billing Address failure");
             }
         });
+//        (new ApolloClientClass()).apolloClient.mutate(new (addressInput,address_id,same_as_shipping,cartPreference.GetCartId("cart_id")))
+//                .toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<SetBillingAddressOnCartMutation.Data>() {
+//            @Override
+//            public void onResponse(@NonNull Response<SetBillingAddressOnCartMutation.Data> response) {
+//                if(!response.hasErrors()){
+//                    counter.add(3,true);
+//                    placeOrderResponseMessage.postValue("Billing Address Success");
+//
+//                }
+//                else
+//                {
+//                    counter.add(3,false);
+//                    placeOrderResponseMessage.postValue("Billing Address failure");
+//                }
+//            }
+//
+//            @Override
+//            public void onFailure(@NonNull ApolloException e) {
+//                counter.add(3, false);
+//                placeOrderResponseMessage.postValue("Billing Address failure");
+//            }
+//        });
     }
     public void ApplyDeliveryCart(String comments, String date, String timeslot)
     {
@@ -413,20 +505,47 @@ public class CheckOutRepository {
             public void onResponse(@NonNull Response<ApplyDeliveryCartMutation.Data> response) {
                 if(response.hasErrors())
                 {
+                    counter.add(3, false);
                     getApplyDeliveryCartResponse.postValue("Error applying delivery cart.");
+                    placeOrderResponseMessage.postValue("Delivery Cart failure");
+
                 }
                 else
                 {
+                    counter.add(3, true);
                     getApplyDeliveryCartResponse.postValue("Delivery Cart Applied.");
+                    placeOrderResponseMessage.postValue("Delivery Cart success");
+
                 }
+
+//                checkCount();
+
             }
 
             @Override
             public void onFailure(@NonNull ApolloException e) {
+                counter.add(3, false);
                 getApplyDeliveryCartResponse.postValue("Error applying delivery cart.");
+                placeOrderResponseMessage.postValue("Delivery Cart failure");
+
 
             }
         });
+    }
+
+
+    public void checkCount(){
+        if(counter.size()== 5){
+            istrue.postValue(true);
+            for(int i=0 ; i<counter.size();i++){
+                if(!counter.get(i))
+                    istrue.postValue(false);
+            }
+            if(istrue.getValue())
+            {
+                PlaceOrder();
+            }
+        }
     }
     public void GetCartDetail(){
 
@@ -456,9 +575,15 @@ public class CheckOutRepository {
             @Override
             public void onResponse(@NonNull Response<PlaceOrderMutation.Data> response) {
                 String ab = "";
+
                 if(response.hasErrors())
                 {
+//                    response.getErrors().get(0).getMessage();
                     placeOrderResponseMessage.postValue(response.getErrors().get(0).getMessage());
+                }
+                else
+                {
+                    placeOrderResponseMessage.postValue("Place order success");
                 }
 
             }
@@ -466,12 +591,16 @@ public class CheckOutRepository {
             @Override
             public void onFailure(@NonNull ApolloException e) {
                 String ab = "";
+                PlaceOrder();
+
                 if(e.getCause().getLocalizedMessage().equals("timeout"))
                 {
                     placeOrderResponseMessage.postValue(e.getCause().getMessage());
-                    PlaceOrder();
+//                    PlaceOrder();
                 }
-
+                else {
+                    placeOrderResponseMessage.postValue("Place order failure");
+                }
             }
         });
     }
@@ -525,5 +654,9 @@ public class CheckOutRepository {
 
     public MutableLiveData<String> getPlaceOrderResponseMessage() {
         return placeOrderResponseMessage;
+    }
+    public MutableLiveData<Boolean> getIstruePlaceOrder()
+    {
+        return  istrue;
     }
 }

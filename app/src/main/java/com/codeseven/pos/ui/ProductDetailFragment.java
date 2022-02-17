@@ -34,6 +34,7 @@ public class ProductDetailFragment extends Fragment {
     public AddToCartViewModel.AddToCartObsrever productObserver;
 
     CatalogItem catalogItem;
+    ProgressDialog progressDialog;
 
     public ProductDetailFragment() {
         // Required empty public constructor
@@ -41,6 +42,7 @@ public class ProductDetailFragment extends Fragment {
 
     public static ProductDetailFragment newInstance() {
         ProductDetailFragment fragment = new ProductDetailFragment();
+
         return fragment;
     }
 
@@ -58,7 +60,7 @@ public class ProductDetailFragment extends Fragment {
         // Inflate the layout for this fragment
         FragmentProductDetailBinding fragmentProductDetailBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_product_detail,container,false);
         View view = fragmentProductDetailBinding.getRoot();
-
+        progressDialog = new ProgressDialog(requireActivity());
         if(productViewModel==null){
             productViewModel = new ViewModelProvider(requireActivity()).get(AddToCartViewModel.class);
         }
@@ -73,6 +75,13 @@ public class ProductDetailFragment extends Fragment {
         Picasso.get().load(catalogItem.getItemImage()).into(fragmentProductDetailBinding.ivProductImg);
         fragmentProductDetailBinding.btnPlaceOrder.setCompoundDrawablePadding(20);
 
+        fragmentProductDetailBinding.btnPlaceOrder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                progressDialog.StartLoadingdialog();
+                productObserver.placeOrder();
+            }
+        });
 
         fragmentProductDetailBinding.topAppBarDetail.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,12 +93,13 @@ public class ProductDetailFragment extends Fragment {
         productObserver.getRepositoryResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String s) {
-
+                progressDialog.dismissDialog();
+                if(s.length()>0) {
                     if (s.equals("Error"))
                         Toast.makeText(requireContext(), "Item not added to cart, please check your network connection.", Toast.LENGTH_SHORT).show();
-                    else if (!s.equals(""))
-                        Toast.makeText(requireContext(), "Item is added to cart.", Toast.LENGTH_SHORT).show();
-
+                    else
+                        Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                }
             }
         });
         

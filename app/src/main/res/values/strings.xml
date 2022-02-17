@@ -3,7 +3,7 @@
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="sign_in_text">اپنے اکاؤنٹ میں سائن ان کریں</string>
-    <string name="phone_number_text">فون نمبر</string>
+    <string name="phone_number_text">فون نمبر/ای میل</string>
     <string name="password_text">پاس ورڈ</string>
     <string name="keep_me_signed_in">مجھے سائن ان رکھیں</string>
     <string name="sign_in_text_button">سائن ان</string>
@@ -26,7 +26,21 @@
     <string name="stop_playing">Stop Playing</string>
     <string name="status">Status</string>
 
-    <string-array name="planets_array">
+    <string-array name="countries_list">
         <item>Pakistan</item>
     </string-array>
+
+    <string name="sign_in_again">اس کام کو انجام دینے کے لیے دوبارہ سائن ان کریں۔</string>
+    <string name="please_speak_clearly">صاف آواز میں بات کریں۔</string>
+    <string name="please_enter_coupon_code">کوپن کوڈ درج کریں۔</string>
+    <string name="check_internet_connection">اپنا انٹرنیٹ کنیکشن چیک کریں۔</string>
+    <string name="fill_in_the_required_fields">خالی خانوں کو بھریں</string>
+    <string name="please_wait"> انتظار کریں </string>
+    <string name="select_time_slot"> آرڈر وصول کرنے کا وقت منتخب کریں۔</string>
+    <string name="order_placed_failed">اپنی تفصیلات کی تصدیق کریں اور آرڈر کے بٹن کو دوبارہ دبائیں۔</string>
+    <string name="order_placed_success">مبارک ہو!!! آپ کا آرڈر کامیابی کے ساتھ درج ہو گیا ہے۔</string>
+
+
+
+
 </resources>

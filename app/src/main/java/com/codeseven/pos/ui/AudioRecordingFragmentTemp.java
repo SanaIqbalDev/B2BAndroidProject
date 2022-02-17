@@ -571,7 +571,7 @@ public class AudioRecordingFragmentTemp extends Fragment {
                     }
                     else
                     {
-                        Toast.makeText(requireContext(), "Please speak clearly.", Toast.LENGTH_LONG).show();
+                        Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.please_speak_clearly), Toast.LENGTH_LONG).show();
 
                     }
 
