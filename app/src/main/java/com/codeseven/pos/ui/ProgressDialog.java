@@ -32,6 +32,10 @@ public class ProgressDialog {
 
         alertDialog.show();
     }
+    void setDialogMessage(String message)
+    {
+        alertDialog.setMessage(message);
+    }
 
     void dismissDialog()
     {

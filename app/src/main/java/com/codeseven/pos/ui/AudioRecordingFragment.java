@@ -299,7 +299,7 @@ public class AudioRecordingFragment extends Fragment {
                     //                                          int[] grantResults)
                     // to handle the case where the user grants the permission. See the documentation
                     // for ActivityCompat#requestPermissions for more details.
-                    Toast.makeText(requireContext(), "Grant required permissions.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), "Grant required permissions.", Toast.LENGTH_LONG).show();
                     RequestPermissions();
 
                     return;
@@ -608,7 +608,7 @@ public class AudioRecordingFragment extends Fragment {
                 String hjj= "[[{\"Quantity\": [Five kilos], \"item Name\": [\"rice\"], \"Date\": [], \"Time\": []}, {\"Quantity\": [\"Five kilos\"], \"item Name\": [\"rice\"], \"Date\": [], \"Time\": []}],[0.8462377190589905]]";
                 Log.e("NLP response",response);
                 progressDialog.dismissDialog();
-                Toast.makeText(requireContext(), response, Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), response, Toast.LENGTH_LONG).show();
 //                Snackbar snackbar = Snackbar
 //                        .make(fragmentAudioRecordingBinding.getRoot(), response, Snackbar.LENGTH_INDEFINITE);
 //                snackbar.show();

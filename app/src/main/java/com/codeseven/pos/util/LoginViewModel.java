@@ -1,5 +1,7 @@
 package com.codeseven.pos.util;
 
+import android.app.Application;
+
 import androidx.databinding.BaseObservable;
 import androidx.databinding.Bindable;
 //import androidx.databinding.library.baseAdapters.BR;
@@ -9,7 +11,10 @@ import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 //import com.codeseven.pos.BR;
+import com.codeseven.pos.ApolloClientClass;
 import com.codeseven.pos.BR;
+import com.codeseven.pos.MainApplication;
+import com.codeseven.pos.R;
 import com.codeseven.pos.api.LoginRepository;
 
 import javax.inject.Inject;
@@ -115,7 +120,7 @@ public class LoginViewModel extends ViewModel {
                 loginRepository.generateCustomerTokenByPhone(String.valueOf(getUserEmail().getValue()),String.valueOf(getUserPassword().getValue()));
             }
             else
-                loginResponse.postValue("Please fill in the required fields.");
+                loginResponse.postValue(MainApplication.getContext().getApplicationContext().getResources().getString(R.string.fill_in_the_required_fields));
         }
 
         public MutableLiveData<String> getLoginResponse()

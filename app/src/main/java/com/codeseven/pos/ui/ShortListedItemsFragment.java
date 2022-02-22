@@ -113,7 +113,7 @@ public class ShortListedItemsFragment extends Fragment {
                 progressDialog.dismissDialog();
                 if(items.size()>0) {
                     String ab = items.get(0).name();
-                    Toast.makeText(requireContext(), ab, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), ab, Toast.LENGTH_LONG).show();
 
                     for(int i=0; i<items.size();i++){
                         itemList.add(items.get(i));
@@ -130,7 +130,7 @@ public class ShortListedItemsFragment extends Fragment {
             public void onClick(View view) {
                 if(addToCartObsrever.getProductSku().length()<1)
                 {
-                    Toast.makeText(requireContext(), "Select an item before placing order.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.select_item_before_order), Toast.LENGTH_LONG).show();
                 }
                 else
                     {
@@ -142,11 +142,7 @@ public class ShortListedItemsFragment extends Fragment {
         addToCartObsrever.getRepositoryResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String s) {
-                if(s.equals("Item added to cart"))
-                {
-                    Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
-                }
-
+                    Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
             }
         });
 

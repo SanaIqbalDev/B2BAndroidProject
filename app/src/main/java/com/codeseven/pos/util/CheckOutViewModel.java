@@ -1,5 +1,8 @@
 package com.codeseven.pos.util;
 
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 import androidx.databinding.BaseObservable;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
@@ -205,6 +208,11 @@ public class CheckOutViewModel extends ViewModel {
         public void checkCount()
         {
             checkOutRepository.checkCount();
+        }
+
+        @RequiresApi(api = Build.VERSION_CODES.O)
+        public void abc(){
+            checkOutRepository.abc();
         }
     }
 }

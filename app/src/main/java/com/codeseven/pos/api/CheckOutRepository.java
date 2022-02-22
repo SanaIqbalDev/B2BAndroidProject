@@ -1,8 +1,10 @@
 package com.codeseven.pos.api;
 
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
 import androidx.lifecycle.MutableLiveData;
 
 import com.apollographql.apollo.ApolloCall;
@@ -11,9 +13,11 @@ import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
 import com.apollographql.apollo.request.RequestHeaders;
 import com.codeseven.pos.ApolloClientClass;
+import com.codeseven.pos.helper.TimeoutInstrumentation;
 import com.codeseven.pos.model.AddressItem;
 import com.codeseven.pos.util.CartPreference;
 import com.codeseven.pos.util.LoginPreference;
+import com.codeseven.pos.util.OrderPreference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,6 +45,8 @@ import apollo.pos.type.CartAddressInput;
 import apollo.pos.type.SetShippingAddressesOnCartInput;
 import apollo.pos.type.ShippingAddressInput;
 import apollo.pos.type.ShippingMethodInput;
+import graphql.GraphQL;
+import graphql.schema.GraphQLSchema;
 //import apollo.pos.type.ShippingMethodInput;
 
 public class CheckOutRepository {
@@ -67,6 +73,7 @@ public class CheckOutRepository {
     private MutableLiveData<String> getApplyDeliveryCartResponse;
 
     private CartPreference cartPreference;
+    private OrderPreference orderPreference;
 
     private MutableLiveData<String> placeOrderResponseMessage;
 
@@ -111,7 +118,7 @@ public class CheckOutRepository {
         counter = new ArrayList<>();
 
         cartPreference = new CartPreference();
-
+        this.orderPreference = new OrderPreference();
 
     }
 
@@ -467,28 +474,6 @@ public class CheckOutRepository {
                 placeOrderResponseMessage.postValue("Billing Address failure");
             }
         });
-//        (new ApolloClientClass()).apolloClient.mutate(new (addressInput,address_id,same_as_shipping,cartPreference.GetCartId("cart_id")))
-//                .toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<SetBillingAddressOnCartMutation.Data>() {
-//            @Override
-//            public void onResponse(@NonNull Response<SetBillingAddressOnCartMutation.Data> response) {
-//                if(!response.hasErrors()){
-//                    counter.add(3,true);
-//                    placeOrderResponseMessage.postValue("Billing Address Success");
-//
-//                }
-//                else
-//                {
-//                    counter.add(3,false);
-//                    placeOrderResponseMessage.postValue("Billing Address failure");
-//                }
-//            }
-//
-//            @Override
-//            public void onFailure(@NonNull ApolloException e) {
-//                counter.add(3, false);
-//                placeOrderResponseMessage.postValue("Billing Address failure");
-//            }
-//        });
     }
     public void ApplyDeliveryCart(String comments, String date, String timeslot)
     {
@@ -518,7 +503,6 @@ public class CheckOutRepository {
 
                 }
 
-//                checkCount();
 
             }
 
@@ -567,6 +551,8 @@ public class CheckOutRepository {
     }
     public void PlaceOrder()
     {
+//        TimeoutInstrumentation timeoutInstrumentation = new TimeoutInstrumentation();
+//        timeoutInstrumentation.
         RequestHeaders.Builder requestHeader = RequestHeaders.builder();
         requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
 
@@ -578,29 +564,32 @@ public class CheckOutRepository {
 
                 if(response.hasErrors())
                 {
-//                    response.getErrors().get(0).getMessage();
                     placeOrderResponseMessage.postValue(response.getErrors().get(0).getMessage());
                 }
                 else
                 {
-                    placeOrderResponseMessage.postValue("Place order success");
+                    orderPreference.AddOrderId(response.getData().placeOrder().order().order_number());
+                    placeOrderResponseMessage.postValue("order_success");
                 }
 
             }
 
             @Override
             public void onFailure(@NonNull ApolloException e) {
-                String ab = "";
-                PlaceOrder();
 
-                if(e.getCause().getLocalizedMessage().equals("timeout"))
-                {
-                    placeOrderResponseMessage.postValue(e.getCause().getMessage());
-//                    PlaceOrder();
-                }
-                else {
-                    placeOrderResponseMessage.postValue("Place order failure");
-                }
+                placeOrderResponseMessage.postValue(e.getCause().getMessage());
+
+//                String ab = "";
+////                PlaceOrder();
+//
+//                if(e.getCause().getLocalizedMessage().equals("timeout"))
+//                {
+//                    placeOrderResponseMessage.postValue(e.getCause().getMessage());
+////                    PlaceOrder();
+//                }
+//                else {
+//                    placeOrderResponseMessage.postValue("Place order failure");
+//                }
             }
         });
     }
@@ -658,5 +647,35 @@ public class CheckOutRepository {
     public MutableLiveData<Boolean> getIstruePlaceOrder()
     {
         return  istrue;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public void abc(){
+//        TimeoutInstrumentation timeoutInstrumentation = new TimeoutInstrumentation();
+//        GraphQL.newGraphQL(GraphQLSchema.newSchema().build()).instrumentation(timeoutInstrumentation).build().execute()
+
+        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
+        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
+
+        (new ApolloClientClass()).getNewClient(loginPreference.GetLoginPreference("token")).mutate(new PlaceOrderMutation(cartPreference.GetCartId("cart_id"))).toBuilder().requestHeaders(requestHeader.build())
+                .build().enqueue(new ApolloCall.Callback<PlaceOrderMutation.Data>() {
+            @Override
+            public void onResponse(@NonNull Response<PlaceOrderMutation.Data> response) {
+                if(response.hasErrors())
+                {
+                    placeOrderResponseMessage.postValue(response.getErrors().get(0).getMessage());
+                }
+                else
+                {
+                    placeOrderResponseMessage.postValue("Place order success");
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull ApolloException e) {
+                Log.e("","");
+            }
+        });
+
     }
 }

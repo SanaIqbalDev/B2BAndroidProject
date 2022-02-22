@@ -96,9 +96,9 @@ public class ProductDetailFragment extends Fragment {
                 progressDialog.dismissDialog();
                 if(s.length()>0) {
                     if (s.equals("Error"))
-                        Toast.makeText(requireContext(), "Item not added to cart, please check your network connection.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
                     else
-                        Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
                 }
             }
         });

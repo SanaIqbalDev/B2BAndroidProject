@@ -8,6 +8,8 @@ import android.view.ViewGroup;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
@@ -65,37 +67,35 @@ public class LoginFragment extends Fragment {
                 loginObserver.verifyLoginInformation();
                 progressDialog.StartLoadingdialog();
 
-                loginObserver.getLoginResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
-                    @Override
-                    public void onChanged(String s) {
-                        if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
-                            if (s.contains("Generated Token:")) {
-                                loginObserver.saveLoginData();
-                                loginObserver.savePreferenceLoginState();
 
-                                progressDialog.dismissDialog();
-                                NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_loginFragment_to_homeFragment);
-                                loginObserver.getLoginResponse().removeObservers(getViewLifecycleOwner());
-                            } else if (!s.equals("")) {
-                                progressDialog.dismissDialog();
-                                Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }
-                });
             }
         });
-//        loginObserver.getLoginResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
-//            @Override
-//            public void onChanged(String s) {
-//                if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
-//                    {
-//                        Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
-//                    }
-//                }
-//            }
-//        });
+
         fragmentLoginBinding.executePendingBindings();
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        loginObserver.getLoginResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
+                    if (s.contains("Generated Token:")) {
+                        loginObserver.saveLoginData();
+                        loginObserver.savePreferenceLoginState();
+
+                        progressDialog.dismissDialog();
+                        NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_loginFragment_to_homeFragment);
+                        loginObserver.getLoginResponse().removeObservers(getViewLifecycleOwner());
+                    } else if (!s.equals("")) {
+                        progressDialog.dismissDialog();
+                        Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
+                    }
+                }
+            }
+        });
     }
 }

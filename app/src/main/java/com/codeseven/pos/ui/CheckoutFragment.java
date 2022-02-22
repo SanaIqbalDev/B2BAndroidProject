@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
@@ -30,12 +31,14 @@ import android.widget.Toast;
 
 import com.apollographql.apollo.api.Input;
 import com.codeseven.pos.R;
+import com.codeseven.pos.api.CheckOutRepository;
 import com.codeseven.pos.databinding.FragmentCheckoutBinding;
 import com.codeseven.pos.model.CartSummaryAdapter;
 import com.codeseven.pos.model.CatalogItem;
 import com.codeseven.pos.util.CartPreference;
 import com.codeseven.pos.util.CartViewModel;
 import com.codeseven.pos.util.CheckOutViewModel;
+import com.codeseven.pos.util.OrderPreference;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -147,123 +150,131 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         fragmentCheckoutBinding.btnPlaceOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                progressDialog.StartLoadingdialog();
-                // 1. Setting Shipping Address...
-                 checkoutObserver.SetCustomerShippingAddress(Integer.parseInt(selected_shipping_id), "", "");
-                 checkoutObserver.getGetShouldPlaceOrder().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
-                    @Override
-                    public void onChanged(Boolean aBoolean) {
-//                        if(aBoolean)
-//                            checkoutObserver.placeOrder();
-                    }
-                });
+                if(!is_time_slot_selected) {
+                    Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.select_time_slot), Toast.LENGTH_LONG).show();
+                }
+                else {
+                    progressDialog.StartLoadingdialog();
+                    // 1. Setting Shipping Address...
+                    checkoutObserver.SetCustomerShippingAddress(Integer.parseInt(selected_shipping_id), "", "");
 
+                }
+            }
+        });
 
-                checkoutObserver.getGetPlaceOrderResponseMessage().observe(getViewLifecycleOwner(), new Observer<String>() {
-                    @Override
-                    public void onChanged(String s) {
-                        if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED)
-                        {
-                            Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+        return fragmentCheckoutBinding.getRoot();
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        checkoutObserver.getGetPlaceOrderResponseMessage().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED)
+                {
+//                            Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
+                }
+                if(s.contains("The cart isn't active")) {
+                    progressDialog.dismissDialog();
+                    cartViewModel = new ViewModelProvider(requireActivity()).get(CartViewModel.class);
+                    customerCartId = cartPreference.GetCartId("cart_id");
+                    cartObserver.getCartItems(customerCartId);
+                    cartObserver.getCartRequestResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
+                        @Override
+                        public void onChanged(String s) {
+                            Toast.makeText(requireContext(),s, Toast.LENGTH_LONG).show();
                         }
-                            if(s.contains("The cart isn't active")) {
-                                progressDialog.dismissDialog();
-                                cartViewModel = new ViewModelProvider(requireActivity()).get(CartViewModel.class);
-                                customerCartId = cartPreference.GetCartId("cart_id");
-                                cartObserver.getCartItems(customerCartId);
-                                cartObserver.getCartRequestResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
-                                    @Override
-                                    public void onChanged(String s) {
-                                        Toast.makeText(requireContext(),s, Toast.LENGTH_LONG).show();
-                                    }
-                                });
-                            }
-                            else if(s.equals("Shipping Address success")){
-                                checkoutObserver.SetShippingMethodOnCart(method_code,carrier_code);
-                            }
-                            else if(s.equals("Shipping Method success")){
-                                if(fragmentCheckoutBinding.layoutPayment.getVisibility() == View.VISIBLE )
-                                {
-                                    if(fragmentCheckoutBinding.cbPaymentMethod.isChecked()) {
-                                        checkoutObserver.SetBillingAddress(null,Integer.parseInt(selected_shipping_id_original),true);
-                                    }else{
-                                        List<String> address_list = new ArrayList<>();
-                                        address_list.add(fragmentCheckoutBinding.etStreetAddress.getText().toString());
-                                        if(!fragmentCheckoutBinding.etStreetAddressOptional.getText().toString().equals(""))
-                                            address_list.add(fragmentCheckoutBinding.etStreetAddressOptional.getText().toString());
+                    });
+                }
+                else if(s.equals("Shipping Address success")){
+//                    progressDialog.setDialogMessage("Shi");
+                    checkoutObserver.SetShippingMethodOnCart(method_code,carrier_code);
+                }
+                else if(s.equals("Shipping Method success")){
+                    if(fragmentCheckoutBinding.layoutPayment.getVisibility() == View.VISIBLE )
+                    {
+                        if(fragmentCheckoutBinding.cbPaymentMethod.isChecked()) {
+                            checkoutObserver.SetBillingAddress(null,Integer.parseInt(selected_shipping_id_original),true);
+                        }else{
+                            List<String> address_list = new ArrayList<>();
+                            address_list.add(fragmentCheckoutBinding.etStreetAddress.getText().toString());
+                            if(!fragmentCheckoutBinding.etStreetAddressOptional.getText().toString().equals(""))
+                                address_list.add(fragmentCheckoutBinding.etStreetAddressOptional.getText().toString());
 
 
-                                        shipping_address_new   = CartAddressInput.builder().city(fragmentCheckoutBinding.etCity.getText().toString())
-                                                .companyInput(new Input<>("",true))
-                                                .country_code(fragmentCheckoutBinding.spinnerCountries.getSelectedItem().toString())
-                                                .firstname(fragmentCheckoutBinding.etFirstName.getText().toString())
-                                                .lastname(fragmentCheckoutBinding.etLastName.getText().toString())
-                                                .postcode("")
-                                                .region("")
-                                                .region_id(null)
-                                                .save_in_address_book(false)
-                                                .street(address_list)
-                                                .telephone(fragmentCheckoutBinding.etPhoneNumber.getText().toString());
+                            shipping_address_new   = CartAddressInput.builder().city(fragmentCheckoutBinding.etCity.getText().toString())
+                                    .companyInput(new Input<>("",true))
+                                    .country_code(fragmentCheckoutBinding.spinnerCountries.getSelectedItem().toString())
+                                    .firstname(fragmentCheckoutBinding.etFirstName.getText().toString())
+                                    .lastname(fragmentCheckoutBinding.etLastName.getText().toString())
+                                    .postcode("")
+                                    .region("")
+                                    .region_id(null)
+                                    .save_in_address_book(false)
+                                    .street(address_list)
+                                    .telephone(fragmentCheckoutBinding.etPhoneNumber.getText().toString());
 
-                                        checkoutObserver.SetBillingAddress(null,Integer.parseInt(selected_shipping_id_original),false);
+                            checkoutObserver.SetBillingAddress(null,Integer.parseInt(selected_shipping_id_original),false);
 
 
-                                    }
+                        }
 
-                                }
-                                else {
-                                    checkoutObserver.SetBillingAddress(null,Integer.parseInt(selected_shipping_id_original),true);
-                                }
-                            }
-                            else if(s.equals("Payment Method success"))
-                            {
-//
-                                checkoutObserver.GetCartDetails();
-                                progressDialog.dismissDialog();
+                    }
+                    else {
+                        checkoutObserver.SetBillingAddress(null,Integer.parseInt(selected_shipping_id_original),true);
+                    }
+                }
+                else if (s.equals("Billing Address Success")){
+                    String comments_ = fragmentCheckoutBinding.etComments.getText().toString();
+                    String date_ = fragmentCheckoutBinding.tvDate.getText().toString();
+                    String time_slot_ = selected_time_slot;
 
-                                checkoutObserver.placeOrder();
+                    if(is_time_slot_selected) {
+                        checkoutObserver.applyDeliveryCart(comments_, date_, time_slot_);
+                    }
+                    else {
+                        progressDialog.dismissDialog();
+                        Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.select_time_slot), Toast.LENGTH_LONG).show();
+                    }
 
-                            }
-                            else if (s.equals("Billing Address Success")){
-                                String comments_ = fragmentCheckoutBinding.etComments.getText().toString();
-                                String date_ = fragmentCheckoutBinding.tvDate.getText().toString();
-                                String time_slot_ = selected_time_slot;
+                }
+                else if(s.equals("Delivery Cart success")){
 
-                                if(is_time_slot_selected) {
-                                    checkoutObserver.applyDeliveryCart(comments_, date_, time_slot_);
-                                }
-                                else
-                                    Toast.makeText(requireContext(),"select a time slot",Toast.LENGTH_SHORT).show();
-
-                            }
-                            else if(s.equals("Delivery Cart success")){
-
-                                checkoutObserver.SetPaymentMethodOnCart("cashondelivery");
+                    checkoutObserver.SetPaymentMethodOnCart("cashondelivery");
 
 //                                checkoutObserver.checkCount();
-                            }
-                           else if(s.equals("Place order success")){
-                                progressDialog.dismissDialog();
+                }
+                else if(s.equals("Payment Method success"))
+                {
+                    checkoutObserver.placeOrder();
+                }
+                else if(s.equals("order_success")){
 
-                                AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
-                                builder1.setMessage("Your order has been placed successfully.");
-                                builder1.setCancelable(false);
-                                builder1.setPositiveButton("Ok",
-                                        new DialogInterface.OnClickListener() {
-                                            public void onClick(DialogInterface dialog, int id) {
-                                                NavHostFragment.findNavController(CheckoutFragment.this).navigate(R.id.action_checkoutFragment_to_homeFragment);
-                                                dialog.cancel();
-                                            }
-                                        });
-                                AlertDialog alert11 = builder1.create();
-                                alert11.show();
-                            }
-                            else if(s.equals("Place order failure")){
-                                progressDialog.dismissDialog();
+                    progressDialog.dismissDialog();
 
-                                Toast.makeText(requireContext(),"Order is not placed successfully.",Toast.LENGTH_SHORT).show();
-//                                checkoutObserver.checkCount();
-                            }
+                    OrderPreference orderPreference = new OrderPreference();
+                    AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
+                    builder1.setMessage(requireContext().getResources().getString(R.string.your_order_is_placed_successfully) +"\n\n ("+ orderPreference.GetOrderId() +")" );
+                    builder1.setCancelable(false);
+                    builder1.setPositiveButton("Ok",
+                            new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    NavHostFragment.findNavController(CheckoutFragment.this).navigate(R.id.action_checkoutFragment_to_homeFragment);
+                                    dialog.cancel();
+                                }
+                            });
+                    AlertDialog alert11 = builder1.create();
+                    alert11.show();
+                }
+
+
+                else if(s.equals("Place order failure")){
+
+                    Toast.makeText(requireContext(),requireContext().getResources().getString(R.string.order_placed_failed),Toast.LENGTH_LONG).show();
+                }
+
 //                            else if(s.equals("Delivery Cart failure")){
 //                                String comments_ = fragmentCheckoutBinding.etComments.getText().toString();
 //                                String date_ = fragmentCheckoutBinding.tvDate.getText().toString();
@@ -273,7 +284,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
 //                                    checkoutObserver.applyDeliveryCart(comments_, date_, time_slot_);
 //                                }
 //                                else
-//                                    Toast.makeText(requireContext(),"select a time slot",Toast.LENGTH_SHORT).show();
+//                                    Toast.makeText(requireContext(),"select a time slot",Toast.LENGTH_LONG).show();
 //                            }
 //                            else if(s.equals("Billing Address failure")){
 //                                if(fragmentCheckoutBinding.layoutPayment.getVisibility() == View.VISIBLE )
@@ -344,12 +355,9 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
 //                                        });
 //                                AlertDialog alert11 = builder1.create();
 //                                alert11.show();
-                    }
-                });
             }
         });
 
-        return fragmentCheckoutBinding.getRoot();
     }
 
     private void setCartSummary() {
@@ -358,7 +366,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireContext(),LinearLayoutManager.VERTICAL,false);
         fragmentCheckoutBinding.rvCartSummaryItems.setLayoutManager(linearLayoutManager);
         fragmentCheckoutBinding.rvCartSummaryItems.setAdapter(cartSummaryAdapter);
-        fragmentCheckoutBinding.tvSavedAmount.setText("PKR " + String.format("%.2f", saved_total));
+        fragmentCheckoutBinding.tvSavedAmount.setText(requireContext().getResources().getString(R.string.pkr) + String.format("%.2f", saved_total));
 
     }
 
@@ -445,7 +453,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                     } else if(s.contains("Failed to execute HTTP")){
 
                         fragmentCheckoutBinding.cbApplyWallet.setChecked(false);
-                        Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
 
                     }else if (s.equals("Success")) {
 
@@ -453,19 +461,19 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                             String wallet_msg = "Pay amount with wallet : " + cartPreference.GetNeedToPay() +"\n"+"Order amount : "+
                                     cartPreference.GetOrderTotal() + "\n"+ "Amount left in wallet : "+cartPreference.GetRemainingWalletAmount();
                             fragmentCheckoutBinding.tvWalletValue.setText(wallet_msg);
-                            fragmentCheckoutBinding.tvWalletValueS.setText("PKR " + cartPreference.GetNeedToPay());
+                            fragmentCheckoutBinding.tvWalletValueS.setText(requireContext() + cartPreference.GetNeedToPay());
 
                         }
                         else {
                             fragmentCheckoutBinding.tvWalletValue.setText("Your credit is:" + " " + cartPreference.GetRemainingWalletAmount());
-                            fragmentCheckoutBinding.tvWalletValueS.setText("PKR 0.0");
+                            fragmentCheckoutBinding.tvWalletValueS.setText(requireContext().getResources().getString(R.string.pkr)+"0.0");
 
                         }
 
                         checkoutObserver.GetListOfAvailablePaymentMethods();
 
                     }else{
-                        Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
                     }
                 }
 
@@ -536,7 +544,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                         signInDialog();
                     }
                     else {
-                        Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
                     }
                 }
             }
@@ -620,7 +628,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         {
             fragmentCheckoutBinding.tvShippingAddress.setText(shipping_address);
             fragmentCheckoutBinding.tvPhoneNumber.setText(telephone);
-            Toast.makeText(requireContext(), String.valueOf(is_address_changed),Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), String.valueOf(is_address_changed),Toast.LENGTH_LONG).show();
 
             selected_shipping_id_original = selected_shipping_id;
         }
@@ -637,7 +645,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                         if (s.contains("The current user cannot perform")) {
                             signInDialog();
                         } else
-                            Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
                     }
 
                 }
@@ -842,12 +850,12 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
 
         if(hours<13) {
             timePeriod = "am";
-//            Toast.makeText(requireContext(), String.valueOf(hours) + timePeriod, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(requireContext(), String.valueOf(hours) + timePeriod, Toast.LENGTH_LONG).show();
         }
         else
         {
             timePeriod = "pm";
-//            Toast.makeText(requireContext(), String.valueOf(hours-12) + timePeriod, Toast.LENGTH_SHORT).show();
+//            Toast.makeText(requireContext(), String.valueOf(hours-12) + timePeriod, Toast.LENGTH_LONG).show();
         }
 
         return hours;

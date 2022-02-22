@@ -37,7 +37,7 @@ public class CartSummaryAdapter  extends RecyclerView.Adapter<CartSummaryAdapter
     public void onBindViewHolder(@NonNull SummaryViewHolder holder, int position) {
         CatalogItem cartItem = cartItemsArrayList.get(position);
         holder.binding.tvItemName.setText(cartItem.getItemName());
-        holder.binding.tvItemPrice.setText("PKR " + cartItem.getItemMinimalPrice());
+        holder.binding.tvItemPrice.setText(context.getResources().getString(R.string.pkr) + cartItem.getItemMinimalPrice());
         Picasso.get().load(cartItem.getItemImage()).into(holder.binding.ivItemImage);
 
     }

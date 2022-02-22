@@ -308,7 +308,7 @@ public class AudioRecordingFragmentTemp extends Fragment {
             }
             if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
 
-                Toast.makeText(requireContext(), "Grant required permissions.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(requireContext(), "Grant required permissions.", Toast.LENGTH_LONG).show();
                 RequestPermissions();
 
                 return;
@@ -515,7 +515,7 @@ public class AudioRecordingFragmentTemp extends Fragment {
                     (new File(filePath)).delete();
                     filePath = null; // Reset file path
 //                    progressDialog.dismissDialog();
-//                    Toast.makeText(,"Order has been placed",Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(,"Order has been placed",Toast.LENGTH_LONG).show();
 //                    NlpApiCall(audio_ref);
 
                 }

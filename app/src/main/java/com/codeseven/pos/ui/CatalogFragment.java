@@ -199,6 +199,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                             updateProducts = true;
                             user_query_text = s;
                             search_current_page = 1;
+                            selected_category = "";
                             SearchApiCall(s);
 
                             return true;
@@ -245,7 +246,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                             fragmentCatalogBinding.btnRefresh.setVisibility(View.VISIBLE);
                             progressDialog.dismissDialog();
                             fragmentCatalogBinding.loadingProgressbar.setVisibility(View.GONE);
-                            Toast.makeText(requireContext(), catalogObserver.getCatalogRequestResponse().getValue(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(requireContext(), catalogObserver.getCatalogRequestResponse().getValue(), Toast.LENGTH_LONG).show();
                         }
                     }
             }}
@@ -266,10 +267,13 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                     fragmentCatalogBinding.loadingProgressbar.setVisibility(View.GONE);
                     dataFound = true;
                     if(items.size()<1){
+                        fragmentCatalogBinding.tvTitle.setVisibility(View.GONE);
                         fragmentCatalogBinding.tvNoItemsFound.setVisibility(View.VISIBLE);
                         fragmentCatalogBinding.nestedScrollView.setVisibility(View.GONE);
                     }
                     else {
+                        fragmentCatalogBinding.tvTitle.setVisibility(View.VISIBLE);
+
                         shouldMakeCall = true;
                         fragmentCatalogBinding.tvNoItemsFound.setVisibility(View.GONE);
                         fragmentCatalogBinding.nestedScrollView.setVisibility(View.VISIBLE);
@@ -277,7 +281,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                         for (int i = 0; i < items.size(); i++) {
                             itemsku = (items.get(i).sku());
                             name = (items.get(i).name());
-                            price = ("PKR " + String.valueOf(items.get(i).price().regularPrice().amount().value().intValue()));
+                            price = ( String.valueOf(items.get(i).price().regularPrice().amount().value().intValue())+" "+requireContext().getResources().getString(R.string.pkr));
                             image_url = items.get(i).small_image().url();
                             description = items.get(i).description().html();
                             catalogItemArrayList.add(new CatalogItem(itemsku, name, price, image_url, description));
@@ -324,7 +328,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                              } else {
                                  progressDialog.dismissDialog();
                                  fragmentCatalogBinding.loadingProgressbar.setVisibility(View.GONE);
-                                 Toast.makeText(requireContext(), "No more data available.", Toast.LENGTH_SHORT).show();
+                                 Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.no_more_data_available), Toast.LENGTH_LONG).show();
                              }
                          }
                     }
@@ -340,7 +344,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                             } else {
                                 progressDialog.dismissDialog();
                                 fragmentCatalogBinding.loadingProgressbar.setVisibility(View.GONE);
-                                Toast.makeText(requireContext(), "No more data available.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.no_more_data_available), Toast.LENGTH_LONG).show();
                             }
                         }
                     }
@@ -405,17 +409,14 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                     }
                     if (getMoreProducts == true || updateProducts) {
                         if(items.size()>0) {
+                            fragmentCatalogBinding.tvTitle.setVisibility(View.VISIBLE);
+
                             if (!items.get(0).sku().equals(item_sku)) {
                                 if(search_current_page == 1)
                                     item_sku = items.get(0).sku();
                                 fragmentCatalogBinding.btnRefresh.setVisibility(View.GONE);
                                 fragmentCatalogBinding.loadingProgressbar.setVisibility(View.GONE);
                                 dataFound = true;
-                                if (items.size() < 1) {
-                                    fragmentCatalogBinding.tvNoItemsFound.setVisibility(View.VISIBLE);
-                                    fragmentCatalogBinding.nestedScrollView.setVisibility(View.GONE);
-//                                progressDialog.dismissDialog();
-                                } else {
                                     shouldMakeCall = true;
 
                                     fragmentCatalogBinding.tvNoItemsFound.setVisibility(View.GONE);
@@ -424,13 +425,12 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                                     for (int i = 0; i < items.size(); i++) {
                                         itemsku = (items.get(i).sku());
                                         name = (items.get(i).name());
-                                        price = ("PKR " + String.valueOf(items.get(i).price().regularPrice().amount().value().intValue()));
+                                        price = (String.valueOf(items.get(i).price().regularPrice().amount().value().intValue()) +" "+ requireContext().getResources().getString(R.string.pkr));
                                         image_url = items.get(i).small_image().url();
                                         description = items.get(i).description().html();
                                         catalogItemArrayList.add(new CatalogItem(itemsku, name, price, image_url, description));
                                     }
-                                }
-                                if (items.size() > 0) {
+
                                     catalogItemAdapter = new CatalogItemAdapter(requireContext(), catalogItemArrayList, new ItemClickListener() {
                                         @Override
                                         public void onItemClicked(CatalogItem groceryItem) {
@@ -444,13 +444,16 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                                     fragmentCatalogBinding.recyclerviewGroceryItems.setLayoutManager(gridLayoutManager);
                                     fragmentCatalogBinding.recyclerviewGroceryItems.setAdapter(catalogItemAdapter);
                                     updateProducts = false;
-//                                progressDialog.dismissDialog();
-                                }
-//                            progressDialog.dismissDialog();
                                 catalogItemAdapter.notifyDataSetChanged();
                                 getMoreProducts = false;
                             }
 
+                        }
+                        else {
+                            fragmentCatalogBinding.tvNoItemsFound.setVisibility(View.VISIBLE);
+                            fragmentCatalogBinding.tvTitle.setVisibility(View.GONE);
+                            fragmentCatalogBinding.nestedScrollView.setVisibility(View.GONE);
+                            progressDialog.dismissDialog();
                         }
                     }
 
@@ -626,12 +629,12 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
 //                    }
                 if(selected_category == headerList.get(groupPosition).category_id)
                 {
-//                    fragmentCatalogBinding.drawerLayout.close();
+                    fragmentCatalogBinding.drawerLayout.close();
                 }
                 else {
                     selected_category = headerList.get(groupPosition).category_id;
                     currentPage = 1;
-//                    Toast.makeText(requireContext(), "Group clicked", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(requireContext(), "Group clicked", Toast.LENGTH_LONG).show();
                     if (!headerList.get(groupPosition).hasChildren) {
                         fragmentCatalogBinding.drawerLayout.close();
                         updateProducts = true;
@@ -667,7 +670,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
 
                     currentPage = 1;
                     progressDialog.StartLoadingdialog();
-//                    Toast.makeText(requireContext(), "Child clicked", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(requireContext(), "Child clicked", Toast.LENGTH_LONG).show();
                     fragmentCatalogBinding.drawerLayout.close();
                     updateProducts = true;
                     catalogItemArrayList = new ArrayList<>();

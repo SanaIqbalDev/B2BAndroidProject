@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
+import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
@@ -41,6 +42,7 @@ public class CartFragment extends Fragment {
     CartViewModel cartViewModel;
     @Inject CartViewModel.CartObserver cartObserver;
     CartPreference cartPreference;
+    CartItemAdapter cartItemAdapter;
     public String customerCartId;
     public boolean getMoreProducts = false;
     private ArrayList<CatalogItem> cartItemArrayList = new ArrayList<>();
@@ -95,13 +97,13 @@ public class CartFragment extends Fragment {
         fragmentCartBinding.rvCartItems.setHasFixedSize(false);
 
 
-        CartItemAdapter cartItemAdapter = new CartItemAdapter(requireContext(), cartItemArrayList, new CartItemClickListener() {
+        cartItemAdapter = new CartItemAdapter(requireContext(), cartItemArrayList, new CartItemClickListener() {
             @Override
             public void onItemCLicked(View view, CatalogItem catalogItem) {
 
                 if(view.getTag().equals("remove")) {
 
-//                    Toast.makeText(requireContext(), "remove Button CLicked", Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(requireContext(), "remove Button CLicked", Toast.LENGTH_LONG).show();
                     processItemObserver.RemoveCartItem(catalogItem.getItemUid());
                     ItemRemoved(Integer.parseInt(catalogItem.getItemQuantity()),Double.parseDouble(catalogItem.getItemMinimalPrice()), Double.parseDouble(catalogItem.getItemRegularPrice()));
                 }
@@ -148,32 +150,51 @@ public class CartFragment extends Fragment {
                     processItemObserver.ApplyCouponToCart(fragmentCartBinding.etCouponCode.getText().toString());
                 }
                 else {
-                    Toast.makeText(requireContext(), "Please enter coupon code.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.please_enter_coupon_code), Toast.LENGTH_LONG).show();
                 }
             }
         });
+
+        fragmentCartBinding.btnProceedToCheckout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Bundle bundle = new Bundle();
+                bundle.putParcelableArrayList("cart_items", cartItemArrayList);
+                NavHostFragment.findNavController(CartFragment.this).navigate(R.id.action_cartFragment_to_checkoutFragment,bundle);
+            }
+        });
+
+        return view;
+
+    }
+
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
 
         cartObserver.getCartItemsList().observe(getViewLifecycleOwner(), new Observer<List<GetCartByIdQuery.Item>>() {
             @Override
             public void onChanged(List<GetCartByIdQuery.Item> items) {
                 if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
 
-                List<GetCartByIdQuery.Item> ab = items;
-                total_items_in_cart = items.size();
-                String name, image_url, quantity, itemsku, itemUid;
-                Double priceThis, regular_price;
+                    List<GetCartByIdQuery.Item> ab = items;
+                    total_items_in_cart = items.size();
+                    String name, image_url, quantity, itemsku, itemUid;
+                    Double priceThis, regular_price;
 
-                progressDialog.dismissDialog();
-                if(getMoreProducts == true) {
-                    if (items.size() < 1) {
-                        fragmentCartBinding.topLayout.setVisibility(View.GONE);
-                        fragmentCartBinding.tvNoItems.setVisibility(View.VISIBLE);
-                    } else
-                    {
-                        fragmentCartBinding.topLayout.setVisibility(View.VISIBLE);
-                        fragmentCartBinding.tvNoItems.setVisibility(View.GONE);
+                    progressDialog.dismissDialog();
+                    if(getMoreProducts == true) {
+                        if (items.size() < 1) {
+                            fragmentCartBinding.topLayout.setVisibility(View.GONE);
+                            fragmentCartBinding.tvNoItems.setVisibility(View.VISIBLE);
+                        } else
+                        {
+                            fragmentCartBinding.topLayout.setVisibility(View.VISIBLE);
+                            fragmentCartBinding.tvNoItems.setVisibility(View.GONE);
 
-                    }
+                        }
                         for (int i = 0; i < items.size(); i++) {
 
                             itemsku = (items.get(i).product().sku());
@@ -199,15 +220,15 @@ public class CartFragment extends Fragment {
                         if (items.size() > 0) {
                             cartItemAdapter.notifyDataSetChanged();
                             getMoreProducts = false;
-                            fragmentCartBinding.tvSubtotalValue.setText("PKR " + String.format("%.2f", sub_total));
-                            fragmentCartBinding.tvEstimatedTotalValue.setText("PKR " + String.format("%.2f", est_total));
+                            fragmentCartBinding.tvSubtotalValue.setText(String.format("%.2f", sub_total) + " "+ requireContext().getResources().getString(R.string.pkr));
+                            fragmentCartBinding.tvEstimatedTotalValue.setText(String.format("%.2f", est_total) + " " + requireContext().getResources().getString(R.string.pkr));
                             progressDialog.dismissDialog();
                             fragmentCartBinding.rvCartItems.setVisibility(View.VISIBLE);
                             fragmentCartBinding.tvNoItems.setVisibility(View.GONE);
                         }
-                }
-                fragmentCartBinding.tvSubtotalValue.setText("PKR " + String.format("%.2f", sub_total));
-                fragmentCartBinding.tvEstimatedTotalValue.setText("PKR " + String.format("%.2f", est_total));
+                    }
+                    fragmentCartBinding.tvSubtotalValue.setText(String.format("%.2f", sub_total)  + " " + requireContext().getResources().getString(R.string.pkr));
+                    fragmentCartBinding.tvEstimatedTotalValue.setText(String.format("%.2f", est_total)  + " " + requireContext().getResources().getString(R.string.pkr));
 
                 }
             }
@@ -220,56 +241,56 @@ public class CartFragment extends Fragment {
                 if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
 
                     if(s.contains("The cart isn't active."))
-                {
-                    cartObserver.GetCustomerCart();
-                }
-                if(s.contains("Log in again.")){
-                    progressDialog.dismissDialog();
-                    Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
-                    AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
-                    builder1.setMessage(requireContext().getResources().getString(R.string.sign_in_again));
-                    builder1.setCancelable(false);
-                    builder1.setPositiveButton("Ok",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                    NavHostFragment.findNavController(CartFragment.this).navigate(R.id.action_cartFragment_to_loginFragment);
-                                }
-                            });
-                    builder1.setNegativeButton("Cancel",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
+                    {
+                        cartObserver.GetCustomerCart();
+                    }
+                    if(s.contains("Log in again.")){
+                        progressDialog.dismissDialog();
+                        Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
+                        AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
+                        builder1.setMessage(requireContext().getResources().getString(R.string.sign_in_again));
+                        builder1.setCancelable(false);
+                        builder1.setPositiveButton("Ok",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                        NavHostFragment.findNavController(CartFragment.this).navigate(R.id.action_cartFragment_to_loginFragment);
+                                    }
+                                });
+                        builder1.setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
 
-                    AlertDialog alert11 = builder1.create();
-                    alert11.show();
-                }
-                if(s.contains("The current user cannot perform operations on cart")){
+                        AlertDialog alert11 = builder1.create();
+                        alert11.show();
+                    }
+                    if(s.contains("The current user cannot perform operations on cart")){
 
-                    Toast.makeText(requireContext(), s, Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
 
-                    AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
-                    builder1.setMessage(requireContext().getResources().getString(R.string.sign_in_again));
-                    builder1.setCancelable(false);
-                    builder1.setPositiveButton("Ok",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    NavHostFragment.findNavController(CartFragment.this).navigate(R.id.action_cartFragment_to_loginFragment);
-                                    dialog.cancel();
-                                }
-                            });
-                    builder1.setNegativeButton("Cancel",
-                            new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int id) {
-                                    dialog.cancel();
-                                }
-                            });
+                        AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
+                        builder1.setMessage(requireContext().getResources().getString(R.string.sign_in_again));
+                        builder1.setCancelable(false);
+                        builder1.setPositiveButton("Ok",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        NavHostFragment.findNavController(CartFragment.this).navigate(R.id.action_cartFragment_to_loginFragment);
+                                        dialog.cancel();
+                                    }
+                                });
+                        builder1.setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
 
-                    AlertDialog alert11 = builder1.create();
-                    alert11.show();
-                }
+                        AlertDialog alert11 = builder1.create();
+                        alert11.show();
+                    }
                 }
             }
         });
@@ -281,20 +302,9 @@ public class CartFragment extends Fragment {
                     {
                         Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
                     }
-            }
-        }});
+                }
+            }});
 
-
-        fragmentCartBinding.btnProceedToCheckout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Bundle bundle = new Bundle();
-                bundle.putParcelableArrayList("cart_items", cartItemArrayList);
-                NavHostFragment.findNavController(CartFragment.this).navigate(R.id.action_cartFragment_to_checkoutFragment,bundle);
-            }
-        });
-
-        return view;
 
     }
 
@@ -305,8 +315,8 @@ public class CartFragment extends Fragment {
         est_total = sub_total+50;
 
         saved_total = saved_total - ((regular_price-price)*quantity);
-        fragmentCartBinding.tvSubtotalValue.setText("PKR " + String.format("%.2f", sub_total));
-        fragmentCartBinding.tvEstimatedTotalValue.setText("PKR " +  String.format("%.2f", est_total));
+        fragmentCartBinding.tvSubtotalValue.setText(requireContext().getResources().getString(R.string.pkr) + String.format("%.2f", sub_total));
+        fragmentCartBinding.tvEstimatedTotalValue.setText(requireContext().getResources().getString(R.string.pkr) +  String.format("%.2f", est_total));
         total_items_in_cart--;
 
         if(total_items_in_cart == 0){
@@ -329,8 +339,8 @@ public class CartFragment extends Fragment {
 
         est_total = sub_total+50;
 
-        fragmentCartBinding.tvSubtotalValue.setText("PKR " + String.format("%.2f", sub_total));
-        fragmentCartBinding.tvEstimatedTotalValue.setText("PKR " + String.format("%.2f", est_total));
+        fragmentCartBinding.tvSubtotalValue.setText(requireContext().getResources().getString(R.string.pkr) + String.format("%.2f", sub_total));
+        fragmentCartBinding.tvEstimatedTotalValue.setText(requireContext().getResources().getString(R.string.pkr) + String.format("%.2f", est_total));
 
     }
 

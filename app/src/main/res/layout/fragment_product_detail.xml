@@ -22,7 +22,6 @@
             android:id="@+id/topAppBar_detail"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:menu="@menu/search_menu_detail"
             app:navigationIcon="@drawable/ic_navigation_back_small"
             android:gravity="center_vertical"
             >

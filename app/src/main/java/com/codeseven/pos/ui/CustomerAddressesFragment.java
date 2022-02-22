@@ -124,7 +124,7 @@ public class CustomerAddressesFragment extends Fragment   implements AddressUpda
                 if(s.length()>0) {
                     progressDialog.dismissDialog();
                     if (s.contains("Failed to execute http call for operation"))
-                        Toast.makeText(requireContext(), "Please check your internet connection.", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
                 }
             }
         });
