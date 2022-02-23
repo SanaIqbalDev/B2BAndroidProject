@@ -1367,7 +1367,7 @@
                     android:id="@+id/btn_place_order"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
-                    android:text="Place Order"
+                    android:text="@string/place_order"
                     android:layout_marginTop="15dp"
                     android:layout_marginLeft="15dp"
                     android:layout_marginRight="15dp"

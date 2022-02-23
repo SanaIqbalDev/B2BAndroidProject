@@ -1,5 +1,7 @@
 package com.codeseven.pos.ui;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 
 import androidx.databinding.DataBindingUtil;
@@ -97,6 +99,30 @@ public class ProductDetailFragment extends Fragment {
                 if(s.length()>0) {
                     if (s.equals("Error"))
                         Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
+                    else if(s.contains("The current user cannot perform")){
+
+                        Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
+
+                        AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
+                        builder1.setMessage(requireContext().getResources().getString(R.string.sign_in_again));
+                        builder1.setCancelable(false);
+                        builder1.setPositiveButton("Ok",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        NavHostFragment.findNavController(ProductDetailFragment.this).navigate(R.id.action_productDetailFragment_to_loginFragment);
+                                        dialog.cancel();
+                                    }
+                                });
+                        builder1.setNegativeButton("Cancel",
+                                new DialogInterface.OnClickListener() {
+                                    public void onClick(DialogInterface dialog, int id) {
+                                        dialog.cancel();
+                                    }
+                                });
+
+                        AlertDialog alert11 = builder1.create();
+                        alert11.show();
+                    }
                     else
                         Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
                 }
