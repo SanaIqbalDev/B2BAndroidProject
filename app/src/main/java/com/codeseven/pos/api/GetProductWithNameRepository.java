@@ -58,4 +58,8 @@ public class GetProductWithNameRepository {
     public MutableLiveData<Integer> GetPagesCount(){
         return total_pages;
     }
+
+    public MutableLiveData<String> getResponseThis(){
+        return responseThis;
+    }
 }

@@ -83,15 +83,18 @@ public class LoginFragment extends Fragment {
             @Override
             public void onChanged(String s) {
                 if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
+                    progressDialog.dismissDialog();
+
                     if (s.contains("Generated Token:")) {
                         loginObserver.saveLoginData();
                         loginObserver.savePreferenceLoginState();
-
-                        progressDialog.dismissDialog();
                         NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_loginFragment_to_homeFragment);
                         loginObserver.getLoginResponse().removeObservers(getViewLifecycleOwner());
-                    } else if (!s.equals("")) {
-                        progressDialog.dismissDialog();
+                    }
+                    else if(s.contains("Network error") || s.contains("http")){
+                        Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
+                    }
+                    else if (!s.equals("")) {
                         Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
                     }
                 }

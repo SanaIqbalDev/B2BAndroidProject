@@ -244,6 +244,9 @@ public class CartFragment extends Fragment {
                     {
                         cartObserver.GetCustomerCart();
                     }
+                    else if(s.contains("Network error") || s.contains("http")){
+                        Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
+                    }
                     if(s.contains("Log in again.")){
                         progressDialog.dismissDialog();
                         Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();

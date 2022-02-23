@@ -94,12 +94,21 @@ public class CatalogRepository {
             @Override
             public void onResponse(@NonNull Response<GetMegaMenuQuery.Data> response) {
                 String ab ="";
-                categoryLists.postValue(response.getData().categoryList());
+                if(response.hasErrors())
+                {
+                    if(response.getErrors().get(0)!=null)
+                        CatalogRequestResponse.postValue(response.getErrors().get(0).getMessage());
+                }
+                else
+                {
+                    categoryLists.postValue(response.getData().categoryList());
+                }
             }
 
             @Override
             public void onFailure(@NonNull ApolloException e) {
                 String ab ="";
+                CatalogRequestResponse.postValue(e.getMessage());
             }
         });
     }

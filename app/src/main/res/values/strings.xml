@@ -36,6 +36,8 @@
     <string name="submit_coupon">کوڈ جمع کروائیں</string>
     <string name="summary">خلاصہ</string>
     <string name="pkr">روپے</string>
+    <string name="credit">کریڈٹ</string>
+    <string name="pkr_0"> 0.0 روپے </string>
     <string name="check_internet_connection">اپنا انٹرنیٹ کنیکشن چیک کریں۔</string>
     <string name="fill_in_the_required_fields">خالی خانوں کو بھریں</string>
     <string name="please_wait"> انتظار کریں </string>
@@ -50,15 +52,30 @@
     <string name="proceed_to_checkout">آرڈر جمع کرانے کی طرف بڑھیں۔</string>
     <string name="when_do_you_want_us_to_deliver">آپ کو آرڈر کب پہنچایا جائے؟</string>
     <string name="delivery_comments_note">آرڈر سے متعلق کوئی بھی اہم بات یہاں درج کریں۔</string>
-    <string name="any_coments_or_note">کوئی بھی متعلقہ بیان:</string>
+    <string name="any_comments_or_note">کوئی بھی متعلقہ بیان:</string>
     <string name="ship_to">آرڈر کی ترسیل کا پتہ</string>
     <string name="default_shipping_address">پہلے سے طے شدہ پتہ</string>
     <string name="change_shipping_address">آرڈر کی ترسیل کا پتہ تبدیل کریں۔</string>
     <string name="shipping_method">بھیجنے کا طریقہ</string>
     <string name="payment_method">رقم کی ادائیگی کا طریقہ</string>
     <string name="apply_credit">کریڈٹ اپلائی کریں۔</string>
-    <string name="your_order_is_placed_successfully"> آپ کا آرڈر اس آرڈر نمبر کے ساتھ دیا گیا ہے:
-</string>
+    <string name="your_credit_is">آپ کا کریڈٹ ہے :</string>
+    <string name="cash_on_delivery">ادائیگی وصولی کے وقت </string>
+    <string name="your_order_is_placed_successfully"> آپ کا آرڈر اس آرڈر نمبر کے ساتھ دیا گیا ہے:</string>
+    <string name="billing_same_as_shipping">ادائیگی کا پتہ ترسیل کے پتہ جیسا ہی ہے۔</string>
+    <string name="cart_summary">ٹوکری کا خلاصہ</string>
+    <string name="pay_amount_with_credit">کریڈٹ کے ساتھ ادا کی گئی رقم  :</string>
+    <string name="order_amount">آرڈر کی رقم  :</string>
+    <string name="amount_left_in_wallet">رقم جو کریڈٹ میں رہ گئی ہے  :</string>
+    <string name="place_order">آرڈر بھیج دیں</string>
+    <string name="unavailable">unavailable</string>
+    <string name="total">کل قیمت</string>
+    <string name="shipping">بھیجنے کی لاگت</string>
+    <string name="subtotal">ذیلی کل</string>
+    <string name="you_saved">بچت :</string>
+    <string name="network_connection_issue">اپنا انٹرنیٹ کنکشن درست کریں۔</string>
+    <string name="estimated_shipping">تخمینہ شدہ شپنگ</string>
+    <string name="estimated_total">تخمینی کل</string>
 
 
 </resources>

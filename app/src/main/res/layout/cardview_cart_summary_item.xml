@@ -24,6 +24,32 @@
             android:weightSum="5"
             android:padding="2dp"
             android:layout_gravity="center_vertical">
+            <TextView
+                android:id="@+id/tv_item_price"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_weight="1.5"
+                android:tag="price"
+                android:textAppearance="?attr/textAppearanceHeadline6"
+                android:gravity="left|center_vertical"
+                android:singleLine="true"
+                android:textSize="14sp"
+                android:textColor="@color/black"
+                />
+
+            <TextView
+                    android:id="@+id/tv_item_name"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="2.5"
+                    android:textAppearance="?attr/textAppearanceHeadline6"
+                    android:gravity="right|center_vertical"
+                    android:singleLine="false"
+                    android:scrollbars="vertical"
+                    android:textSize="14sp"
+                    android:textColor="@color/black"
+                    android:paddingRight="15dp"
+                    android:text="item name"/>
 
             <ImageView
                 android:id="@+id/iv_item_image"
@@ -34,32 +60,6 @@
                 app:srcCompat="@drawable/product_item_temp"
                 android:scaleType="centerCrop"/>
 
-            <TextView
-                    android:id="@+id/tv_item_name"
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="2.5"
-                    android:textAppearance="?attr/textAppearanceHeadline6"
-                    android:gravity="left|center_vertical"
-                    android:singleLine="false"
-                    android:scrollbars="vertical"
-                    android:textSize="14sp"
-                    android:textColor="@color/black"
-                    android:paddingLeft="15dp"
-                    android:text="item name"/>
-
-            <TextView
-                android:id="@+id/tv_item_price"
-                android:layout_width="0dp"
-                android:layout_height="50dp"
-                android:layout_weight="1.5"
-                android:tag="price"
-                android:textAppearance="?attr/textAppearanceHeadline6"
-                android:gravity="right|center_vertical"
-                android:singleLine="true"
-                android:textSize="14sp"
-                android:textColor="@color/black"
-                />
 
         </LinearLayout>
 

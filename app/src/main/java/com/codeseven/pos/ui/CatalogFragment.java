@@ -132,9 +132,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
         //Search implemenattion...
         getProductByNameViewModel = (new ViewModelProvider(requireActivity())).get(GetProductByNameViewModel.class);
 
-
 //        BaseActivity.setSupportActionBar(toolbar)
-
         setHasOptionsMenu(true);
 
 
@@ -143,9 +141,6 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-//        Toolbar toolbar = (Toolbar) view.findViewById(R.id.toolbar);
-//        requireActivity()..setActionBar(fragmentCatalogBinding.topAppBar);
-//        ).setSupportActionBar(toolbar)
 
         setHasOptionsMenu(true);
 
@@ -237,20 +232,6 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
         fragmentCatalogBinding.recyclerviewGroceryItems.setAdapter(catalogItemAdapter);
 
 
-        catalogObserver.getCatalogRequestResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
-                    {
-                        if (s.length() > 0) {
-                            fragmentCatalogBinding.btnRefresh.setVisibility(View.VISIBLE);
-                            progressDialog.dismissDialog();
-                            fragmentCatalogBinding.loadingProgressbar.setVisibility(View.GONE);
-                            Toast.makeText(requireContext(), catalogObserver.getCatalogRequestResponse().getValue(), Toast.LENGTH_LONG).show();
-                        }
-                    }
-            }}
-        });
 
         catalogObserver.getProductFragments().observe(getViewLifecycleOwner(), new Observer<List<ProductsFragment.Item>>() {
             @Override
@@ -461,11 +442,47 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
             }
         });
 
+        getProductsByNameObserver.getResponseSearchProducts().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                  if(s.contains("Network error") || s.contains("http")){
+                    Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
+                }
+                  else
+                  {
+                      Toast.makeText(requireContext(),s,Toast.LENGTH_LONG).show();
+                  }
+            }
+        });
         getProductsByNameObserver.getPages_count().observe(getViewLifecycleOwner(), new Observer<Integer>() {
             @Override
             public void onChanged(Integer integer) {
                 search_pages_count = integer;
             }
+        });
+
+        catalogObserver.getCatalogRequestResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+                    {
+                        if (s.length() > 0) {
+
+                            progressDialog.dismissDialog();
+                            fragmentCatalogBinding.btnRefresh.setVisibility(View.VISIBLE);
+                            fragmentCatalogBinding.loadingProgressbar.setVisibility(View.GONE);
+
+                            if(s.contains("Network error") || s.contains("http"))
+                            {
+                                Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
+                            }
+                            else
+                            {
+                                Toast.makeText(requireContext(), catalogObserver.getCatalogRequestResponse().getValue(), Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    }
+                }}
         });
 
     }

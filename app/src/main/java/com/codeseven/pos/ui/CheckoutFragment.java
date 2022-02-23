@@ -1,6 +1,8 @@
 package com.codeseven.pos.ui;
 
 import static com.codeseven.pos.ui.CartFragment.saved_total;
+import static com.codeseven.pos.ui.CartFragment.sub_total;
+import static com.codeseven.pos.ui.CartFragment.est_total;
 import static com.codeseven.pos.ui.CustomerAddressesFragment.telephone;
 
 
@@ -188,11 +190,16 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                         }
                     });
                 }
+                else if(s.contains("Network error") || s.contains("http")){
+                    Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
+                }
                 else if(s.equals("Shipping Address success")){
-//                    progressDialog.setDialogMessage("Shi");
+                    progressDialog.setDialogMessage("Shipping address is set on cart...");
                     checkoutObserver.SetShippingMethodOnCart(method_code,carrier_code);
                 }
                 else if(s.equals("Shipping Method success")){
+                    progressDialog.setDialogMessage("Shipping method is set on cart...");
+
                     if(fragmentCheckoutBinding.layoutPayment.getVisibility() == View.VISIBLE )
                     {
                         if(fragmentCheckoutBinding.cbPaymentMethod.isChecked()) {
@@ -366,7 +373,19 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(requireContext(),LinearLayoutManager.VERTICAL,false);
         fragmentCheckoutBinding.rvCartSummaryItems.setLayoutManager(linearLayoutManager);
         fragmentCheckoutBinding.rvCartSummaryItems.setAdapter(cartSummaryAdapter);
-        fragmentCheckoutBinding.tvSavedAmount.setText(requireContext().getResources().getString(R.string.pkr) + String.format("%.2f", saved_total));
+        fragmentCheckoutBinding.tvSavedAmount.setText(String.format("%.2f", saved_total) +" " + requireContext().getResources().getString(R.string.pkr) );
+        fragmentCheckoutBinding.tvSubtotalValue.setText(String.format("%.2f", sub_total) +" " + requireContext().getResources().getString(R.string.pkr) );
+        fragmentCheckoutBinding.tvShippingValue.setText("50"  +" " + requireContext().getResources().getString(R.string.pkr) );
+        if(!fragmentCheckoutBinding.cbApplyWallet.isChecked())
+        {
+            fragmentCheckoutBinding.tvTotalValue.setText(String.format("%.2f", est_total) +" " + requireContext().getResources().getString(R.string.pkr) );
+        }
+        else
+        {
+            fragmentCheckoutBinding.tvTotalValue.setText(cartPreference.GetOrderTotal() +"  "+requireContext().getResources().getString(R.string.pkr));
+        }
+
+
 
     }
 
@@ -426,7 +445,9 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             public void onChanged(GetCustomerWalletQuery.Wallet wallet) {
 
                 progressDialog.dismissDialog();
-                fragmentCheckoutBinding.tvWalletValue.setText("Your credit is: "+ wallet.wallet_amount());
+                fragmentCheckoutBinding.tvWalletValue.setText(requireContext().getResources().getString(R.string.your_credit_is)+
+                        wallet.wallet_amount() +
+                        requireContext().getResources().getString(R.string.pkr));
             }
         });
 
@@ -450,25 +471,34 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                         fragmentCheckoutBinding.cbApplyWallet.setChecked(false);
                         signInDialog();
 
-                    } else if(s.contains("Failed to execute HTTP")){
+                    } else if(s.contains("Network error") || s.contains("http")){
+                        Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
 
                         fragmentCheckoutBinding.cbApplyWallet.setChecked(false);
-                        Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
-
                     }else if (s.equals("Success")) {
 
                         if(fragmentCheckoutBinding.cbApplyWallet.isChecked()){
-                            String wallet_msg = "Pay amount with wallet : " + cartPreference.GetNeedToPay() +"\n"+"Order amount : "+
-                                    cartPreference.GetOrderTotal() + "\n"+ "Amount left in wallet : "+cartPreference.GetRemainingWalletAmount();
+                            String wallet_msg = requireContext().getResources().getString(R.string.pay_amount_with_credit) +"  "+
+                                    cartPreference.GetNeedToPay() +"  "+requireContext().getResources().getString(R.string.pkr)+"\n"+
+                                    requireContext().getResources().getString(R.string.order_amount)+"  "+
+                                    cartPreference.GetOrderTotal() +"  "+requireContext().getResources().getString(R.string.pkr);
+//                                    "\n"+
+//                                    requireContext().getResources().getString(R.string.amount_left_in_wallet)+"  "+
+//                                    cartPreference.GetRemainingWalletAmount() +"  "+requireContext().getResources().getString(R.string.pkr);
                             fragmentCheckoutBinding.tvWalletValue.setText(wallet_msg);
-                            fragmentCheckoutBinding.tvWalletValueS.setText(requireContext() + cartPreference.GetNeedToPay());
+                            fragmentCheckoutBinding.tvWalletValueS.setText(cartPreference.GetNeedToPay() + " " + requireContext().getResources().getString(R.string.pkr));
+                            fragmentCheckoutBinding.tvTotalValue.setText(cartPreference.GetOrderTotal() +"  "+requireContext().getResources().getString(R.string.pkr));
 
                         }
                         else {
-                            fragmentCheckoutBinding.tvWalletValue.setText("Your credit is:" + " " + cartPreference.GetRemainingWalletAmount());
-                            fragmentCheckoutBinding.tvWalletValueS.setText(requireContext().getResources().getString(R.string.pkr)+"0.0");
+                            fragmentCheckoutBinding.tvWalletValue.setText(requireContext().getResources().getString(R.string.your_credit_is)+
+                                    cartPreference.GetRemainingWalletAmount()+
+                                    requireContext().getResources().getString(R.string.pkr));
+                            fragmentCheckoutBinding.tvWalletValueS.setText(" 0.0" + requireContext().getResources().getString(R.string.pkr));
+                            fragmentCheckoutBinding.tvTotalValue.setText(String.format("%.2f", est_total) +" " + requireContext().getResources().getString(R.string.pkr) );
 
                         }
+
 
                         checkoutObserver.GetListOfAvailablePaymentMethods();
 
@@ -494,8 +524,15 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                         fragmentCheckoutBinding.cbApplyWallet.setChecked(true);
                         fragmentCheckoutBinding.tvWalletValueS.setText(cartPreference.GetNeedToPay());
 
-                        String wallet_msg = "Pay amount with wallet : " + cartPreference.GetNeedToPay() +"\n"+"Order amount : "+
-                                cartPreference.GetOrderTotal() + "\n"+ "Amount left in wallet : "+cartPreference.GetRemainingWalletAmount();
+                        String wallet_msg = requireContext().getResources().getString(R.string.pay_amount_with_credit) +"  "+
+                                cartPreference.GetNeedToPay() +"  "+requireContext().getResources().getString(R.string.pkr)+"\n"+
+                                requireContext().getResources().getString(R.string.order_amount)+"  "+
+                                cartPreference.GetOrderTotal() +"  "+requireContext().getResources().getString(R.string.pkr);
+
+//                                + "\n"+
+//                                requireContext().getResources().getString(R.string.amount_left_in_wallet)+"  "+
+//                                cartPreference.GetRemainingWalletAmount() +"  "+requireContext().getResources().getString(R.string.pkr);
+
                         fragmentCheckoutBinding.tvWalletValue.setText(wallet_msg);
 
                     }
@@ -542,6 +579,9 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                     progressDialog.dismissDialog();
                     if(s.contains("The current user cannot perform")){
                         signInDialog();
+                    }
+                    else if(s.contains("Network error") || s.contains("http")){
+                        Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
                     }
                     else {
                         Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
@@ -644,7 +684,9 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                     if (s.length() > 0) {
                         if (s.contains("The current user cannot perform")) {
                             signInDialog();
-                        } else
+                        } else if(s.contains("Network error") || s.contains("http")){
+                            Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
+                        }else
                             Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
                     }
 
