@@ -7,6 +7,7 @@ import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.api.Input;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
+import com.apollographql.apollo.fetcher.ApolloResponseFetchers;
 import com.apollographql.apollo.request.RequestHeaders;
 import com.codeseven.pos.ApolloClientClass;
 
@@ -50,13 +51,14 @@ public class CatalogRepository {
         Input<SortEnum> sortOrderInput = new Input<>(sortOrder,true);
         Input<ProductAttributeSortInput> sortOption = new Input<>(ProductAttributeSortInput.builder().positionInput(sortOrderInput).build(),true);
 
-
-        (new ApolloClientClass()).apolloClient.query(new GetProductsQuery(pageSize,currentPage,
+        GetProductsQuery a = new GetProductsQuery(pageSize,currentPage,
                 ProductAttributeFilterInput.builder().category_id(FilterEqualTypeInput.builder().eq(category).build()).build()
-                , sortOption)).enqueue(new ApolloCall.Callback<GetProductsQuery.Data>() {
+                , sortOption);
+
+        (new ApolloClientClass()).apolloClient.query(a).toBuilder().responseFetcher(ApolloResponseFetchers.CACHE_AND_NETWORK).build().watcher().enqueueAndWatch(new ApolloCall.Callback<GetProductsQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetProductsQuery.Data> response) {
-                if(response.getErrors()!=null) {
+                if(response.hasErrors()) {
                     if (response.getErrors().size() > 0)
                         CatalogRequestResponse.postValue(response.getErrors().get(0).getMessage());
                 }

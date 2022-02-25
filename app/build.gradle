@@ -3,6 +3,7 @@ plugins {
     id 'dagger.hilt.android.plugin'
     id "com.apollographql.apollo"
     id "com.google.gms.google-services"
+
 }
 
 android {
@@ -19,6 +20,9 @@ android {
     }
 
     buildTypes {
+        custom {
+            matchingFallbacks = ["debug"]
+        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -31,6 +35,7 @@ android {
     buildFeatures {
         dataBinding true
     }
+
 }
 
 dependencies {
@@ -47,13 +52,12 @@ dependencies {
     implementation 'com.apollographql.apollo:apollo-runtime:2.5.11'
     implementation 'com.apollographql.apollo:apollo-coroutines-support:2.5.11'
 
-//    implementation 'androidx.paging:paging-runtime:3.1.0'
-//    implementation 'androidx.paging:paging-rxjava3:3.1.0'
-//    implementation "com.apollographql.apollo:apollo-android-support:2.5.11"
-
-
     implementation 'com.graphql-java:graphql-java:230521-nf-execution'
-    implementation "com.apollographql.apollo:apollo-rx3-support:2.5.11"
+    implementation 'com.apollographql.apollo:apollo-rx3-support:2.5.11'
+    implementation 'com.apollographql.apollo:apollo-normalized-cache-sqlite-android-debug:2.5.11'
+//    implementation 'com.apollographql.apollo3:apollo-normalized-cache-sqlite-android:3.1.0'
+
+//    implementation 'com.apollographql.apollo3:apollo-normalized-cache:2.5.11'
 
 
 //    implementation 'com.chibde:audiovisualizer:2.2.0'

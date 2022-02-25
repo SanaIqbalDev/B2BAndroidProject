@@ -248,7 +248,6 @@ public class CartFragment extends Fragment {
                         Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
                     }
                     if(s.contains("Log in again.")){
-                        progressDialog.dismissDialog();
                         Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
                         AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
                         builder1.setMessage(requireContext().getResources().getString(R.string.sign_in_again));
