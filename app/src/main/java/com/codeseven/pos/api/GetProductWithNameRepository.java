@@ -18,17 +18,18 @@ public class GetProductWithNameRepository {
     private MutableLiveData<List<GetAutocompleteResultsQuery.Item>> itemsList = new MutableLiveData<>(new ArrayList<>());
     private MutableLiveData<Integer> total_pages;
     private MutableLiveData<String> responseThis ;
-
+    private ApolloClientClass apolloClientClass;
 
     public GetProductWithNameRepository() {
         itemsList = new MutableLiveData<>(new ArrayList<>());
         responseThis = new MutableLiveData<>("");
         total_pages = new MutableLiveData<>(0);
+        apolloClientClass = new ApolloClientClass();
     }
 
     public void getProducts(String itemName, int currentPage, int pageSize)
     {
-        (new ApolloClientClass()).apolloClient.query(new GetAutocompleteResultsQuery(itemName,currentPage,pageSize)).enqueue(new ApolloCall.Callback<GetAutocompleteResultsQuery.Data>() {
+        apolloClientClass.apolloClient.query(new GetAutocompleteResultsQuery(itemName,currentPage,pageSize)).enqueue(new ApolloCall.Callback<GetAutocompleteResultsQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetAutocompleteResultsQuery.Data> response) {
                 String ab ="";

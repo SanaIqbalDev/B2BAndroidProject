@@ -10,6 +10,7 @@ import com.apollographql.apollo.cache.normalized.lru.EvictionPolicy;
 import com.apollographql.apollo.cache.normalized.lru.LruNormalizedCacheFactory;
 import com.apollographql.apollo.cache.normalized.sql.SqlNormalizedCacheFactory;
 import com.apollographql.apollo.request.RequestHeaders;
+import com.codeseven.pos.util.CartPreference;
 import com.codeseven.pos.util.LoginPreference;
 import com.codeseven.pos.util.Utilities;
 
@@ -24,8 +25,9 @@ import okhttp3.Response;
 public class ApolloClientClass {
 
     public ApolloClient apolloClient;
-    private OkHttpClient okHttpClient;
-    private LoginPreference loginPreference;
+    private final OkHttpClient okHttpClient;
+    private final LoginPreference loginPreference;
+    private CartPreference cartPref;
 
     public ApolloClientClass() {
 
@@ -33,26 +35,24 @@ public class ApolloClientClass {
                 .connectTimeout(30, TimeUnit.SECONDS) // connect timeout
                 .writeTimeout(30, TimeUnit.SECONDS) // write timeout
                 .readTimeout(30, TimeUnit.SECONDS);
-
-
-
-//                .addInterceptor(provideOfflineCacheInterceptor())
-//                .addNetworkInterceptor(provideCacheInterceptor()); // read timeout
-
-
         okHttpClient = builder.build();
-//        okHttpClient.interceptors().add(provideOfflineCacheInterceptor());
-//        okHttpClient.networkInterceptors().add(provideCacheInterceptor());
+        apolloClient= ApolloClient.builder().
+                serverUrl("https://mcstaging.24seven.pk/graphql").
+                okHttpClient(okHttpClient).
+                build();
 
-        NormalizedCacheFactory cacheFactory = new LruNormalizedCacheFactory(EvictionPolicy.builder().maxSizeBytes(10 * 1024 * 1024).build());
+        loginPreference = new LoginPreference();
+        cartPref = new CartPreference();
+    }
+    public ApolloClientClass(boolean isCache) {
 
-
-//        SqlNormalizedCacheFactory sqlNormalizedCacheFactory = new SqlNormalizedCacheFactory(MainApplication.getContext(), "apollo.db");
+        OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS) // connect timeout
+                .writeTimeout(30, TimeUnit.SECONDS) // write timeout
+                .readTimeout(30, TimeUnit.SECONDS);
+        okHttpClient = builder.build();
 
         NormalizedCacheFactory sqlCacheFactory = new SqlNormalizedCacheFactory(MainApplication.getContext(), "24_seven");
-//        NormalizedCacheFactory memoryFirstThenSqlCacheFactory = new LruNormalizedCacheFactory(
-//                EvictionPolicy.builder().maxSizeBytes(10 * 1024 * 1024).build()
-//        ).chain(sqlCacheFactory);
 
         apolloClient= ApolloClient.builder().
                 serverUrl("https://mcstaging.24seven.pk/graphql").
@@ -60,49 +60,9 @@ public class ApolloClientClass {
                 normalizedCache(sqlCacheFactory).
                 build();
 
-
-//        NormalizedCache.configureApolloClientBuilder(
-//                apolloClient,
-//                new MemoryCacheFactory(10 * 1024 * 1024, -1),
-//                TypePolicyCacheKeyGenerator.INSTANCE,
-//                FieldPolicyCacheResolver.INSTANCE,
-//                false
-//        );
-
         loginPreference = new LoginPreference();
+        cartPref = new CartPreference();
     }
-    Interceptor provideOfflineCacheInterceptor() {
-        return chain -> {
-                Request originalRequest = chain.request();
-                String cacheHeaderValue = Utilities.isNetworkConnected()
-                        ? "public, max-age=2419200"
-                        : "public, only-if-cached, max-stale=2419200" ;
-                Request request = originalRequest.newBuilder().build();
-                Response response = chain.proceed(request);
-                return response.newBuilder()
-                        .removeHeader("Pragma")
-                        .removeHeader("Cache-Control")
-                        .header("Cache-Control", cacheHeaderValue)
-                        .build();
-        };
-    }
-//
-    Interceptor provideCacheInterceptor() {
-        return chain -> {
-            Request originalRequest = chain.request();
-            String cacheHeaderValue = Utilities.isNetworkConnected()
-                    ? "public, max-age=2419200"
-                    : "public, only-if-cached, max-stale=2419200" ;
-            Request request = originalRequest.newBuilder().build();
-            Response response = chain.proceed(request);
-            return response.newBuilder()
-                    .removeHeader("Pragma")
-                    .removeHeader("Cache-Control")
-                    .header("Cache-Control", cacheHeaderValue)
-                    .build();
-        };
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.O)
     public  ApolloClient getNewClient(String token){
        return ApolloClient.builder()
@@ -131,14 +91,7 @@ public class ApolloClientClass {
         return requestHeader.build();
     }
 
-//    public Cache provideCache() {
-//        Cache cache = null;
-//        try {
-//            cache = new Cache(new File(MainApplication.getContext().getCacheDir(), "http-cache"), 20 * 1024 * 1024); // 10 MB
-//        } catch (Exception e) {
-//            Log.e("Cache", "Could not create Cache!");
-//        }
-//
-//        return cache;
-//    }
+    public String getCartId(){
+        return (cartPref.GetCartId("cart_id"));
+    }
 }

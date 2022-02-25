@@ -28,11 +28,12 @@ import okhttp3.internal.http2.Header;
 
 public class ViewCartRepository {
 
-    private CartPreference cartPreference;
-    private LoginPreference loginPreference;
-    private MutableLiveData<String> cartRequestResponse;
+    private final CartPreference cartPreference;
+    private final LoginPreference loginPreference;
+    private final MutableLiveData<String> cartRequestResponse;
     private String cartId ;
-    private MutableLiveData<List<GetCartByIdQuery.Item>> cartItems;
+    private final MutableLiveData<List<GetCartByIdQuery.Item>> cartItems;
+    private final ApolloClientClass apolloClientClass;
 
     public ViewCartRepository() {
         cartPreference = new CartPreference();
@@ -40,14 +41,14 @@ public class ViewCartRepository {
         this.cartRequestResponse = new MutableLiveData<>();
         cartId = "";
         cartItems = new MutableLiveData<>(new ArrayList<>());
+        apolloClientClass = new ApolloClientClass();
     }
 
     public void getCustomerExistingCart(){
 
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
 
-        (new ApolloClientClass()).apolloClient.query(new GetCustomerCartQuery()).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetCustomerCartQuery.Data>() {
+        apolloClientClass.apolloClient.query(new GetCustomerCartQuery()).toBuilder()
+                .requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<GetCustomerCartQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetCustomerCartQuery.Data> response) {
                 if(response.hasErrors()) {
@@ -81,7 +82,7 @@ public class ViewCartRepository {
 
     public void getCustomerNewCart()
     {
-        (new ApolloClientClass()).apolloClient.mutate(new CreateCartMutation()).enqueue(new ApolloCall.Callback<CreateCartMutation.Data>() {
+        apolloClientClass.apolloClient.mutate(new CreateCartMutation()).enqueue(new ApolloCall.Callback<CreateCartMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<CreateCartMutation.Data> response) {
                 cartRequestResponse.postValue("New cart Created");
@@ -101,19 +102,11 @@ public class ViewCartRepository {
     }
     public void GetCartById(String cartId){
 
-
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
-
-
-        (new ApolloClientClass()).apolloClient.query(new GetCartByIdQuery(cartId)).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetCartByIdQuery.Data>() {
+        apolloClientClass.apolloClient.query(new GetCartByIdQuery(cartId)).toBuilder()
+                .requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<GetCartByIdQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetCartByIdQuery.Data> response) {
                 if(response.hasErrors()){
-//                        if (response.getErrors().get(0).getMessage().contains("The cart isn't active."))
-//                        {
-//                            getCustomerExistingCart();
-//                        }
                         cartRequestResponse.postValue(response.getErrors().get(0).getMessage());
                 }
                 else {

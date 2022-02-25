@@ -24,25 +24,25 @@ public class AddProductToCartRepository {
     private MutableLiveData<String> requestResponse;
     private CartPreference cartPreference;
     private LoginPreference loginPreference;
+    private ApolloClientClass apolloClientClass;
 
 
     public AddProductToCartRepository() {
         requestResponse = new MutableLiveData<>("");
         cartPreference = new CartPreference();
         loginPreference = new LoginPreference();
+        apolloClientClass = new ApolloClientClass();
     }
 
     public void addProductToCart(String sku, String quantity)
     {
-        String cart_id = cartPreference.GetCartId("cart_id");
+        String cart_id = apolloClientClass.getCartId();
         List<CartItemInput> cartItemInputList = new ArrayList<>();
         cartItemInputList.add(CartItemInput.builder().sku(sku).quantity(Double.parseDouble(quantity)).build());
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
 
 
         if(!cart_id.equals("")) {
-            (new ApolloClientClass()).apolloClient.mutate(new AddProductsToCartMutation(cart_id, cartItemInputList)).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<AddProductsToCartMutation.Data>() {
+            apolloClientClass.apolloClient.mutate(new AddProductsToCartMutation(cart_id, cartItemInputList)).toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<AddProductsToCartMutation.Data>() {
                 @Override
                 public void onResponse(@NonNull Response<AddProductsToCartMutation.Data> response) {
                     if (response.hasErrors())

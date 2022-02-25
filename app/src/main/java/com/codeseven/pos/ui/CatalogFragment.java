@@ -445,13 +445,17 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
         getProductsByNameObserver.getResponseSearchProducts().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String s) {
+                if(s.length()>0){
+
                   if(s.contains("Network error") || s.contains("http")){
                     Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
-                }
+                  }
                   else
                   {
                       Toast.makeText(requireContext(),s,Toast.LENGTH_LONG).show();
                   }
+
+                }
             }
         });
         getProductsByNameObserver.getPages_count().observe(getViewLifecycleOwner(), new Observer<Integer>() {

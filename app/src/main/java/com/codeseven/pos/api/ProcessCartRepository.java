@@ -27,29 +27,29 @@ import apollo.pos.type.UpdateCartItemsInput;
 
 public class ProcessCartRepository {
 
-    private MutableLiveData<String> requestResponse;
-    private MutableLiveData<String> applyCouponRequestResponse;
-    private LoginPreference loginPreference;
-    private CartPreference cartPreference;
+    private final MutableLiveData<String> requestResponse;
+    private final MutableLiveData<String> applyCouponRequestResponse;
+    private final LoginPreference loginPreference;
+    private final CartPreference cartPreference;
+    private final ApolloClientClass apolloClientClass;
+
     public ProcessCartRepository() {
         requestResponse = new MutableLiveData<>();
         loginPreference = new LoginPreference();
         cartPreference = new CartPreference();
         applyCouponRequestResponse = new MutableLiveData<>();
+        apolloClientClass = new ApolloClientClass();
     }
 
     public void removeItemFromCart(String item_uid){
 
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
-        cartPreference.GetCartId("cart_id");
 
-
-        RemoveItemFromCartInput removeItemFromCartInput = RemoveItemFromCartInput.builder().cart_id( cartPreference.GetCartId("cart_id")).cart_item_uid(item_uid).build();
-        (new ApolloClientClass()).apolloClient.mutate((new RemoveItemFromCartMutation(removeItemFromCartInput))).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<RemoveItemFromCartMutation.Data>() {
+        RemoveItemFromCartInput removeItemFromCartInput = RemoveItemFromCartInput.builder().cart_id(apolloClientClass.getCartId()).cart_item_uid(item_uid).build();
+        apolloClientClass.apolloClient.mutate((new RemoveItemFromCartMutation(removeItemFromCartInput)))
+                .toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<RemoveItemFromCartMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<RemoveItemFromCartMutation.Data> response) {
-                if(response.getErrors()!=null) {
+                if(response.hasErrors()) {
                     if (response.getErrors().size() > 0)
                         requestResponse.postValue(response.getErrors().get(0).getMessage());
                 }
@@ -67,15 +67,13 @@ public class ProcessCartRepository {
     public void UpdateItemInCart(CatalogItem item)
     {
 
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
-        String cart_id = cartPreference.GetCartId("cart_id");
+        String cart_id = apolloClientClass.getCartId();
 
         List<CartItemUpdateInput> cartItemUpdateInputs = Collections.singletonList((CartItemUpdateInput.builder().cart_item_uid(item.getItemUid()).quantity(Double.valueOf(item.getItemQuantity())).build()));
         UpdateCartItemsInput itemsInput= UpdateCartItemsInput.builder().cart_id(cart_id).cart_items(cartItemUpdateInputs).build();
 
-        (new ApolloClientClass()).apolloClient.mutate(new UpdateCartItemMutation(itemsInput))
-                .toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<UpdateCartItemMutation.Data>() {
+        apolloClientClass.apolloClient.mutate(new UpdateCartItemMutation(itemsInput))
+                .toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<UpdateCartItemMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<UpdateCartItemMutation.Data> response) {
                 String ab = "";
@@ -89,15 +87,13 @@ public class ProcessCartRepository {
     }
 
     public void ApplyCouponOnCart(String coupon_code){
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
-        String cart_id = cartPreference.GetCartId("cart_id");
+        String cart_id = apolloClientClass.getCartId();
 
-        (new ApolloClientClass()).apolloClient.mutate(new ApplyCouponToCartMutation(ApplyCouponToCartInput.builder().cart_id(cart_id).coupon_code(coupon_code).build()))
-                .toBuilder().requestHeaders(RequestHeaders.builder().addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token")).build()).build().enqueue(new ApolloCall.Callback<ApplyCouponToCartMutation.Data>() {
+       apolloClientClass.apolloClient.mutate(new ApplyCouponToCartMutation(ApplyCouponToCartInput.builder().cart_id(cart_id).coupon_code(coupon_code).build()))
+                .toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<ApplyCouponToCartMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<ApplyCouponToCartMutation.Data> response) {
-                if(response.getErrors()!=null) {
+                if(response.hasErrors()) {
                     if (response.getErrors().size() > 0)
                         applyCouponRequestResponse.postValue(response.getErrors().get(0).getMessage());
                 }

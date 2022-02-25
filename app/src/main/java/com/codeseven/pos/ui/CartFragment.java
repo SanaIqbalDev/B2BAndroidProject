@@ -302,7 +302,8 @@ public class CartFragment extends Fragment {
                 progressDialog.dismissDialog();
                 if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
                     {
-                        Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
+                        if(s.length()>0)
+                            Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
                     }
                 }
             }});

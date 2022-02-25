@@ -82,6 +82,8 @@ public class CheckOutRepository {
     //    private MutableLiveData<List<Boolean>> shouldPlaceOrder;
     private List<Boolean> counter;
 
+    private ApolloClientClass apolloClientClass;
+
 
     public CheckOutRepository() {
         this.loginPreference = new LoginPreference();
@@ -119,17 +121,16 @@ public class CheckOutRepository {
 
         cartPreference = new CartPreference();
         this.orderPreference = new OrderPreference();
+        apolloClientClass = new ApolloClientClass();
 
     }
 
     public void  getCustomerInfo(){
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
 
-        (new ApolloClientClass()).apolloClient.query(new GetCustomerDetailsQuery()).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetCustomerDetailsQuery.Data>() {
+        apolloClientClass.apolloClient.query(new GetCustomerDetailsQuery()).toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<GetCustomerDetailsQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetCustomerDetailsQuery.Data> response) {
-                if(response.getErrors()!=null) {
+                if(response.hasErrors()) {
                     if (response.getErrors().size() > 0)
                         CustomerInfoResponse.postValue(response.getErrors().get(0).getMessage());
                 }
@@ -146,14 +147,12 @@ public class CheckOutRepository {
     }
     public void getShippingAddressAndMethod(){
 
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
-        String cart_id =cartPreference.GetCartId("cart_id");
+       String cart_id = apolloClientClass.getCartId();
 
-        (new ApolloClientClass()).apolloClient.query(new GetSelectedAndAvailableShippingMethodsQuery(cart_id)).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetSelectedAndAvailableShippingMethodsQuery.Data>() {
+        apolloClientClass.apolloClient.query(new GetSelectedAndAvailableShippingMethodsQuery(cart_id)).toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<GetSelectedAndAvailableShippingMethodsQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetSelectedAndAvailableShippingMethodsQuery.Data> response) {
-                if(response.getErrors()!=null) {
+                if(response.hasErrors()) {
                     if (response.getErrors().size() > 0)
                         CustomerInfoResponse.postValue(response.getErrors().get(0).getMessage());
                 }
@@ -190,15 +189,12 @@ public class CheckOutRepository {
 
     }
     public void getCustomerWallet(){
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
 
-
-        (new ApolloClientClass()).apolloClient.query(new GetCustomerWalletQuery()).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetCustomerWalletQuery.Data>() {
+        apolloClientClass.apolloClient.query(new GetCustomerWalletQuery()).toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<GetCustomerWalletQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetCustomerWalletQuery.Data> response) {
 
-                if(response.getErrors()!= null) {
+                if(response.hasErrors()) {
                     if (response.getErrors().size() > 0) {
                         walletQueryResponse.postValue(response.getErrors().get(0).getMessage());
                     }
@@ -219,16 +215,14 @@ public class CheckOutRepository {
     }
     public void ApplyWalletToCart(boolean applyWallet){
 
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
-        String cart_id =cartPreference.GetCartId("cart_id");
+       String cart_id = apolloClientClass.getCartId();
 
-        (new ApolloClientClass()).apolloClient.mutate(new ApplyWalletToCartMutation(ApplyWalletCartInput.builder()
-                .apply_wallet(applyWallet).cart_id(cart_id).build())).toBuilder().requestHeaders(requestHeader.build()).build()
+        apolloClientClass.apolloClient.mutate(new ApplyWalletToCartMutation(ApplyWalletCartInput.builder()
+                .apply_wallet(applyWallet).cart_id(cart_id).build())).toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build()
                 .enqueue(new ApolloCall.Callback<ApplyWalletToCartMutation.Data>() {
                     @Override
                     public void onResponse(@NonNull Response<ApplyWalletToCartMutation.Data> response) {
-                        if(response.getErrors()!=null)
+                        if(response.hasErrors())
                         {
                             if(response.getErrors().size()>0)
                                 applyWalletQueryResponse.postValue(response.getErrors().get(0).getMessage());
@@ -251,17 +245,15 @@ public class CheckOutRepository {
 
     }
     public void getAvailablePaymentMethods(){
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
-        String cart_id =cartPreference.GetCartId("cart_id");
+        String cart_id = apolloClientClass.getCartId();
 
 
-        (new ApolloClientClass()).apolloClient.query(new GetAvailablePaymentMethodsQuery(cart_id)).toBuilder().
-                requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetAvailablePaymentMethodsQuery.Data>() {
+        apolloClientClass.apolloClient.query(new GetAvailablePaymentMethodsQuery(cart_id)).toBuilder().
+                requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<GetAvailablePaymentMethodsQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetAvailablePaymentMethodsQuery.Data> response) {
 
-                if(response.getErrors()!=null){
+                if(response.hasErrors()){
                     if(response.getErrors().size()>0)
                     {
                         getPaymentMethodResponse.postValue(response.getErrors().get(0).getMessage());
@@ -283,13 +275,11 @@ public class CheckOutRepository {
 
     }
     public void GetCustomerAddresses(){
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
 
-        (new ApolloClientClass()).apolloClient.query(new GetCustomerAddressesQuery()).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetCustomerAddressesQuery.Data>() {
+        apolloClientClass.apolloClient.query(new GetCustomerAddressesQuery()).toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<GetCustomerAddressesQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetCustomerAddressesQuery.Data> response) {
-                if(response.getErrors()!=null){
+                if(response.hasErrors()){
                     if(response.getErrors().size()>0)
                        getAddressResponse.postValue(response.getErrors().get(0).getMessage());
                 }
@@ -335,12 +325,11 @@ public class CheckOutRepository {
         ShippingAddressInput input = ShippingAddressInput.builder().customer_address_id(customer_address_id).build();
         List<ShippingAddressInput> list = new ArrayList<>();
         list.add(input);
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
 
-        SetShippingAddressesOnCartInput ab = SetShippingAddressesOnCartInput.builder().shipping_addresses(list).cart_id(cartPreference.GetCartId("cart_id")).build();
+        SetShippingAddressesOnCartInput ab = SetShippingAddressesOnCartInput.builder().shipping_addresses(list).cart_id(apolloClientClass.getCartId()).build();
 
-        (new ApolloClientClass()).apolloClient.mutate(new SetShippingMutation(ab)).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<SetShippingMutation.Data>() {
+        apolloClientClass.apolloClient.mutate(new SetShippingMutation(ab)).toBuilder().requestHeaders
+                (apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<SetShippingMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<SetShippingMutation.Data> response) {
                 if(!response.hasErrors())
@@ -370,15 +359,13 @@ public class CheckOutRepository {
     }
     public void SetShippingMethodOnCart(){
 
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
 
         List<ShippingMethodInput> list = new ArrayList<>();
         list.add(ShippingMethodInput.builder().method_code("flatrate").carrier_code("flatrate").build());
 
 
-        (new ApolloClientClass()).apolloClient.mutate(new SetShippingmethodOnCartMutation(cartPreference.GetCartId("cart_id"),list)).toBuilder()
-                .requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<SetShippingmethodOnCartMutation.Data>() {
+        apolloClientClass.apolloClient.mutate(new SetShippingmethodOnCartMutation(apolloClientClass.getCartId(),list)).toBuilder()
+                .requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<SetShippingmethodOnCartMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<SetShippingmethodOnCartMutation.Data> response) {
 
@@ -417,12 +404,8 @@ public class CheckOutRepository {
 
     public void SetPaymentMethodOnCart(String payment_method_code){
 
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
-
-
-        (new ApolloClientClass()).apolloClient.mutate(new SetPaymentMethodOnCartMutation(cartPreference.GetCartId("cart_id"), payment_method_code))
-                .toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<SetPaymentMethodOnCartMutation.Data>() {
+        apolloClientClass.apolloClient.mutate(new SetPaymentMethodOnCartMutation(apolloClientClass.getCartId(), payment_method_code))
+                .toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<SetPaymentMethodOnCartMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<SetPaymentMethodOnCartMutation.Data> response) {
                 if(!response.hasErrors())
@@ -447,13 +430,9 @@ public class CheckOutRepository {
 
     public void SetBillingAddress(CartAddressInput addressInput, int address_id, boolean same_as_shipping)
     {
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
-
-
-        (new ApolloClientClass()).apolloClient.mutate(new SetBillingAddresMutation(BillingAddressInput.builder()
-                .customer_address_id(address_id).build() , cartPreference.GetCartId("cart_id") )).toBuilder()
-                .requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<SetBillingAddresMutation.Data>() {
+        apolloClientClass.apolloClient.mutate(new SetBillingAddresMutation(BillingAddressInput.builder()
+                .customer_address_id(address_id).build() , apolloClientClass.getCartId())).toBuilder()
+                .requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<SetBillingAddresMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<SetBillingAddresMutation.Data> response) {
                 if(!response.hasErrors()){
@@ -477,15 +456,11 @@ public class CheckOutRepository {
     }
     public void ApplyDeliveryCart(String comments, String date, String timeslot)
     {
-        ApplyDeliveryCartInput applyDeliveryCartInput = ApplyDeliveryCartInput.builder().cart_id(cartPreference.GetCartId("cart_id")).shipping_arrival_comments(comments)
+        ApplyDeliveryCartInput applyDeliveryCartInput = ApplyDeliveryCartInput.builder().cart_id(apolloClientClass.getCartId()).shipping_arrival_comments(comments)
                 .shipping_arrival_date(date).shipping_arrival_timeslot(timeslot).build();
 
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
-
-
-        (new ApolloClientClass()).apolloClient.mutate(new ApplyDeliveryCartMutation(applyDeliveryCartInput)).toBuilder()
-                .requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<ApplyDeliveryCartMutation.Data>() {
+        apolloClientClass.apolloClient.mutate(new ApplyDeliveryCartMutation(applyDeliveryCartInput)).toBuilder()
+                .requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<ApplyDeliveryCartMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<ApplyDeliveryCartMutation.Data> response) {
                 if(response.hasErrors())
@@ -531,13 +506,10 @@ public class CheckOutRepository {
             }
         }
     }
-    public void GetCartDetail(){
-
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
-
-        (new ApolloClientClass()).apolloClient.query(new GetCartDetailsQuery(cartPreference.GetCartId("cart_id"))).
-                toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetCartDetailsQuery.Data>() {
+    public void GetCartDetail()
+    {
+       apolloClientClass.apolloClient.query(new GetCartDetailsQuery(apolloClientClass.getCartId())).
+                toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<GetCartDetailsQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetCartDetailsQuery.Data> response) {
                 String ab = "";
@@ -551,12 +523,8 @@ public class CheckOutRepository {
     }
     public void PlaceOrder()
     {
-//        TimeoutInstrumentation timeoutInstrumentation = new TimeoutInstrumentation();
-//        timeoutInstrumentation.
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
-
-        (new ApolloClientClass()).apolloClient.mutate(new PlaceOrderMutation(cartPreference.GetCartId("cart_id"))).toBuilder().requestHeaders(requestHeader.build())
+        apolloClientClass.apolloClient.mutate(new PlaceOrderMutation(apolloClientClass.getCartId())).
+                toBuilder().requestHeaders(apolloClientClass.getRequestHeader())
                 .build().enqueue(new ApolloCall.Callback<PlaceOrderMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<PlaceOrderMutation.Data> response) {
@@ -578,18 +546,6 @@ public class CheckOutRepository {
             public void onFailure(@NonNull ApolloException e) {
 
                 placeOrderResponseMessage.postValue(e.getCause().getMessage());
-
-//                String ab = "";
-////                PlaceOrder();
-//
-//                if(e.getCause().getLocalizedMessage().equals("timeout"))
-//                {
-//                    placeOrderResponseMessage.postValue(e.getCause().getMessage());
-////                    PlaceOrder();
-//                }
-//                else {
-//                    placeOrderResponseMessage.postValue("Place order failure");
-//                }
             }
         });
     }
@@ -651,13 +607,10 @@ public class CheckOutRepository {
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     public void abc(){
-//        TimeoutInstrumentation timeoutInstrumentation = new TimeoutInstrumentation();
-//        GraphQL.newGraphQL(GraphQLSchema.newSchema().build()).instrumentation(timeoutInstrumentation).build().execute()
 
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
-
-        (new ApolloClientClass()).getNewClient(loginPreference.GetLoginPreference("token")).mutate(new PlaceOrderMutation(cartPreference.GetCartId("cart_id"))).toBuilder().requestHeaders(requestHeader.build())
+        apolloClientClass.getNewClient(loginPreference.GetLoginPreference("token")).
+                mutate(new PlaceOrderMutation(apolloClientClass.getCartId())).toBuilder().
+                requestHeaders(apolloClientClass.getRequestHeader())
                 .build().enqueue(new ApolloCall.Callback<PlaceOrderMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<PlaceOrderMutation.Data> response) {

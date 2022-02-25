@@ -8,7 +8,6 @@ import com.apollographql.apollo.api.Input;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers;
-import com.apollographql.apollo.request.RequestHeaders;
 import com.codeseven.pos.ApolloClientClass;
 
 import java.util.ArrayList;
@@ -30,6 +29,7 @@ public class CatalogRepository {
     private MutableLiveData<List<ProductsFragment.Item>> productsFragment;
     private MutableLiveData<Integer> pageCount;
     private MutableLiveData<List<GetMegaMenuQuery.CategoryList>> categoryLists;
+    private ApolloClientClass apolloClientClass;
 
 
     public CatalogRepository() {
@@ -37,7 +37,7 @@ public class CatalogRepository {
         productsFragment = new MutableLiveData<>();
         pageCount = new MutableLiveData<>(0);
         categoryLists = new MutableLiveData<>();
-
+        apolloClientClass = new ApolloClientClass(true);
     }
 
     public void getCatalog(int currentPage, int pageSize, String category){
@@ -55,7 +55,7 @@ public class CatalogRepository {
                 ProductAttributeFilterInput.builder().category_id(FilterEqualTypeInput.builder().eq(category).build()).build()
                 , sortOption);
 
-        (new ApolloClientClass()).apolloClient.query(a).toBuilder().responseFetcher(ApolloResponseFetchers.CACHE_AND_NETWORK).build().watcher().enqueueAndWatch(new ApolloCall.Callback<GetProductsQuery.Data>() {
+        apolloClientClass.apolloClient.query(a).toBuilder().responseFetcher(ApolloResponseFetchers.CACHE_AND_NETWORK).build().watcher().enqueueAndWatch(new ApolloCall.Callback<GetProductsQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetProductsQuery.Data> response) {
                 if(response.hasErrors()) {
@@ -89,10 +89,10 @@ public class CatalogRepository {
     }
     public void getCaterogiesList(){
 
-        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-        requestHeader.addHeader("store","ur");
+//        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
+//        requestHeader.addHeader("store","ur");
 
-        (new ApolloClientClass()).apolloClient.query(new GetMegaMenuQuery()).toBuilder().requestHeaders(requestHeader.build()).build().enqueue(new ApolloCall.Callback<GetMegaMenuQuery.Data>() {
+        apolloClientClass.apolloClient.query(new GetMegaMenuQuery()).toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<GetMegaMenuQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetMegaMenuQuery.Data> response) {
                 String ab ="";

@@ -15,15 +15,17 @@ public class LoginRepository {
 
     private MutableLiveData<String> loginResponse;
     private LoginPreference loginPreference;
+    private ApolloClientClass apolloClientClass;
 
     public LoginRepository() {
         loginResponse = new MutableLiveData<>();
         loginPreference = new LoginPreference();
+        apolloClientClass = new ApolloClientClass();
     }
 
     public void generateCustomerTokenByPhone(String phoneNumber, String password)
     {
-        (new ApolloClientClass()).apolloClient.mutate(new GenerateCustomerTokenByPhoneMutation("waleed.umar@codeninja.pk",password, false)).enqueue(new ApolloCall.Callback<GenerateCustomerTokenByPhoneMutation.Data>() {
+        apolloClientClass.apolloClient.mutate(new GenerateCustomerTokenByPhoneMutation("waleed.umar@codeninja.pk",password, false)).enqueue(new ApolloCall.Callback<GenerateCustomerTokenByPhoneMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<GenerateCustomerTokenByPhoneMutation.Data> response) {
                if(response.getData().generateCustomerTokenByPhone()!= null)

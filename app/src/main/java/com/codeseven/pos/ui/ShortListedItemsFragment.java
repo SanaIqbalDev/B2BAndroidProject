@@ -142,6 +142,7 @@ public class ShortListedItemsFragment extends Fragment {
         addToCartObsrever.getRepositoryResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String s) {
+                if(s.length()>0)
                     Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
             }
         });
