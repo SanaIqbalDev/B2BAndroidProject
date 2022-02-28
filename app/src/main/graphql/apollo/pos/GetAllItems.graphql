@@ -1,0 +1,51 @@
+query GetAllItems(
+    $filters: ProductAttributeFilterInput!
+    $sort: ProductAttributeSortInput
+) {
+    products(
+        filter: $filters
+        sort: $sort
+    ) {
+        ...AllProductsFragment
+        __typename
+    }
+}
+fragment AllProductsFragment on Products {
+    items {
+        id
+        name
+
+        categories{
+            uid
+        }
+        rating_summary
+        description {
+            html
+        }price {
+            regularPrice {
+                amount {
+                    currency
+                    value
+                    __typename
+                }
+                __typename
+            }
+            __typename
+        }
+        special_price
+        sku
+        small_image {
+            url
+            __typename
+        }
+        url_key
+        url_suffix
+        __typename
+    }
+    page_info {
+        total_pages
+        __typename
+    }
+    total_count
+    __typename
+}

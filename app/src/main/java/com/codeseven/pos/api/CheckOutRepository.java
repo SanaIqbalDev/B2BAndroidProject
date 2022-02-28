@@ -8,12 +8,9 @@ import androidx.annotation.RequiresApi;
 import androidx.lifecycle.MutableLiveData;
 
 import com.apollographql.apollo.ApolloCall;
-import com.apollographql.apollo.api.Input;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
-import com.apollographql.apollo.request.RequestHeaders;
 import com.codeseven.pos.ApolloClientClass;
-import com.codeseven.pos.helper.TimeoutInstrumentation;
 import com.codeseven.pos.model.AddressItem;
 import com.codeseven.pos.util.CartPreference;
 import com.codeseven.pos.util.LoginPreference;
@@ -45,8 +42,6 @@ import apollo.pos.type.CartAddressInput;
 import apollo.pos.type.SetShippingAddressesOnCartInput;
 import apollo.pos.type.ShippingAddressInput;
 import apollo.pos.type.ShippingMethodInput;
-import graphql.GraphQL;
-import graphql.schema.GraphQLSchema;
 //import apollo.pos.type.ShippingMethodInput;
 
 public class CheckOutRepository {

@@ -683,7 +683,7 @@
                     android:padding="10dp"
                     android:layout_margin="5dp"
                     android:textColor="@color/black"
-                    app:layout_constraintTop_toBottomOf="@id/layout_payment"
+                    app:layout_constraintTop_toBottomOf="@+id/layout_payment"
                     />
                 <LinearLayout
                     android:visibility="gone"

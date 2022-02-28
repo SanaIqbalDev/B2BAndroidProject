@@ -99,6 +99,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
     String item_sku = "abcdef";
     private boolean shouldMakeCall = true;
 
+    CatalogRepository catalogRepository;
 
     @Inject
     public CatalogFragment() {
@@ -116,7 +117,11 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
 
         // Getting customer catalog...
         progressDialog.StartLoadingdialog();
-        catalogObserver.getUpdatedcatalog(currentPage,pageSize,selected_category);
+        catalogObserver.getAllCatalog(currentPage,pageSize,selected_category);
+
+//        catalogRepository = new CatalogRepository();
+//        catalogRepository.getAllItemsForCache();
+
         catalogObserver.GetCategoryList();
         totalPages= catalogObserver.getPageCount().getValue();
 
@@ -134,8 +139,6 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
 
 //        BaseActivity.setSupportActionBar(toolbar)
         setHasOptionsMenu(true);
-
-
     }
 
     @Override
@@ -158,7 +161,6 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
             public void onClick(View view) {
                 isCategoryMenu = true;
                 fragmentCatalogBinding.drawerLayout.open();
-
             }
         });
         fragmentCatalogBinding.topAppBar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
@@ -487,6 +489,17 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                         }
                     }
                 }}
+        });
+
+
+        catalogObserver.getIsTransactionComplete().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                if(true)
+                {
+                    progressDialog.dismissDialog();
+                }
+            }
         });
 
     }

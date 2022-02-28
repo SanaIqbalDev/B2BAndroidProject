@@ -3,16 +3,40 @@ package com.codeseven.pos.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.PrimaryKey;
 
+import org.jetbrains.annotations.NotNull;
+
+
+@Entity
 public class CatalogItem implements Parcelable {
 
+    @PrimaryKey
+    @NotNull
+    @ColumnInfo(name = "itemSku")
     private String itemSku;
+
+    @ColumnInfo(name = "itemName")
     private String itemName;
+
+    @ColumnInfo(name = "itemMinimalPrice")
     private String itemMinimalPrice;
+
+    @ColumnInfo(name = "itemRegularPrice")
     private String itemRegularPrice;
+
+    @ColumnInfo(name = "itemImage")
     private String itemImage;
+
+    @ColumnInfo(name = "itemDescription")
     private String itemDescription;
+
+    @ColumnInfo(name = "itemQuantity")
     private String itemQuantity;
+
+    @ColumnInfo(name = "itemUid")
     private String itemUid;
 
     public CatalogItem(String itemSku, String itemName, String itemMinimalPrice, String itemImage, String description) {
@@ -30,7 +54,17 @@ public class CatalogItem implements Parcelable {
         this.itemImage = itemImage;
         this.itemQuantity = quantity;
         this.itemUid = uid;
+    }
 
+    public CatalogItem(String itemSku, String itemName, String itemMinimalPrice, String itemRegularPrice, String itemImage, String itemDescription, String itemQuantity, String itemUid) {
+        this.itemSku = itemSku;
+        this.itemName = itemName;
+        this.itemMinimalPrice = itemMinimalPrice;
+        this.itemRegularPrice = itemRegularPrice;
+        this.itemImage = itemImage;
+        this.itemDescription = itemDescription;
+        this.itemQuantity = itemQuantity;
+        this.itemUid = itemUid;
     }
 
     protected CatalogItem(Parcel in) {

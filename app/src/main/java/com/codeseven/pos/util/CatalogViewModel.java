@@ -39,6 +39,8 @@ public class CatalogViewModel extends ViewModel {
         private String responseMessage;
         private MutableLiveData<Integer> pageCount;
         private MutableLiveData<List<GetMegaMenuQuery.CategoryList>> categoryLists;
+        private MutableLiveData<Boolean> isTransactionComplete;
+
 
 
         @Inject
@@ -50,11 +52,16 @@ public class CatalogViewModel extends ViewModel {
             pageCount = catalogRepository.getPageCount();
             responseMessage = catalogRepository.getMessage();
             categoryLists = catalogRepository.getCategoryList();
+            isTransactionComplete = catalogRepository.getIsTransactionComplete();
         }
 
         public void getUpdatedcatalog(int currentPage, int pageSize, String category)
         {
             catalogRepository.getCatalog(currentPage,pageSize, category);
+        }
+        public void getAllCatalog(int currentPage, int pageSize, String category)
+        {
+            catalogRepository.getAllCatalog(currentPage,pageSize, category);
         }
 
 
@@ -82,6 +89,10 @@ public class CatalogViewModel extends ViewModel {
 
         public MutableLiveData<List<GetMegaMenuQuery.CategoryList>> getCategoryLists() {
             return categoryLists;
+        }
+
+        public MutableLiveData<Boolean> getIsTransactionComplete() {
+            return isTransactionComplete;
         }
     }
 }

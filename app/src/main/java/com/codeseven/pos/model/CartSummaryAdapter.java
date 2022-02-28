@@ -39,7 +39,7 @@ public class CartSummaryAdapter  extends RecyclerView.Adapter<CartSummaryAdapter
         holder.binding.tvItemName.setText(cartItem.getItemName());
         holder.binding.tvItemPrice.setText(context.getResources().getString(R.string.pkr) + cartItem.getItemMinimalPrice());
         Picasso.get().load(cartItem.getItemImage()).into(holder.binding.ivItemImage);
-
+        Picasso.get().load(cartItem.getItemImage());
     }
 
     @Override
