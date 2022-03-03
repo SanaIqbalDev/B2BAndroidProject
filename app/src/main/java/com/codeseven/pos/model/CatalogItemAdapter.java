@@ -45,6 +45,8 @@ public class CatalogItemAdapter extends RecyclerView.Adapter<CatalogItemAdapter.
         CatalogItem catalogItem = catalogItemsArrayList.get(position);
         holder.cardviewItemsBinding.tvProductName.setText(catalogItem.getItemName());
         holder.cardviewItemsBinding.tvProductPrice.setText(catalogItem.getItemMinimalPrice());
+//        Picasso.Builder p = new Picasso.Builder(context);
+//        p.build();
         Picasso.get().load(catalogItem.getItemImage()).into(holder.cardviewItemsBinding.ivProductImage);
 
         holder.bind(catalogItemsArrayList.get(position), onItemClickListenerThis);

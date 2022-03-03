@@ -10,6 +10,7 @@
 <FrameLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layoutDirection="rtl"
     tools:context="com.codeseven.pos.ui.CatalogFragment">
 
     <androidx.drawerlayout.widget.DrawerLayout
@@ -34,7 +35,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:menu="@menu/search_menu_catalog"
-                app:navigationIcon="@drawable/ic_navigation_small"
+                app:navigationIcon="@drawable/ic_navigation_24"
                 android:gravity="center_vertical"
                 >
 
@@ -142,7 +143,7 @@
             android:id="@+id/expandableListView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="200dp"
+            android:layout_marginTop="170dp"
             android:background="@android:color/white"
             android:dividerHeight="0dp"
             android:groupIndicator="@null"/>

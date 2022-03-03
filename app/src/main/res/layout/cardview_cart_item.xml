@@ -12,6 +12,7 @@
     app:cardCornerRadius="3dp"
     app:cardElevation="1dp"
     app:cardMaxElevation="1dp"
+    android:layoutDirection="rtl"
     android:layout_marginBottom="5dp"
     app:cardPreventCornerOverlap="true"
     app:cardUseCompatPadding="true"
@@ -51,7 +52,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:textAppearance="?attr/textAppearanceHeadline6"
-                    android:gravity="left|center_vertical"
+                    android:gravity="right|center_vertical"
                     android:singleLine="false"
                     android:scrollbars="vertical"
                     android:textSize="16sp"
@@ -65,7 +66,7 @@
                     android:textAppearance="?attr/textAppearanceBody2"
                     android:textColor="@color/primaryColor"
                     android:layout_marginTop="5dp"
-                    android:gravity="center_vertical|left"
+                    android:gravity="center_vertical|right"
                     android:textSize="14sp"
                     android:text="@string/product_subtitle_temp"/>
 

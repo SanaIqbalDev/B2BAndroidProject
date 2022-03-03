@@ -12,7 +12,9 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:layoutDirection="rtl"
+        >
 
 
         <com.google.android.material.appbar.AppBarLayout
@@ -25,10 +27,8 @@
                 android:id="@+id/checkout_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:navigationIcon="@drawable/ic_navigation_back_small"
-                android:background="@color/primaryDarkColor"
-                app:title="CHECKOUT"
-                app:titleTextColor="@color/white"
+                app:navigationIcon="@drawable/ic_arrow_right_24"
+                app:title="@string/checkout"
                 android:gravity="center_vertical"/>
         </com.google.android.material.appbar.AppBarLayout>
         <androidx.core.widget.NestedScrollView

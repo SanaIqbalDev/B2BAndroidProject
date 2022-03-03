@@ -9,6 +9,8 @@
 <FrameLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layoutDirection="rtl"
+
     tools:context=".ui.AudioRecordingFragment">
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
@@ -20,8 +22,8 @@
             android:id="@+id/audio_toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            app:navigationIcon="@drawable/ic_navigation_back_small"
-            android:background="@color/primaryDarkColor"
+            app:navigationIcon="@drawable/ic_arrow_right_24"
+            app:title="@string/record_audio_title"
             android:gravity="center_vertical"/>
     </com.google.android.material.appbar.AppBarLayout>
 

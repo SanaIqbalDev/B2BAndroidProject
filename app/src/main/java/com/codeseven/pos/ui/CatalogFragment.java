@@ -124,10 +124,13 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
         getMoreProducts = true;
 
         // Getting customer catalog...
-        progressDialog.StartLoadingdialog();
         if(loginPreference.GetFirstTimePreference()){
+            progressDialog.StartCachingDialog();
 //            loginPreference.IsFirstTimePreference(false);
-
+        }
+        else
+        {
+            progressDialog.StartLoadingdialog();
         }
 
         catalogObserver.getAllCatalog(currentPage,pageSize,selected_category);

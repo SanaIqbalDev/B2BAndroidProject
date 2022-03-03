@@ -19,10 +19,11 @@
         android:id="@+id/message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="@string/please_wait_for_cache"
+        android:text="@string/please_wait_data_is_being_cached"
         android:textSize="18sp"
         android:textColor="@color/black"
         android:singleLine="false"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
