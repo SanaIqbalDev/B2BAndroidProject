@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.codeseven.pos.api.CatalogRepository;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.inject.Inject;
@@ -40,6 +41,9 @@ public class CatalogViewModel extends ViewModel {
         private MutableLiveData<Integer> pageCount;
         private MutableLiveData<List<GetMegaMenuQuery.CategoryList>> categoryLists;
         private MutableLiveData<Boolean> isTransactionComplete;
+        private MutableLiveData<Boolean> isDefCatCacheComplete;
+
+        private MutableLiveData<Integer> isCategoryTransactionComplete;
 
 
 
@@ -53,6 +57,8 @@ public class CatalogViewModel extends ViewModel {
             responseMessage = catalogRepository.getMessage();
             categoryLists = catalogRepository.getCategoryList();
             isTransactionComplete = catalogRepository.getIsTransactionComplete();
+            isDefCatCacheComplete = catalogRepository.getIsDefCatCacheComplete();
+            isCategoryTransactionComplete = catalogRepository.getIsCurrentCategoryComplete();
         }
 
         public void getUpdatedcatalog(int currentPage, int pageSize, String category)
@@ -61,10 +67,18 @@ public class CatalogViewModel extends ViewModel {
         }
         public void getAllCatalog(int currentPage, int pageSize, String category)
         {
-            catalogRepository.getAllCatalog(currentPage,pageSize, category);
+            catalogRepository.CacheAllCatalog(currentPage,pageSize, category);
+        }
+        public void collectAllCategoriesData(String category_id ,int index){
+
+                catalogRepository.CacheThisCategoryData(category_id, index);
         }
 
 
+        public void GetPageSizeOfCategory(String category){
+            catalogRepository.GetPageSizeofCategory(category);
+
+        }
         public MutableLiveData<List<ProductsFragment.Item>> getProductFragments()
         {
             return productsList;
@@ -93,6 +107,14 @@ public class CatalogViewModel extends ViewModel {
 
         public MutableLiveData<Boolean> getIsTransactionComplete() {
             return isTransactionComplete;
+        }
+
+        public MutableLiveData<Integer> getIsCategoryTransactionComplete() {
+            return isCategoryTransactionComplete;
+        }
+
+        public MutableLiveData<Boolean> getIsDefCatCacheComplete() {
+            return isDefCatCacheComplete;
         }
     }
 }

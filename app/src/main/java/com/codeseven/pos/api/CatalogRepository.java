@@ -10,14 +10,19 @@ import com.apollographql.apollo.api.Input;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers;
+import com.apollographql.apollo.request.RequestHeaders;
 import com.codeseven.pos.ApolloClientClass;
+import com.codeseven.pos.MainApplication;
+import com.codeseven.pos.util.LoginPreference;
 import com.squareup.picasso.Picasso;
+import com.squareup.picasso.StatsSnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import apollo.pos.GetAllItemsQuery;
 import apollo.pos.GetMegaMenuQuery;
+import apollo.pos.GetPageSizeQuery;
 import apollo.pos.GetProductsQuery;
 import apollo.pos.fragment.ProductsFragment;
 import apollo.pos.type.FilterEqualTypeInput;
@@ -35,20 +40,37 @@ public class CatalogRepository {
     private MutableLiveData<List<GetMegaMenuQuery.CategoryList>> categoryLists;
     private ApolloClientClass apolloClientClass;
     private MutableLiveData<Boolean> isTransactionComplete;
-    int currentUnit = 0;
+    private MutableLiveData<Boolean> isDefCatCacheComplete;
+    private MutableLiveData<Integer> isCurrentCategoryComplete;
 
+    int currentUnit = 0;
+    private ArrayList<String> allCategories = new ArrayList<>();
+    private int allCategoriesIndexCurrent = 0;
+    private int currentCategoryPageCount = 1;
+    private int currentCategoryCurrentPage = 1;
+
+    private LoginPreference loginPreference;
 
     public CatalogRepository() {
         CatalogRequestResponse = new MutableLiveData<>("");
         isTransactionComplete = new MutableLiveData<>();
         isTransactionComplete.postValue(false);
+
+        isDefCatCacheComplete = new MutableLiveData<>();
+        isDefCatCacheComplete.postValue(false);
+
+        isCurrentCategoryComplete = new MutableLiveData<>();
+        isCurrentCategoryComplete.postValue(0);
+
         productsFragment = new MutableLiveData<>();
         pageCount = new MutableLiveData<>(0);
         categoryLists = new MutableLiveData<>();
         apolloClientClass = new ApolloClientClass(true);
+
+        loginPreference = new LoginPreference();
     }
 
-    public void getAllCatalog(int currentPage, int pageSize, String category){
+    public void CacheAllCatalog(int currentPage, int pageSize, String category){
 
 
         currentUnit = currentPage;
@@ -70,7 +92,8 @@ public class CatalogRepository {
             public void onResponse(@NonNull Response<GetProductsQuery.Data> response) {
                 if(response.hasErrors()) {
                     if (response.getErrors().size() > 0)
-                        CatalogRequestResponse.postValue(response.getErrors().get(0).getMessage());
+                        if(!response.getErrors().get(0).getMessage().contains("specified is greater than the"))
+                            CatalogRequestResponse.postValue(response.getErrors().get(0).getMessage());
                 }
                 else
                 {
@@ -89,28 +112,35 @@ public class CatalogRepository {
                         int len = response.getData().products().fragments().productsFragment().items().size();
                         for(int i=0;i<len; i++){
 
-                            Picasso.get().load(response.getData().products().fragments().productsFragment().items().get(i).small_image().url());
+                                Picasso.get().
+                                        load(response.getData().products().fragments().productsFragment().
+                                                items().get(i).small_image().url())
+                                    .fetch();
+
                         }
                     }
 
-                    if(currentUnit<= pageCount.getValue()){
-                        currentUnit++;
-                        getAllCatalog(currentUnit,pageSize,category);
-                        if(currentUnit==pageCount.getValue()){
+                    if(loginPreference.GetFirstTimePreference()) {
+                        Log.d("cache All Category ", String.valueOf(currentUnit));
+                        if (currentUnit <= pageCount.getValue()) {
                             currentUnit++;
-                            isTransactionComplete.postValue(true);
+                            CacheAllCatalog(currentUnit, pageSize, category);
+                            if(currentUnit == 200){
+                                String ab = "";
+                            }
+                            if (pageCount.getValue().equals(currentUnit)) {
+                                Log.d("cache All complete", String.valueOf(currentUnit));
+
+                                isDefCatCacheComplete.postValue(true);
+//                            apolloClientClass.apolloClient.getApolloStore();
+//                                isTransactionComplete.postValue(true);
+                            }
                         }
                     }
-                    else{
-
+                    else {
+                        isDefCatCacheComplete.postValue(true);
                     }
-
-                    Log.d("count", String.valueOf(currentUnit));
-
-
                 }
-
-
             }
 
             @Override
@@ -121,6 +151,203 @@ public class CatalogRepository {
             }
         });
     }
+
+    public void CacheAllCategoriesData(ArrayList<String> categories) {
+
+        allCategories = categories;
+
+        ArrayList<String> category = new ArrayList<>();
+        if (allCategoriesIndexCurrent < allCategories.size())
+            category.add(allCategories.get(allCategoriesIndexCurrent));
+
+
+        SortEnum sortOrder = SortEnum.safeValueOf("ASC");
+        Input<SortEnum> sortOrderInput = new Input<>(sortOrder, true);
+        Input<ProductAttributeSortInput> sortOption = new Input<>(ProductAttributeSortInput.builder().positionInput(sortOrderInput).build(), true);
+
+        GetProductsQuery a = new GetProductsQuery(12, currentCategoryCurrentPage,
+                ProductAttributeFilterInput.builder().category_id(FilterEqualTypeInput.builder().eq(String.valueOf(allCategories.get(allCategoriesIndexCurrent))).build()).build()
+                , sortOption);
+
+            apolloClientClass.apolloClient.query(a).toBuilder().responseFetcher(ApolloResponseFetchers.CACHE_FIRST).build().watcher().enqueueAndWatch(new ApolloCall.Callback<GetProductsQuery.Data>() {
+                @Override
+                public void onResponse(@NonNull Response<GetProductsQuery.Data> response) {
+                    if (response.hasErrors()) {
+                        if (response.getErrors().size() > 0)
+                            CatalogRequestResponse.postValue(response.getErrors().get(0).getMessage());
+                        Log.d("cache error response", response.getErrors().get(0).getMessage());
+                        String res = response.getErrors().get(0).getMessage();
+//                    if(res.contains("specified is greater than the")){
+//                        currentCategoryCurrentPage = 1;
+//                        allCategoriesIndexCurrent++;
+//                        CacheAllCategoriesData(allCategories);
+//                    }
+
+                    } else {
+                        if (currentCategoryCurrentPage == 1) {
+                            try {
+                                if (response.getData().products().fragments().productsFragment().page_info().total_pages() != null) {
+
+                                    currentCategoryPageCount = response.getData().products().fragments().productsFragment().page_info().total_pages();
+                                    Log.d("cache page_count", String.valueOf(currentCategoryPageCount));
+
+
+                                }
+                            } catch (NullPointerException nullPointerException) {
+                            }
+                        } else {
+                            int len = response.getData().products().fragments().productsFragment().items().size();
+                            for (int i = 0; i < len; i++) {
+
+//                                Picasso.get().load(response.getData().products().fragments().productsFragment().items().get(i).small_image().url()).fetch();
+
+                            }
+                        }
+
+                        if (currentCategoryCurrentPage < currentCategoryPageCount) {
+                            currentCategoryCurrentPage++;
+                        }
+                        if (currentCategoryCurrentPage >= currentCategoryPageCount) {
+
+                            Log.d("cache category", String.valueOf(allCategories.get(allCategoriesIndexCurrent)));
+                            Log.d("cache pages", String.valueOf(currentCategoryCurrentPage));
+
+                            currentCategoryCurrentPage = 1;
+                            allCategoriesIndexCurrent++;
+                        }
+
+
+                        CacheAllCategoriesData(allCategories);
+
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull ApolloException e) {
+                    message = e.getMessage();
+                    CatalogRequestResponse.postValue(e.getLocalizedMessage());
+
+                }
+            });
+
+    }
+
+    public void CacheThisCategoryData(String category, int index) {
+
+        SortEnum sortOrder = SortEnum.safeValueOf("ASC");
+        Input<SortEnum> sortOrderInput = new Input<>(sortOrder, true);
+        Input<ProductAttributeSortInput> sortOption = new Input<>(ProductAttributeSortInput.builder().positionInput(sortOrderInput).build(), true);
+
+        if (currentCategoryCurrentPage <= currentCategoryPageCount) {
+            GetProductsQuery a = new GetProductsQuery(12, index,
+                    ProductAttributeFilterInput.builder().category_id(FilterEqualTypeInput.builder().eq(category).build()).build()
+                    , sortOption);
+            Log.d("cache", category+"     "+index);
+
+            apolloClientClass.apolloClient.query(a).toBuilder().responseFetcher(ApolloResponseFetchers.CACHE_FIRST).build().watcher().enqueueAndWatch(new ApolloCall.Callback<GetProductsQuery.Data>() {
+                @Override
+                public void onResponse(@NonNull Response<GetProductsQuery.Data> response) {
+                    Log.d("response", category+"     "+index);
+
+                    if (response.hasErrors()) {
+                        if (response.getErrors().size() > 0)
+                            CatalogRequestResponse.postValue(response.getErrors().get(0).getMessage());
+                    } else {
+
+//                        Log.d("cache", category+"     "+index);
+                        int len = response.getData().products().fragments().productsFragment().items().size();
+                        for (int i = 0; i < len; i++) {
+
+//                            Picasso.get().load(response.getData().products().fragments().productsFragment().items().get(i).small_image().url()).fetch();
+
+                        }
+                        if(loginPreference.GetCategoryLastItem().equals(category)  &&  loginPreference.GetLastpageItemCount()==index){
+
+                            isTransactionComplete.postValue(true);
+                        }
+
+
+//                        if (currentCategoryCurrentPage == 1) {
+//                            try {
+//                                if (response.getData().products().fragments().productsFragment().page_info().total_pages() != null) {
+//                                    currentCategoryPageCount = (response.getData().products().fragments().productsFragment().page_info().total_pages());
+//                                }
+////                                int len = response.getData().products().fragments().productsFragment().items().size();
+////                                for (int i = 0; i < len; i++) {
+////
+////                                    Picasso.get().load(response.getData().products().fragments().productsFragment().items().get(i).small_image().url()).fetch();
+////
+////                                }
+//                            } catch (NullPointerException nullPointerException) {
+//                            }
+//                        }
+
+//                        if (currentCategoryCurrentPage < currentCategoryPageCount) {
+//                            currentCategoryCurrentPage++;
+//                            CacheThisCategoryData(category, index);
+//
+//                        }
+//                        if (currentCategoryCurrentPage >= currentCategoryPageCount) {
+//
+//                            Log.d("cache pages", String.valueOf(currentCategoryPageCount));
+//                            currentCategoryCurrentPage = 1;
+//
+//                            isCurrentCategoryComplete.postValue(index);
+//                        }
+//
+//
+//
+
+                    }
+                }
+
+                @Override
+                public void onFailure(@NonNull ApolloException e) {
+                    message = e.getMessage();
+                    CatalogRequestResponse.postValue(e.getLocalizedMessage());
+
+                }
+            });
+        }
+    }
+
+
+    public void GetPageSizeofCategory(String category){
+
+        GetPageSizeQuery query = new GetPageSizeQuery(12,
+                ProductAttributeFilterInput.builder().category_id(FilterEqualTypeInput.builder().eq(category).build()).build());
+
+        apolloClientClass.apolloClient.query(query).toBuilder().responseFetcher(ApolloResponseFetchers.CACHE_FIRST)
+                .build().watcher().enqueueAndWatch(new ApolloCall.Callback<GetPageSizeQuery.Data>() {
+            @Override
+            public void onResponse(@NonNull Response<GetPageSizeQuery.Data> response) {
+
+                if(response.hasErrors())
+                {
+                    Log.d("cache","Get page size error");
+
+                }
+                else {
+                    int pageCount =  response.getData().products().fragments().pageFragment().page_info().total_pages().intValue();
+                    String isLastCategory = loginPreference.GetCategoryLastItem();
+
+                    if(category.equals(isLastCategory)){
+                        loginPreference.setLastPageItemsCount(pageCount);
+                    }
+                    for(int a= 1; a<=pageCount ; a++){
+                        CacheThisCategoryData(category, (a));
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull ApolloException e) {
+
+            }
+        });
+    }
+
+
 
 
     public void getCatalog(int currentPage, int pageSize, String category){
@@ -172,20 +399,24 @@ public class CatalogRepository {
     }
     public void getCaterogiesList(){
 
-//        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
-//        requestHeader.addHeader("store","ur");
+        RequestHeaders.Builder requestHeader = RequestHeaders.builder();
+//        requestHeader.addHeader("authorization","bearer "+loginPreference.GetLoginPreference("token"));
+        requestHeader.addHeader("store","ur");
 
-        apolloClientClass.apolloClient.query(new GetMegaMenuQuery()).toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<GetMegaMenuQuery.Data>() {
+        apolloClientClass.apolloClient.query(new GetMegaMenuQuery()).toBuilder().requestHeaders(RequestHeaders.builder().build()).build().enqueue(new ApolloCall.Callback<GetMegaMenuQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetMegaMenuQuery.Data> response) {
                 String ab ="";
                 if(response.hasErrors())
                 {
+                    Log.d("cache","Category List error");
                     if(response.getErrors().get(0)!=null)
                         CatalogRequestResponse.postValue(response.getErrors().get(0).getMessage());
                 }
                 else
                 {
+                    Log.d("cache","Category List recieved");
+
                     categoryLists.postValue(response.getData().categoryList());
                 }
             }
@@ -193,6 +424,7 @@ public class CatalogRepository {
             @Override
             public void onFailure(@NonNull ApolloException e) {
                 String ab ="";
+                Log.d("cache","Category List error" + e.getMessage());
                 CatalogRequestResponse.postValue(e.getMessage());
             }
         });
@@ -216,7 +448,7 @@ public class CatalogRepository {
                 , sortOption);
 
         apolloClientClass.apolloClient.query(a).toBuilder().
-                responseFetcher(ApolloResponseFetchers.CACHE_AND_NETWORK).build().watcher().
+                responseFetcher(ApolloResponseFetchers.CACHE_FIRST).build().watcher().
                 enqueueAndWatch(new ApolloCall.Callback<GetAllItemsQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetAllItemsQuery.Data> response) {
@@ -252,5 +484,13 @@ public class CatalogRepository {
 
     public MutableLiveData<Boolean> getIsTransactionComplete() {
         return isTransactionComplete;
+    }
+
+    public MutableLiveData<Integer> getIsCurrentCategoryComplete() {
+        return isCurrentCategoryComplete;
+    }
+
+    public MutableLiveData<Boolean> getIsDefCatCacheComplete() {
+        return isDefCatCacheComplete;
     }
 }

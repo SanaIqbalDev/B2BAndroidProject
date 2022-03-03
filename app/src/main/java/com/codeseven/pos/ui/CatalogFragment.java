@@ -32,6 +32,7 @@ import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
+import com.codeseven.pos.ApolloClientClass;
 import com.codeseven.pos.R;
 import com.codeseven.pos.api.CatalogRepository;
 import com.codeseven.pos.databinding.FragmentCatalogBinding;
@@ -44,6 +45,7 @@ import com.codeseven.pos.util.CartViewModel;
 import com.codeseven.pos.util.CatalogViewModel;
 import com.codeseven.pos.util.GetProductByNameViewModel;
 import com.codeseven.pos.util.ItemClickListener;
+import com.codeseven.pos.util.LoginPreference;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
@@ -99,8 +101,13 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
     String item_sku = "abcdef";
     private boolean shouldMakeCall = true;
 
-    CatalogRepository catalogRepository;
+    private ArrayList<String> categoryIdList = new ArrayList<>();
+    private int current_category_id = 0;
 
+    CatalogRepository catalogRepository;
+    private boolean CacheComplete = false;
+
+    LoginPreference loginPreference ;
     @Inject
     public CatalogFragment() {
         // Required empty public constructor
@@ -112,22 +119,28 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
 
         progressDialog= new ProgressDialog(requireActivity());
         catalogViewModel = new ViewModelProvider(this).get(CatalogViewModel.class);
+        loginPreference = new LoginPreference();
 
         getMoreProducts = true;
 
         // Getting customer catalog...
         progressDialog.StartLoadingdialog();
+        if(loginPreference.GetFirstTimePreference()){
+//            loginPreference.IsFirstTimePreference(false);
+
+        }
+
         catalogObserver.getAllCatalog(currentPage,pageSize,selected_category);
 
 //        catalogRepository = new CatalogRepository();
 //        catalogRepository.getAllItemsForCache();
 
-        catalogObserver.GetCategoryList();
         totalPages= catalogObserver.getPageCount().getValue();
 
 
         //Getting customer cart...
         cartPreference = new CartPreference();
+
         cartViewModel = new ViewModelProvider(requireActivity()).get(CartViewModel.class);
         customerCartId = cartPreference.GetCartId("cart_id");
         if(customerCartId.equals(""))
@@ -245,7 +258,9 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                     catalogItemAdapter.notifyDataSetChanged();
                 }
                 if(getMoreProducts == true || updateProducts) {
-                    progressDialog.dismissDialog();
+                    if(!loginPreference.GetFirstTimePreference()){
+                        progressDialog.dismissDialog();
+                    }
                     fragmentCatalogBinding.btnRefresh.setVisibility(View.GONE);
                     fragmentCatalogBinding.loadingProgressbar.setVisibility(View.GONE);
                     dataFound = true;
@@ -309,7 +324,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                                  catalogObserver.getUpdatedcatalog(currentPage, pageSize, selected_category);
                                  shouldMakeCall = false;
                              } else {
-                                 progressDialog.dismissDialog();
+                                     progressDialog.dismissDialog();
                                  fragmentCatalogBinding.loadingProgressbar.setVisibility(View.GONE);
                                  Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.no_more_data_available), Toast.LENGTH_LONG).show();
                              }
@@ -339,13 +354,9 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
             @Override
             public void onClick(View view) {
                 progressDialog.StartLoadingdialog();
+                catalogObserver.getAllCatalog(currentPage,pageSize, selected_category);
 
-                catalogObserver.getUpdatedcatalog(currentPage,pageSize, selected_category);
-
-//                headerList = new ArrayList<>();
-//                childList = new HashMap<>();
-//
-                catalogObserver.GetCategoryList();
+//                catalogObserver.GetCategoryList();
 
             }
         });
@@ -474,7 +485,8 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                     {
                         if (s.length() > 0) {
 
-                            progressDialog.dismissDialog();
+                            if(CacheComplete)
+                                progressDialog.dismissDialog();
                             fragmentCatalogBinding.btnRefresh.setVisibility(View.VISIBLE);
                             fragmentCatalogBinding.loadingProgressbar.setVisibility(View.GONE);
 
@@ -488,20 +500,43 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                             }
                         }
                     }
-                }}
-        });
+                }
+                else if(!loginPreference.GetFirstTimePreference())
+                    progressDialog.dismissDialog();
 
+            }
+        });
+        catalogObserver.getIsDefCatCacheComplete().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
+            @Override
+            public void onChanged(Boolean aBoolean) {
+                if (aBoolean){
+                    catalogObserver.GetCategoryList();
+
+                }
+            }
+        });
 
         catalogObserver.getIsTransactionComplete().observe(getViewLifecycleOwner(), new Observer<Boolean>() {
             @Override
             public void onChanged(Boolean aBoolean) {
-                if(true)
+                if(aBoolean)
                 {
+                    CacheComplete = true;
                     progressDialog.dismissDialog();
                 }
             }
         });
 
+        catalogObserver.getIsCategoryTransactionComplete().observe(getViewLifecycleOwner(), new Observer<Integer>() {
+            @Override
+            public void onChanged(Integer integer) {
+                Log.d("integer value", String.valueOf(integer));
+                integer++;
+                if (categoryIdList.size() > integer)
+                    catalogObserver.collectAllCategoriesData(categoryIdList.get(integer), integer);
+            }
+        }
+        );
     }
 
     private void SearchApiCall(String queryText) {
@@ -609,6 +644,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
         boolean has_children,is_group;
         NavMenuItem menuModel = new NavMenuItem("تمام مصنوعات","2",false,false,""); //Menu of Android Tutorial. No sub menus
         headerList.add(menuModel);
+//        categoryIdList.add("2");
         for(int i=0;i<categoryList.get(0).children().size();i++){
             GetMegaMenuQuery.Child child = categoryList.get(0).children().get(i);
             menu_name = child.name();
@@ -621,6 +657,8 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
             menuModel = new NavMenuItem(menu_name,category_id,has_children,is_group, "https://mcstaging.24seven.pk"+child.thumbnail());
             if(child.include_in_menu()==1) {
                 headerList.add(menuModel);
+                categoryIdList.add(category_id);
+
 
                 if (menuModel.hasChildren) {
                     for (int x = 0; x < children_size; x++) {
@@ -636,6 +674,8 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                         if(a.include_in_menu() == 1)
                         {
                             childModelsList.add(childModel);
+                            categoryIdList.add(category_id);
+
                         }
                     }
                     childList.put(menuModel, childModelsList);
@@ -646,6 +686,21 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
 
             }
 
+        }
+
+
+
+//        catalogObserver.collectAllCategoriesData(categoryIdList.get(0), 0);
+
+        if(loginPreference.GetFirstTimePreference()) {
+
+            loginPreference.SetCategoryLastItem(categoryIdList.get(categoryIdList.size()-1));
+
+            for (int b = 0; b < categoryIdList.size(); b++) {
+                catalogObserver.GetPageSizeOfCategory(categoryIdList.get(b));
+            }
+
+            loginPreference.IsFirstTimePreference(false);
         }
     }
 
@@ -658,9 +713,6 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
 
-//                if (headerList.get(groupPosition).isGroup) {
-//                    if (!headerList.get(groupPosition).hasChildren) {
-//                    }
                 if(selected_category == headerList.get(groupPosition).category_id)
                 {
                     fragmentCatalogBinding.drawerLayout.close();
@@ -668,7 +720,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                 else {
                     selected_category = headerList.get(groupPosition).category_id;
                     currentPage = 1;
-//                    Toast.makeText(requireContext(), "Group clicked", Toast.LENGTH_LONG).show();
+
                     if (!headerList.get(groupPosition).hasChildren) {
                         fragmentCatalogBinding.drawerLayout.close();
                         updateProducts = true;
@@ -681,7 +733,6 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                     }
 
                 }
-//                }
 
                 return false;
             }

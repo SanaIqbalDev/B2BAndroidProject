@@ -21,6 +21,7 @@ import com.codeseven.pos.R;
 import com.codeseven.pos.databinding.FragmentProductDetailBinding;
 import com.codeseven.pos.model.CatalogItem;
 import com.codeseven.pos.util.AddToCartViewModel;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import javax.inject.Inject;

@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.codeseven.pos.R;
 import com.codeseven.pos.databinding.CardviewProductSelectionItemBinding;
 import com.codeseven.pos.util.ProductSelectionListener;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;

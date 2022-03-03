@@ -1,0 +1,16 @@
+query GetPageSize(
+    $pageSize: Int!
+    $filters: ProductAttributeFilterInput!
+) {
+    products(pageSize: $pageSize,filter: $filters
+    ) {
+        ...PageFragment
+        __typename
+    }
+}
+fragment PageFragment on Products {
+    page_info {
+        total_pages
+        __typename
+    }
+}

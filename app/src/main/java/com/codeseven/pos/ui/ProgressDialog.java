@@ -32,6 +32,20 @@ public class ProgressDialog {
 
         alertDialog.show();
     }
+
+    void StartCachingDialog(){
+        AlertDialog.Builder  builder = new AlertDialog.Builder(activity);
+
+        LayoutInflater inflater = activity.getLayoutInflater();
+        builder.setView(inflater.inflate(R.layout.loading_cache_dialog,null));
+        builder.setCancelable(true);
+
+        alertDialog = builder.create();
+        alertDialog.setCancelable(false);
+
+        alertDialog.show();
+
+    }
     void setDialogMessage(String message)
     {
         alertDialog.setMessage(message);

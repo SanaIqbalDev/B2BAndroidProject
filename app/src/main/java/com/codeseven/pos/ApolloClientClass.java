@@ -9,6 +9,7 @@ import com.apollographql.apollo.cache.normalized.NormalizedCacheFactory;
 import com.apollographql.apollo.cache.normalized.lru.EvictionPolicy;
 import com.apollographql.apollo.cache.normalized.lru.LruNormalizedCacheFactory;
 import com.apollographql.apollo.cache.normalized.sql.SqlNormalizedCacheFactory;
+import com.apollographql.apollo.internal.batch.BatchConfig;
 import com.apollographql.apollo.request.RequestHeaders;
 import com.codeseven.pos.util.CartPreference;
 import com.codeseven.pos.util.LoginPreference;
@@ -54,10 +55,14 @@ public class ApolloClientClass {
 
         NormalizedCacheFactory sqlCacheFactory = new SqlNormalizedCacheFactory(MainApplication.getContext(), "24_seven");
 
+        BatchConfig batchConfig = new BatchConfig();
+        batchConfig.copy(true,50,10);
+
         apolloClient= ApolloClient.builder().
                 serverUrl("https://mcstaging.24seven.pk/graphql").
                 okHttpClient(okHttpClient).
                 normalizedCache(sqlCacheFactory).
+                batchingConfiguration(batchConfig).
                 build();
 
         loginPreference = new LoginPreference();
