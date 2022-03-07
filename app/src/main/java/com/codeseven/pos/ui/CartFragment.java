@@ -318,8 +318,8 @@ public class CartFragment extends Fragment {
         est_total = sub_total+50;
 
         saved_total = saved_total - ((regular_price-price)*quantity);
-        fragmentCartBinding.tvSubtotalValue.setText(requireContext().getResources().getString(R.string.pkr) + String.format("%.2f", sub_total));
-        fragmentCartBinding.tvEstimatedTotalValue.setText(requireContext().getResources().getString(R.string.pkr) +  String.format("%.2f", est_total));
+        fragmentCartBinding.tvSubtotalValue.setText(String.format("%.2f", sub_total) +" "+ requireContext().getResources().getString(R.string.pkr));
+        fragmentCartBinding.tvEstimatedTotalValue.setText(String.format("%.2f", est_total)  +" "+ requireContext().getResources().getString(R.string.pkr));
         total_items_in_cart--;
 
         if(total_items_in_cart == 0){
@@ -342,8 +342,8 @@ public class CartFragment extends Fragment {
 
         est_total = sub_total+50;
 
-        fragmentCartBinding.tvSubtotalValue.setText(requireContext().getResources().getString(R.string.pkr) + String.format("%.2f", sub_total));
-        fragmentCartBinding.tvEstimatedTotalValue.setText(requireContext().getResources().getString(R.string.pkr) + String.format("%.2f", est_total));
+        fragmentCartBinding.tvSubtotalValue.setText(String.format("%.2f", sub_total) +" "+ requireContext().getResources().getString(R.string.pkr));
+        fragmentCartBinding.tvEstimatedTotalValue.setText(String.format("%.2f", est_total)  +" "+ requireContext().getResources().getString(R.string.pkr));
 
     }
 

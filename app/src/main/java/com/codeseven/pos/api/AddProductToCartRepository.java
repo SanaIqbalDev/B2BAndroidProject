@@ -6,7 +6,6 @@ import androidx.lifecycle.MutableLiveData;
 import com.apollographql.apollo.ApolloCall;
 import com.apollographql.apollo.api.Response;
 import com.apollographql.apollo.exception.ApolloException;
-import com.apollographql.apollo.request.RequestHeaders;
 import com.codeseven.pos.ApolloClientClass;
 import com.codeseven.pos.MainApplication;
 import com.codeseven.pos.R;
@@ -18,6 +17,7 @@ import java.util.List;
 
 import apollo.pos.AddProductsToCartMutation;
 import apollo.pos.type.CartItemInput;
+
 public class AddProductToCartRepository {
 
 

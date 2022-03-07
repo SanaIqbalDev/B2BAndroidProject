@@ -32,9 +32,10 @@
                 android:layout_weight="1.5"
                 android:tag="price"
                 android:textAppearance="?attr/textAppearanceHeadline6"
-                android:gravity="left|center_vertical"
+                android:gravity="right|center_vertical"
                 android:singleLine="true"
                 android:textSize="14sp"
+                android:paddingRight="3dp"
                 android:textColor="@color/black"
                 />
 
