@@ -10,13 +10,13 @@
 <FrameLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layoutDirection="rtl"
     tools:context=".ui.ProductDetailFragment">
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         style="@style/Widget.MaterialComponents.AppBarLayout.Surface"
+        android:layoutDirection="rtl"
         android:fitsSystemWindows="true">
 
         <androidx.appcompat.widget.Toolbar

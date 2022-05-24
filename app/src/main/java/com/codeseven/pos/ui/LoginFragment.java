@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckBox;
 import android.widget.Toast;
 
 import androidx.activity.OnBackPressedCallback;
@@ -34,6 +35,11 @@ public class LoginFragment extends Fragment {
     LoginViewModel.LoginObserver loginObserver;
 
     ProgressDialog progressDialog;
+
+    CheckBox cb_keep_login;
+
+    FragmentLoginBinding fragmentLoginBinding;
+
     public LoginFragment() {
     }
 
@@ -48,11 +54,10 @@ public class LoginFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        FragmentLoginBinding fragmentLoginBinding = DataBindingUtil.inflate(inflater,R.layout.fragment_login,
-                container,false);
+        fragmentLoginBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_login,
+                container, false);
 
-
-        if(loginViewModel == null)
+        if (loginViewModel == null)
             loginViewModel = new ViewModelProvider(requireActivity()).get(LoginViewModel.class);
 
 
@@ -60,15 +65,10 @@ public class LoginFragment extends Fragment {
 
         View view = fragmentLoginBinding.getRoot();
 
-        fragmentLoginBinding.btnLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
 
-                loginObserver.verifyLoginInformation();
-                progressDialog.StartLoadingdialog();
-
-
-            }
+        fragmentLoginBinding.btnLogin.setOnClickListener(view1 -> {
+            loginObserver.verifyLoginInformation();
+            progressDialog.StartLoadingdialog();
         });
 
         fragmentLoginBinding.executePendingBindings();
@@ -78,27 +78,29 @@ public class LoginFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-        loginObserver.getLoginResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
-            @Override
-            public void onChanged(String s) {
-                if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
+        loginObserver.getLoginResponse().observe(getViewLifecycleOwner(), s -> {
+            if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
+                if (s.contains("Generated Token:")) {
+                    loginObserver.saveLoginData();
+                    loginObserver.savePreferenceLoginState();
+//                    loginObserver.setU;
+                    NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_loginFragment_to_homeFragment);
+                    loginObserver.getLoginResponse().removeObservers(getViewLifecycleOwner());
                     progressDialog.dismissDialog();
-
-                    if (s.contains("Generated Token:")) {
-                        loginObserver.saveLoginData();
-                        loginObserver.savePreferenceLoginState();
-                        NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_loginFragment_to_homeFragment);
-                        loginObserver.getLoginResponse().removeObservers(getViewLifecycleOwner());
-                    }
-                    else if(s.contains("Network error") || s.contains("http")){
-                        Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
-                    }
-                    else if (!s.equals("")) {
-                        Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
-                    }
+                } else if (s.contains("Network error") || s.contains("http")) {
+                    Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
+                } else if (!s.equals("")) {
+                    Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
                 }
             }
         });
+
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if(loginObserver.getPhoneNumberPreference().equals("") && !loginObserver.getPasswordPreference().equals("") && loginObserver.getPreferenceLoginState())
+            NavHostFragment.findNavController(LoginFragment.this).navigate(R.id.action_loginFragment_to_homeFragment);
     }
 }

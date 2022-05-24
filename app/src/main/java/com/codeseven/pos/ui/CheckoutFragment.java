@@ -1,17 +1,23 @@
 package com.codeseven.pos.ui;
 
+import static com.codeseven.pos.ui.CartFragment.est_total;
 import static com.codeseven.pos.ui.CartFragment.saved_total;
 import static com.codeseven.pos.ui.CartFragment.sub_total;
-import static com.codeseven.pos.ui.CartFragment.est_total;
 import static com.codeseven.pos.ui.CustomerAddressesFragment.telephone;
-
-
 
 import android.app.AlertDialog;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.text.format.DateUtils;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.CompoundButton;
+import android.widget.DatePicker;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.databinding.DataBindingUtil;
@@ -22,18 +28,8 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import android.text.format.DateUtils;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.CompoundButton;
-import android.widget.DatePicker;
-import android.widget.Toast;
-
 import com.apollographql.apollo.api.Input;
 import com.codeseven.pos.R;
-import com.codeseven.pos.api.CheckOutRepository;
 import com.codeseven.pos.databinding.FragmentCheckoutBinding;
 import com.codeseven.pos.model.CartSummaryAdapter;
 import com.codeseven.pos.model.CatalogItem;
@@ -86,10 +82,13 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
     @Inject CartViewModel.CartObserver cartObserver;
     public String customerCartId;
 
+    public Boolean isFullWalletEnabled = true;
+    public Boolean isPartialWalletEnabled = true;
+
     public CheckoutFragment() {
     }
 
-    public static CheckoutFragment newInstance(String param1, String param2) {
+    public static CheckoutFragment newInstance() {
         CheckoutFragment fragment = new CheckoutFragment();
         return fragment;
     }
@@ -143,7 +142,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         setShippingDetails();
 
 
-        ///// Payment Method Logic...
+        // Payment Method Logic...
 
         setPaymentMethod();
 
@@ -176,7 +175,6 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
             public void onChanged(String s) {
                 if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED)
                 {
-//                            Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
                 }
                 if(s.contains("The cart isn't active")) {
                     progressDialog.dismissDialog();
@@ -252,7 +250,6 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
 
                     checkoutObserver.SetPaymentMethodOnCart("cashondelivery");
 
-//                                checkoutObserver.checkCount();
                 }
                 else if(s.equals("Payment Method success"))
                 {
@@ -266,7 +263,7 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                     AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
                     builder1.setMessage(requireContext().getResources().getString(R.string.your_order_is_placed_successfully) +"\n\n ("+ orderPreference.GetOrderId() +")" );
                     builder1.setCancelable(false);
-                    builder1.setPositiveButton("Ok",
+                    builder1.setPositiveButton(requireContext().getResources().getString(R.string.ok),
                             new DialogInterface.OnClickListener() {
                                 public void onClick(DialogInterface dialog, int id) {
                                     NavHostFragment.findNavController(CheckoutFragment.this).navigate(R.id.action_checkoutFragment_to_homeFragment);
@@ -282,87 +279,6 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
 
                     Toast.makeText(requireContext(),requireContext().getResources().getString(R.string.order_placed_failed),Toast.LENGTH_LONG).show();
                 }
-
-//                            else if(s.equals("Delivery Cart failure")){
-//                                String comments_ = fragmentCheckoutBinding.etComments.getText().toString();
-//                                String date_ = fragmentCheckoutBinding.tvDate.getText().toString();
-//                                String time_slot_ = selected_time_slot;
-//
-//                                if(is_time_slot_selected) {
-//                                    checkoutObserver.applyDeliveryCart(comments_, date_, time_slot_);
-//                                }
-//                                else
-//                                    Toast.makeText(requireContext(),"select a time slot",Toast.LENGTH_LONG).show();
-//                            }
-//                            else if(s.equals("Billing Address failure")){
-//                                if(fragmentCheckoutBinding.layoutPayment.getVisibility() == View.VISIBLE )
-//                                {
-//                                    if(fragmentCheckoutBinding.cbPaymentMethod.isChecked()) {
-//                                        checkoutObserver.SetBillingAddress(null,Integer.parseInt(selected_shipping_id_original),true);
-//                                    }else{
-//                                        List<String> address_list = new ArrayList<>();
-//                                        address_list.add(fragmentCheckoutBinding.etStreetAddress.getText().toString());
-//                                        if(!fragmentCheckoutBinding.etStreetAddressOptional.getText().toString().equals(""))
-//                                            address_list.add(fragmentCheckoutBinding.etStreetAddressOptional.getText().toString());
-//
-//
-//                                        shipping_address_new   = CartAddressInput.builder().city(fragmentCheckoutBinding.etCity.getText().toString())
-//                                                .companyInput(new Input<>("",true))
-//                                                .country_code(fragmentCheckoutBinding.spinnerCountries.getSelectedItem().toString())
-//                                                .firstname(fragmentCheckoutBinding.etFirstName.getText().toString())
-//                                                .lastname(fragmentCheckoutBinding.etLastName.getText().toString())
-//                                                .postcode("")
-//                                                .region("")
-//                                                .region_id(null)
-//                                                .save_in_address_book(false)
-//                                                .street(address_list)
-//                                                .telephone(fragmentCheckoutBinding.etPhoneNumber.getText().toString());
-//
-//                                        checkoutObserver.SetBillingAddress(null,Integer.parseInt(selected_shipping_id_original),false);
-//
-//
-//                                    }
-//
-//                                }
-//                                else {
-//                                    checkoutObserver.SetBillingAddress(null,Integer.parseInt(selected_shipping_id_original),true);
-//                                }
-//                            }
-//                            else if (s.equals("Payment Method failure")){
-//                                checkoutObserver.SetPaymentMethodOnCart("cashondelivery");
-//                            }
-//                            else if (s.equals("Shipping Method failure")){
-//                                checkoutObserver.SetShippingMethodOnCart(method_code,carrier_code);
-//                            }
-//                            else if(s.equals("Shipping Address failure")){
-//                                shipping_address_selected   = CartAddressInput.builder().city(customer_shipping_address.city()).companyInput(new Input<>("",true))
-//                                        .country_code(customer_shipping_address.country().code()).firstname(customer_shipping_address.firstname()).lastname(customer_shipping_address.lastname())
-//                                        .postcode(customer_shipping_address.postcode()).region(customer_shipping_address.region().code())
-//                                        .region_id(customer_shipping_address.region().region_id()).save_in_address_book(false)
-//                                        .street(customer_shipping_address.street()).telephone(customer_shipping_address.telephone());
-//
-//                                CartAddressInput bb = shipping_address_selected.build();
-//                                checkoutObserver.SetCustomerShippingAddress(Integer.parseInt(selected_shipping_id),"","");
-//                            }
-//                            else if(s.equals("Unable to place order: The shipping method is missing. Select the shipping method and try again."))
-//                            {
-////                                checkoutObserver.GetCartDetails();
-//
-//                                checkoutObserver.SetShippingMethodOnCart(method_code,carrier_code);
-//                            }
-
-//                                AlertDialog.Builder builder1 = new AlertDialog.Builder(requireContext());
-//                                builder1.setMessage("Your order has been placed successfully.");
-//                                builder1.setCancelable(false);
-//                                builder1.setPositiveButton("Ok",
-//                                        new DialogInterface.OnClickListener() {
-//                                            public void onClick(DialogInterface dialog, int id) {
-//                                                NavHostFragment.findNavController(CheckoutFragment.this).navigate(R.id.action_checkoutFragment_to_homeFragment);
-//                                                dialog.cancel();
-//                                            }
-//                                        });
-//                                AlertDialog alert11 = builder1.create();
-//                                alert11.show();
             }
         });
 
@@ -377,23 +293,11 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         fragmentCheckoutBinding.tvSavedAmount.setText(String.format("%.2f", saved_total) +" " + requireContext().getResources().getString(R.string.pkr) );
         fragmentCheckoutBinding.tvSubtotalValue.setText(String.format("%.2f", sub_total) +" " + requireContext().getResources().getString(R.string.pkr) );
         fragmentCheckoutBinding.tvShippingValue.setText("50"  +" " + requireContext().getResources().getString(R.string.pkr) );
-        if(!fragmentCheckoutBinding.cbApplyWallet.isChecked())
-        {
-            fragmentCheckoutBinding.tvTotalValue.setText(String.format("%.2f", est_total) +" " + requireContext().getResources().getString(R.string.pkr) );
-        }
-        else
-        {
-            fragmentCheckoutBinding.tvTotalValue.setText(cartPreference.GetOrderTotal() +"  "+requireContext().getResources().getString(R.string.pkr));
-        }
-
-
-
     }
 
     private void setCalenderLayout() {
 
         Calendar mCalendar = Calendar.getInstance();
-//        String today = DateFormat.getDateInstance(DateFormat.DATE_FIELD).format(mCalendar.getTime());
 
         int year = mCalendar.get(Calendar.YEAR);
 
@@ -438,8 +342,6 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         fragmentCheckoutBinding.spinnerCountries.setAdapter(adapter);
 
 
-        //
-//        checkoutObserver.GetListOfAvailablePaymentMethods();
         checkoutObserver.getCustomerWallet();
         checkoutObserver.getCustomerWalletData().observe(getViewLifecycleOwner(), new Observer<GetCustomerWalletQuery.Wallet>() {
             @Override
@@ -454,11 +356,57 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
 
 
 
-        fragmentCheckoutBinding.cbApplyWallet.setOnClickListener(new View.OnClickListener() {
+        fragmentCheckoutBinding.btnApplyFullWallet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                progressDialog.StartLoadingdialog();
+                fragmentCheckoutBinding.llPartialAmount.setVisibility(View.GONE);
+
+                if(isFullWalletEnabled) {
+                    fragmentCheckoutBinding.btnApplyFullWallet.setBackgroundColor(requireContext().getResources().getColor(R.color.dark_gray));
+                    checkoutObserver.ApplyWallet(true, "0");
+                    isFullWalletEnabled = false ;
+
+                }
+                else
+                {
+                    fragmentCheckoutBinding.btnApplyFullWallet.setBackgroundColor(requireContext().getResources().getColor(R.color.basic));
+                    checkoutObserver.ApplyWallet(false,"0");
+                    isFullWalletEnabled = true ;
+                }
+            }
+        });
+
+        fragmentCheckoutBinding.btnApplyPartialWallet.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                fragmentCheckoutBinding.etGetFromCredit.setText(String.valueOf(sub_total));
+                fragmentCheckoutBinding.llPartialAmount.setVisibility(View.VISIBLE);
+                if(isPartialWalletEnabled) {
+                    fragmentCheckoutBinding.btnApplyPartialWallet.setBackgroundColor(requireContext().getResources().getColor(R.color.dark_gray));
+                    isPartialWalletEnabled = false ;
+                }
+                else
+                {
+                    fragmentCheckoutBinding.btnApplyPartialWallet.setBackgroundColor(requireContext().getResources().getColor(R.color.basic));
+                    isPartialWalletEnabled = true ;
+                }
+            }
+        });
+        fragmentCheckoutBinding.btnOk.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 progressDialog.StartLoadingdialog();
-                checkoutObserver.ApplyWallet(fragmentCheckoutBinding.cbApplyWallet.isChecked());
+
+                if(isPartialWalletEnabled) {
+                    checkoutObserver.ApplyWallet(true, fragmentCheckoutBinding.etGetFromCredit.getText().toString());
+                }
+                else
+                {
+                    checkoutObserver.ApplyWallet(false,fragmentCheckoutBinding.etGetFromCredit.getText().toString());
+                }
+
             }
         });
         checkoutObserver.getApplyWalletQueryResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
@@ -469,23 +417,47 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
 
                     if (s.contains("The current user cannot perform")) {
 
-                        fragmentCheckoutBinding.cbApplyWallet.setChecked(false);
+                        isFullWalletEnabled = true;
+
+                        fragmentCheckoutBinding.btnApplyFullWallet.setBackgroundColor(requireContext().getResources().getColor(R.color.basic));
+
                         signInDialog();
 
                     } else if(s.contains("Network error") || s.contains("http")){
                         Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
+                        if(isFullWalletEnabled){
+                            isFullWalletEnabled = false;
+                            fragmentCheckoutBinding.btnApplyFullWallet.setBackgroundColor(requireContext().getResources().getColor(R.color.dark_gray));
+                        }
+                        else
+                        {
+                            isFullWalletEnabled = true;
+                            fragmentCheckoutBinding.btnApplyFullWallet.setBackgroundColor(requireContext().getResources().getColor(R.color.basic));
+                        }
 
-                        fragmentCheckoutBinding.cbApplyWallet.setChecked(false);
+
+                        if(isPartialWalletEnabled){
+                            isPartialWalletEnabled = false;
+                            fragmentCheckoutBinding.btnApplyPartialWallet.setBackgroundColor(requireContext().getResources().getColor(R.color.dark_gray));
+                        }
+                        else {
+                            isPartialWalletEnabled = true;
+                            fragmentCheckoutBinding.btnApplyFullWallet.setBackgroundColor(requireContext().getResources().getColor(R.color.basic));
+                        }
+
+//                        fragmentCheckoutBinding.cbApplyWalletComplete.setChecked(false);
+                        isFullWalletEnabled = true;
+
+                        fragmentCheckoutBinding.btnApplyFullWallet.setBackgroundColor(requireContext().getResources().getColor(R.color.basic));
+
                     }else if (s.equals("Success")) {
 
-                        if(fragmentCheckoutBinding.cbApplyWallet.isChecked()){
+                        if(isFullWalletEnabled || isPartialWalletEnabled){
                             String wallet_msg = requireContext().getResources().getString(R.string.pay_amount_with_credit) +"  "+
                                     cartPreference.GetNeedToPay() +"  "+requireContext().getResources().getString(R.string.pkr)+"\n"+
                                     requireContext().getResources().getString(R.string.order_amount)+"  "+
                                     cartPreference.GetOrderTotal() +"  "+requireContext().getResources().getString(R.string.pkr);
-//                                    "\n"+
-//                                    requireContext().getResources().getString(R.string.amount_left_in_wallet)+"  "+
-//                                    cartPreference.GetRemainingWalletAmount() +"  "+requireContext().getResources().getString(R.string.pkr);
+
                             fragmentCheckoutBinding.tvWalletValue.setText(wallet_msg);
                             fragmentCheckoutBinding.tvWalletValueS.setText(cartPreference.GetNeedToPay() + " " + requireContext().getResources().getString(R.string.pkr));
                             fragmentCheckoutBinding.tvTotalValue.setText(cartPreference.GetOrderTotal() +"  "+requireContext().getResources().getString(R.string.pkr));
@@ -522,7 +494,11 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                 for(int i=0;i<available_payment_methods.size();i++){
                     if(available_payment_methods.get(i).title().equals("No Payment Information Required")) {
                         showPaymentMethods = false;
-                        fragmentCheckoutBinding.cbApplyWallet.setChecked(true);
+//                        fragmentCheckoutBinding.cbApplyWalletComplete.setChecked(true);
+                        isFullWalletEnabled = false;
+
+                        fragmentCheckoutBinding.btnApplyFullWallet.setBackgroundColor(requireContext().getResources().getColor(R.color.dark_gray));
+
                         fragmentCheckoutBinding.tvWalletValueS.setText(cartPreference.GetNeedToPay());
 
                         String wallet_msg = requireContext().getResources().getString(R.string.pay_amount_with_credit) +"  "+
@@ -530,17 +506,13 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                                 requireContext().getResources().getString(R.string.order_amount)+"  "+
                                 cartPreference.GetOrderTotal() +"  "+requireContext().getResources().getString(R.string.pkr);
 
-//                                + "\n"+
-//                                requireContext().getResources().getString(R.string.amount_left_in_wallet)+"  "+
-//                                cartPreference.GetRemainingWalletAmount() +"  "+requireContext().getResources().getString(R.string.pkr);
-
                         fragmentCheckoutBinding.tvWalletValue.setText(wallet_msg);
 
                     }
                 }
 
                 if(showPaymentMethods) {
-//                    fragmentCheckoutBinding.tvNoPaymentInfoRequired.setVisibility(View.GONE);
+
                     fragmentCheckoutBinding.dividerPaymentMethod.setVisibility(View.VISIBLE);
                     if (available_payment_methods.size() > 0 && available_payment_methods.size() < 2) {
                         fragmentCheckoutBinding.rbSlectionPaymentMethodA.setText(available_payment_methods.get(0).title());
@@ -567,7 +539,6 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                     fragmentCheckoutBinding.layoutPaymentA.setVisibility(View.GONE);
                     fragmentCheckoutBinding.layoutPaymentB.setVisibility(View.GONE);
                     fragmentCheckoutBinding.dividerPaymentMethod.setVisibility(View.GONE);
-//                    fragmentCheckoutBinding.tvNoPaymentInfoRequired.setVisibility(View.VISIBLE);
                 }
 
                 progressDialog.dismissDialog();
@@ -699,15 +670,6 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
                 public void onChanged(ShippingInformationFragment.Shipping_address customer) {
 
                     customer_shipping_address = customer;
-//                String shipping_address = customer.firstname() + " " + customer.lastname() + "\n" +
-//                        customer.street().get(0) + "\n" +
-//                        customer.city() + ", " + customer.region().label() + " " +  customer.country().code()
-//                        ;
-//
-//
-//                fragmentCheckoutBinding.tvShippingAddress.setText(shipping_address);
-//                fragmentCheckoutBinding.tvPhoneNumber.setText(customer.telephone());
-
                     progressDialog.dismissDialog();
                 }
             });
@@ -881,7 +843,6 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
         mCalendar.set(Calendar.MONTH,i1);
         mCalendar.set(Calendar.DAY_OF_MONTH,i2);
 
-//        selectedDate = DateFormat.getDateInstance(DateFormat.DATE_FIELD).format(mCalendar.getTime());
         selectedDate = i1+"/"+i2+"/"+i;
 
         fragmentCheckoutBinding.tvDate.setText(selectedDate);
@@ -893,12 +854,10 @@ public class CheckoutFragment extends Fragment implements DatePickerDialog.OnDat
 
         if(hours<13) {
             timePeriod = "am";
-//            Toast.makeText(requireContext(), String.valueOf(hours) + timePeriod, Toast.LENGTH_LONG).show();
         }
         else
         {
             timePeriod = "pm";
-//            Toast.makeText(requireContext(), String.valueOf(hours-12) + timePeriod, Toast.LENGTH_LONG).show();
         }
 
         return hours;

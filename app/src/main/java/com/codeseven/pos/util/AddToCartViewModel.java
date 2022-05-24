@@ -115,7 +115,8 @@ public class AddToCartViewModel extends ViewModel {
 
         public void decreaseQuantity()
         {
-            int temp = Integer.valueOf(getProductQuantity());
+
+            int temp = Integer.parseInt(getProductQuantity());
             if(temp>1) {
 
                 setProductQuantity(String.valueOf(temp-1));

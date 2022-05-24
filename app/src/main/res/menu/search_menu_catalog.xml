@@ -5,18 +5,24 @@
         android:title="Search"
         android:icon="@drawable/ic_baseline_search_24"
         android:iconTint="@color/primaryColor"
-        app:showAsAction="collapseActionView|ifRoom"
-        app:actionViewClass="android.widget.SearchView" />
+        app:showAsAction="always"
+         />
 
     <item
         android:id="@+id/cart"
         android:icon="@drawable/ic_baseline_shopping_cart_24"
         android:title="ViewCart"
-        app:showAsAction="collapseActionView|ifRoom"
+        app:showAsAction="always"
         />
     <item
         android:id="@+id/record"
         android:icon="@drawable/ic_baseline_mic_24"
         android:title="recordAudio"
-        app:showAsAction="collapseActionView|ifRoom"/>
+        app:showAsAction="always"/>
+    <item
+        android:id="@+id/whatsapp"
+        android:icon="@drawable/ic_whatsapp"
+        android:title="goToWhatsapp"
+        app:showAsAction="always"
+        />
 </menu>

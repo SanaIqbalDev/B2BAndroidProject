@@ -112,8 +112,8 @@ public class ShortListedItemsFragment extends Fragment {
             public void onChanged(List<GetAutocompleteResultsQuery.Item> items) {
                 progressDialog.dismissDialog();
                 if(items.size()>0) {
-                    String ab = items.get(0).name();
-                    Toast.makeText(requireContext(), ab, Toast.LENGTH_LONG).show();
+                    String itemName = items.get(0).name();
+                    Toast.makeText(requireContext(), itemName, Toast.LENGTH_LONG).show();
 
                     for(int i=0; i<items.size();i++){
                         itemList.add(items.get(i));
@@ -142,8 +142,10 @@ public class ShortListedItemsFragment extends Fragment {
         addToCartObsrever.getRepositoryResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String s) {
-                if(s.length()>0)
+                if(s.length()>0){
+                    progressDialog.dismissDialog();
                     Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
+                }
             }
         });
 

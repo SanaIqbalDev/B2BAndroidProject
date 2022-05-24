@@ -32,7 +32,6 @@ public class GetProductWithNameRepository {
         apolloClientClass.apolloClient.query(new GetAutocompleteResultsQuery(itemName,currentPage,pageSize)).enqueue(new ApolloCall.Callback<GetAutocompleteResultsQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetAutocompleteResultsQuery.Data> response) {
-                String ab ="";
                 if(response.hasErrors()) {
                     responseThis.postValue(response.getErrors().get(0).getMessage());
                 }

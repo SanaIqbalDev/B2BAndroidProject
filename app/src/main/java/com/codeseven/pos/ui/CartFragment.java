@@ -103,7 +103,6 @@ public class CartFragment extends Fragment {
 
                 if(view.getTag().equals("remove")) {
 
-//                    Toast.makeText(requireContext(), "remove Button CLicked", Toast.LENGTH_LONG).show();
                     processItemObserver.RemoveCartItem(catalogItem.getItemUid());
                     ItemRemoved(Integer.parseInt(catalogItem.getItemQuantity()),Double.parseDouble(catalogItem.getItemMinimalPrice()), Double.parseDouble(catalogItem.getItemRegularPrice()));
                 }
@@ -179,7 +178,7 @@ public class CartFragment extends Fragment {
             public void onChanged(List<GetCartByIdQuery.Item> items) {
                 if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
 
-                    List<GetCartByIdQuery.Item> ab = items;
+                    List<GetCartByIdQuery.Item> itemList = items;
                     total_items_in_cart = items.size();
                     String name, image_url, quantity, itemsku, itemUid;
                     Double priceThis, regular_price;
@@ -302,8 +301,12 @@ public class CartFragment extends Fragment {
                 progressDialog.dismissDialog();
                 if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
                     {
-                        if(s.length()>0)
-                            Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
+                        if(s.length()>0) {
+                            if(s.contains("The coupon code isn't valid."))
+                                Toast.makeText(requireContext(),requireContext().getResources().getString(R.string.coupon_code_is_invalid), Toast.LENGTH_LONG).show();
+                            else
+                                Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
+                        }
                     }
                 }
             }});

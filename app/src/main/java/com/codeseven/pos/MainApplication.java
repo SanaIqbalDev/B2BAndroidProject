@@ -33,6 +33,8 @@ public class MainApplication extends Application {
 
     }
 
+
+
     public static MainApplication getContext() {
         return mContext;
     }

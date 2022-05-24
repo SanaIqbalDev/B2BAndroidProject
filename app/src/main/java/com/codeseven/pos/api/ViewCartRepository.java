@@ -29,7 +29,6 @@ import okhttp3.internal.http2.Header;
 public class ViewCartRepository {
 
     private final CartPreference cartPreference;
-    private final LoginPreference loginPreference;
     private final MutableLiveData<String> cartRequestResponse;
     private String cartId ;
     private final MutableLiveData<List<GetCartByIdQuery.Item>> cartItems;
@@ -37,7 +36,6 @@ public class ViewCartRepository {
 
     public ViewCartRepository() {
         cartPreference = new CartPreference();
-        loginPreference = new LoginPreference();
         this.cartRequestResponse = new MutableLiveData<>();
         cartId = "";
         cartItems = new MutableLiveData<>(new ArrayList<>());

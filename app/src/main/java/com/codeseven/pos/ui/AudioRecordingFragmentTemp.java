@@ -9,9 +9,17 @@ import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.media.AudioFormat;
 import android.media.AudioRecord;
-import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.Environment;
+import android.os.SystemClock;
+import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -20,18 +28,6 @@ import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.navigation.fragment.NavHostFragment;
-
-import android.os.CountDownTimer;
-import android.os.Environment;
-import android.os.SystemClock;
-import android.util.Log;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Chronometer;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.airbnb.lottie.LottieAnimationView;
 import com.android.volley.Request;
@@ -46,7 +42,6 @@ import com.codeseven.pos.databinding.FragmentAudioRecordingBinding;
 import com.codeseven.pos.helper.WavAudioRecorder;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -54,7 +49,6 @@ import com.yalantis.waves.util.Horizon;
 
 import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -129,13 +123,6 @@ public class AudioRecordingFragmentTemp extends Fragment {
     public AudioRecordingFragmentTemp() {
         // Required empty public constructor
     }
-
-
-    public static AudioRecordingFragment newInstance() {
-        AudioRecordingFragment fragment = new AudioRecordingFragment();
-        return fragment;
-    }
-
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -514,16 +501,12 @@ public class AudioRecordingFragmentTemp extends Fragment {
                     String audio_ref = taskSnapshot.getMetadata().getReference().toString();
                     (new File(filePath)).delete();
                     filePath = null; // Reset file path
-//                    progressDialog.dismissDialog();
-//                    Toast.makeText(,"Order has been placed",Toast.LENGTH_LONG).show();
-//                    NlpApiCall(audio_ref);
-
                 }
             });
             AlertDialog.Builder builder = new AlertDialog.Builder(requireContext());
             builder.setMessage("    آپ کا آرڈر بھیج دیا گیا ہے    ")
                     .setCancelable(false)
-                    .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(requireContext().getResources().getString(R.string.ok), new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int id) {
                             NavHostFragment.findNavController(AudioRecordingFragmentTemp.this).popBackStack();
                         }

@@ -40,12 +40,6 @@ public class CatalogViewModel extends ViewModel {
         private String responseMessage;
         private MutableLiveData<Integer> pageCount;
         private MutableLiveData<List<GetMegaMenuQuery.CategoryList>> categoryLists;
-        private MutableLiveData<Boolean> isTransactionComplete;
-        private MutableLiveData<Boolean> isDefCatCacheComplete;
-
-        private MutableLiveData<Integer> isCategoryTransactionComplete;
-
-
 
         @Inject
         public CatalogObserver() {
@@ -56,24 +50,16 @@ public class CatalogViewModel extends ViewModel {
             pageCount = catalogRepository.getPageCount();
             responseMessage = catalogRepository.getMessage();
             categoryLists = catalogRepository.getCategoryList();
-            isTransactionComplete = catalogRepository.getIsTransactionComplete();
-            isDefCatCacheComplete = catalogRepository.getIsDefCatCacheComplete();
-            isCategoryTransactionComplete = catalogRepository.getIsCurrentCategoryComplete();
         }
 
         public void getUpdatedcatalog(int currentPage, int pageSize, String category)
         {
             catalogRepository.getCatalog(currentPage,pageSize, category);
         }
-        public void getAllCatalog(int currentPage, int pageSize, String category)
+        public void getCatalog(int currentPage, int pageSize, String category)
         {
-            catalogRepository.CacheAllCatalog(currentPage,pageSize, category);
+            catalogRepository.getCatalog(currentPage,pageSize, category);
         }
-        public void collectAllCategoriesData(String category_id ,int index){
-
-                catalogRepository.CacheThisCategoryData(category_id, index);
-        }
-
 
         public void GetPageSizeOfCategory(String category){
             catalogRepository.GetPageSizeofCategory(category);
@@ -105,16 +91,5 @@ public class CatalogViewModel extends ViewModel {
             return categoryLists;
         }
 
-        public MutableLiveData<Boolean> getIsTransactionComplete() {
-            return isTransactionComplete;
-        }
-
-        public MutableLiveData<Integer> getIsCategoryTransactionComplete() {
-            return isCategoryTransactionComplete;
-        }
-
-        public MutableLiveData<Boolean> getIsDefCatCacheComplete() {
-            return isDefCatCacheComplete;
-        }
     }
 }

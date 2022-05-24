@@ -59,7 +59,10 @@
     <string name="change_shipping_address">آرڈر کی ترسیل کا پتہ تبدیل کریں۔</string>
     <string name="shipping_method">بھیجنے کا طریقہ</string>
     <string name="payment_method">رقم کی ادائیگی کا طریقہ</string>
-    <string name="apply_credit">کریڈٹ اپلائی کریں۔</string>
+<!--    <string name="apply_credit_complete"> مکمل رقم کریڈٹ سے اپلائی کریں۔</string>-->
+<!--    <string name="apply_credit_partial"> کچھ رقم کریڈٹ سے اپلائی کریں۔</string>-->
+     <string name="apply_credit_complete"> مکمل رقم اپلائی کریں۔</string>
+    <string name="apply_credit_partial"> کچھ رقم اپلائی کریں۔</string>
     <string name="your_credit_is">آپ کا کریڈٹ ہے :</string>
     <string name="cash_on_delivery">ادائیگی وصولی کے وقت </string>
     <string name="your_order_is_placed_successfully"> آپ کا آرڈر اس آرڈر نمبر کے ساتھ دیا گیا ہے:</string>
@@ -82,6 +85,10 @@
     <string name="cart">ٹوکری</string>
     <string name="record_audio_title">آرڈر ریکارڈ کریں</string>
     <string name="product_detail">تفصیل</string>
-
-
+    <string name="enter_quantity">آرڈر کے لیے پروڈکٹ کی مقدار درج کریں۔</string>
+    <string name="search_it">تلاش کریں</string>
+    <string name="enter_the_item_name">آئٹم کا نام</string>
+    <string name="cancel">منسوخ</string>
+    <string name="ok">ٹھیک ہے</string>
+    <string name="coupon_code_is_invalid">کوپن کوڈ درست نہیں ہے۔</string>
 </resources>

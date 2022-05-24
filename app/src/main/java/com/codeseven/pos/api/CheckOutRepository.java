@@ -17,6 +17,7 @@ import com.codeseven.pos.util.LoginPreference;
 import com.codeseven.pos.util.OrderPreference;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,7 +43,7 @@ import apollo.pos.type.CartAddressInput;
 import apollo.pos.type.SetShippingAddressesOnCartInput;
 import apollo.pos.type.ShippingAddressInput;
 import apollo.pos.type.ShippingMethodInput;
-//import apollo.pos.type.ShippingMethodInput;
+
 
 public class CheckOutRepository {
 
@@ -74,7 +75,6 @@ public class CheckOutRepository {
 
     private  MutableLiveData<Boolean> istrue;
 
-    //    private MutableLiveData<List<Boolean>> shouldPlaceOrder;
     private List<Boolean> counter;
 
     private ApolloClientClass apolloClientClass;
@@ -110,7 +110,6 @@ public class CheckOutRepository {
 
         istrue = new MutableLiveData<>();
         istrue.postValue(true);
-//        shouldPlaceOrder = new MutableLiveData<>(new ArrayList<>());
 
         counter = new ArrayList<>();
 
@@ -128,9 +127,6 @@ public class CheckOutRepository {
                 if(response.hasErrors()) {
                     if (response.getErrors().size() > 0)
                         CustomerInfoResponse.postValue(response.getErrors().get(0).getMessage());
-                }
-                else {
-//                    responseData.postValue(response.getData().customer());
                 }
             }
 
@@ -195,7 +191,6 @@ public class CheckOutRepository {
                     }
                 }
                 else {
-//                    cartPreference.AddRemainingWalletAmount(response.getData().customer().wallet().wallet_amount());
                     customer_wallet.postValue(response.getData().customer().wallet());
                 }
             }
@@ -208,12 +203,12 @@ public class CheckOutRepository {
         });
 
     }
-    public void ApplyWalletToCart(boolean applyWallet){
+    public void ApplyWalletToCart(boolean applyWallet, String amount){
 
        String cart_id = apolloClientClass.getCartId();
 
         apolloClientClass.apolloClient.mutate(new ApplyWalletToCartMutation(ApplyWalletCartInput.builder()
-                .apply_wallet(applyWallet).cart_id(cart_id).build())).toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build()
+                .apply_wallet(applyWallet).cart_id(cart_id).amount(Double.valueOf(amount)).build())).toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build()
                 .enqueue(new ApolloCall.Callback<ApplyWalletToCartMutation.Data>() {
                     @Override
                     public void onResponse(@NonNull Response<ApplyWalletToCartMutation.Data> response) {
@@ -321,9 +316,9 @@ public class CheckOutRepository {
         List<ShippingAddressInput> list = new ArrayList<>();
         list.add(input);
 
-        SetShippingAddressesOnCartInput ab = SetShippingAddressesOnCartInput.builder().shipping_addresses(list).cart_id(apolloClientClass.getCartId()).build();
+        SetShippingAddressesOnCartInput setShippingAdd = SetShippingAddressesOnCartInput.builder().shipping_addresses(list).cart_id(apolloClientClass.getCartId()).build();
 
-        apolloClientClass.apolloClient.mutate(new SetShippingMutation(ab)).toBuilder().requestHeaders
+        apolloClientClass.apolloClient.mutate(new SetShippingMutation(setShippingAdd)).toBuilder().requestHeaders
                 (apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<SetShippingMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<SetShippingMutation.Data> response) {
@@ -365,7 +360,6 @@ public class CheckOutRepository {
             public void onResponse(@NonNull Response<SetShippingmethodOnCartMutation.Data> response) {
 
                 if(!response.hasErrors()) {
-                    String ab = "";
                     placeOrderResponseMessage.postValue("Shipping Method success");
                     counter.add(1, true);
                     if(counter.size()==5){
@@ -381,7 +375,6 @@ public class CheckOutRepository {
 
             @Override
             public void onFailure(@NonNull ApolloException e) {
-                String ab = "";
                 counter.add(1, false);
                 placeOrderResponseMessage.postValue("Shipping Method failure");
 
@@ -418,7 +411,6 @@ public class CheckOutRepository {
             public void onFailure(@NonNull ApolloException e) {
                 counter.add(4,false);
                 placeOrderResponseMessage.postValue("Payment Method failure");
-                String ab = "";
             }
         });
     }
@@ -507,12 +499,11 @@ public class CheckOutRepository {
                 toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<GetCartDetailsQuery.Data>() {
             @Override
             public void onResponse(@NonNull Response<GetCartDetailsQuery.Data> response) {
-                String ab = "";
             }
 
             @Override
             public void onFailure(@NonNull ApolloException e) {
-                String ab = "";
+
             }
         });
     }
@@ -523,7 +514,6 @@ public class CheckOutRepository {
                 .build().enqueue(new ApolloCall.Callback<PlaceOrderMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<PlaceOrderMutation.Data> response) {
-                String ab = "";
 
                 if(response.hasErrors())
                 {
@@ -621,9 +611,9 @@ public class CheckOutRepository {
 
             @Override
             public void onFailure(@NonNull ApolloException e) {
-                Log.e("","");
             }
         });
 
     }
+
 }

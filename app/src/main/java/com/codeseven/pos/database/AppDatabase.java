@@ -13,4 +13,7 @@ public abstract class AppDatabase extends RoomDatabase {
 
     public abstract CategoryItemsDao categoryItemsDao();
     public abstract CatalogItemDao catalogItemDao();
+
+
+
 }

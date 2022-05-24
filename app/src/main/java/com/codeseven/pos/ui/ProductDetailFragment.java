@@ -1,6 +1,8 @@
 package com.codeseven.pos.ui;
 
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 
@@ -15,6 +17,7 @@ import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Toast;
 
 import com.codeseven.pos.R;
@@ -81,8 +84,23 @@ public class ProductDetailFragment extends Fragment {
         fragmentProductDetailBinding.btnPlaceOrder.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                progressDialog.StartLoadingdialog();
-                productObserver.placeOrder();
+                if(productObserver.getProductQuantity().length()>0) {
+                    if (Integer.parseInt(productObserver.getProductQuantity()) > 0 ) {
+
+                        //hide keyboard
+                       closeKeyboard();
+
+                        progressDialog.StartLoadingdialog();
+                        productObserver.placeOrder();
+
+                    }
+                    else {
+                        Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.enter_quantity), Toast.LENGTH_LONG).show();
+                    }
+                }
+                else {
+                    Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.enter_quantity), Toast.LENGTH_LONG).show();
+                }
             }
         });
 
@@ -124,23 +142,28 @@ public class ProductDetailFragment extends Fragment {
                         AlertDialog alert11 = builder1.create();
                         alert11.show();
                     }
-                    else
+                    else {
+
+
                         Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
+
+                    }
                 }
             }
         });
-        
-        
-        
-        
-        
-        
-        
-        
-        
+
         return view;
     }
 
 
+    private void closeKeyboard()
+    {
+        View view = requireActivity().getCurrentFocus();
+        if (view != null) {
+
+            InputMethodManager manager = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            manager.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
+    }
 
 }

@@ -33,7 +33,7 @@ public class ApolloClientClass {
     public ApolloClientClass() {
 
         OkHttpClient.Builder builder = new OkHttpClient.Builder()
-                .connectTimeout(30, TimeUnit.SECONDS) // connect timeout
+                .connectTimeout(15, TimeUnit.SECONDS) // connect timeout
                 .writeTimeout(30, TimeUnit.SECONDS) // write timeout
                 .readTimeout(30, TimeUnit.SECONDS);
         okHttpClient = builder.build();

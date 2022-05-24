@@ -76,12 +76,10 @@ public class ProcessCartRepository {
                 .toBuilder().requestHeaders(apolloClientClass.getRequestHeader()).build().enqueue(new ApolloCall.Callback<UpdateCartItemMutation.Data>() {
             @Override
             public void onResponse(@NonNull Response<UpdateCartItemMutation.Data> response) {
-                String ab = "";
             }
 
             @Override
             public void onFailure(@NonNull ApolloException e) {
-                String ab = "";
             }
         });
     }

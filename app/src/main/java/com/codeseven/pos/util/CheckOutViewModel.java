@@ -119,8 +119,8 @@ public class CheckOutViewModel extends ViewModel {
             return applyWalletQueryResponse;
         }
 
-        public void ApplyWallet(boolean applyWallet){
-            checkOutRepository.ApplyWalletToCart(applyWallet);
+        public void ApplyWallet(boolean applyWallet, String partialAmount){
+            checkOutRepository.ApplyWalletToCart(applyWallet, partialAmount);
         }
 
 

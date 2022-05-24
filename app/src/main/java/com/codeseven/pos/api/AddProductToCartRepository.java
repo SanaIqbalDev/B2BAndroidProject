@@ -22,15 +22,11 @@ public class AddProductToCartRepository {
 
 
     private MutableLiveData<String> requestResponse;
-    private CartPreference cartPreference;
-    private LoginPreference loginPreference;
     private ApolloClientClass apolloClientClass;
 
 
     public AddProductToCartRepository() {
         requestResponse = new MutableLiveData<>("");
-        cartPreference = new CartPreference();
-        loginPreference = new LoginPreference();
         apolloClientClass = new ApolloClientClass();
     }
 

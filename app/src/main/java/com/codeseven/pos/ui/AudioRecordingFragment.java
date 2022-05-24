@@ -52,7 +52,6 @@ public class AudioRecordingFragment extends Fragment {
 
     FragmentAudioRecordingBinding fragmentAudioRecordingBinding;
 
-    // string variable is created for storing a file name
     private static String mFileName = null;
     private int fileNameCounter= 1;
 
@@ -177,7 +176,6 @@ public class AudioRecordingFragment extends Fragment {
                     createAudioRecorder(MediaRecorder.AudioSource.MIC, 48000, AudioFormat.CHANNEL_IN_MONO, AudioFormat.ENCODING_PCM_16BIT);
                 prepare();
                 start();
-//                fragmentAudioRecordingBinding.tvRecordingStatus.setText("Recording Started");
             }
         });
 
@@ -194,8 +192,6 @@ public class AudioRecordingFragment extends Fragment {
 
                 playAudio();
 
-
-//                uploadToGCS();
                 release();
             }
         });
@@ -249,7 +245,6 @@ public class AudioRecordingFragment extends Fragment {
                 mHorizon.updateView(buffer);
             }
             int numOfBytes = audioRecorder.read(buffer, 0, buffer.length); // read audio data to buffer
-//			Log.d(WavAudioRecorder.this.getClass().getName(), state + ":" + numOfBytes);
             try {
                 randomAccessWriter.write(buffer);          // write audio data to file
                 payloadSize += buffer.length;
@@ -314,9 +309,6 @@ public class AudioRecordingFragment extends Fragment {
                 filePath = null;
                 state = WavAudioRecorder.State.INITIALIZING;
 
-
-//        mFileName = Environment.getExternalStorageDirectory().getPath();
-//            mFileName += "/order"+String.valueOf(System.currentTimeMillis())+".wav";
                 setOutputFile(mFileName);
 
         } catch (Exception e) {
@@ -532,21 +524,6 @@ public class AudioRecordingFragment extends Fragment {
             Log.e("TAG", "prepare() failed");
         }
     }
-//
-//    public void pauseRecording() {
-//        // below method will stop
-//        // the audio recording.
-//        mRecorder.stop();
-//
-//        // below method will release
-//        // the media recorder class.
-//        mRecorder.release();
-//
-//
-//        mRecorder = null;
-//        fragmentAudioRecordingBinding.tvRecordingStatus.setText("Recording Stopped");
-//    }
-//
 
     public void uploadToGCS()
     {
@@ -578,12 +555,10 @@ public class AudioRecordingFragment extends Fragment {
             uploadTask.addOnFailureListener(new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
-//                    mFileName = "";
                 }
             }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-//                    mFileName = "";
                    String audio_ref = taskSnapshot.getMetadata().getReference().toString();
                    NlpApiCall(audio_ref);
 

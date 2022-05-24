@@ -7,13 +7,17 @@
     android:padding="30dp">
 
     <ProgressBar
-        android:id="@+id/progressBar"
-        style="?android:attr/progressBarStyle"
-        android:layout_width="wrap_content"
+        android:id="@+id/progressBarCache"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+
+        android:layout_width="match_parent"
         android:layout_height="53dp"
         app:layout_constraintBottom_toTopOf="@+id/message"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
+        app:layout_constraintStart_toStartOf="parent"
+        android:max="100"
+        android:progress="1"
+        />
 
     <TextView
         android:id="@+id/message"

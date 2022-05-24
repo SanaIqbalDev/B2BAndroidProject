@@ -20,9 +20,6 @@ android {
     }
 
     buildTypes {
-//        custom {
-//            matchingFallbacks = ["debug"]
-//        }
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
@@ -52,7 +49,6 @@ dependencies {
 
     //hilt dependencies...
     implementation 'com.google.dagger:hilt-android:2.40.5'
-//    implementation 'androidx.hilt:hilt-navigation-fragment:1.0.0'
     annotationProcessor "com.google.dagger:hilt-android-compiler:2.40.5"
 
 
