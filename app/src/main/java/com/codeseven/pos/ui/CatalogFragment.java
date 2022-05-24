@@ -58,7 +58,6 @@ import dagger.hilt.android.AndroidEntryPoint;
 public class CatalogFragment extends Fragment implements NavigationView.OnNavigationItemSelectedListener, SearchDialog.SearchQuerySubmitListener {
 
 
-
     CatalogViewModel catalogViewModel;
     @Inject
     CatalogViewModel.CatalogObserver catalogObserver;
@@ -69,10 +68,11 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
 
 
     CartViewModel cartViewModel;
-    @Inject CartViewModel.CartObserver cartObserver;
+    @Inject
+    CartViewModel.CartObserver cartObserver;
     CartPreference cartPreference;
     public String customerCartId;
-    boolean dataFound=false;
+    boolean dataFound = false;
 
 
     ProgressDialog progressDialog;
@@ -86,7 +86,8 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
 
     // Search Implementation...
     GetProductByNameViewModel getProductByNameViewModel;
-    @Inject GetProductByNameViewModel.GetProductsByNameObserver getProductsByNameObserver;
+    @Inject
+    GetProductByNameViewModel.GetProductsByNameObserver getProductsByNameObserver;
     List<GetAutocompleteResultsQuery.Item> itemList = new ArrayList<>();
     Integer search_pages_count = 0;
     Integer search_current_page = 1;
@@ -101,7 +102,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
     private final int current_category_id = 0;
 
 
-    LoginPreference loginPreference ;
+    LoginPreference loginPreference;
     private String search_query = "";
 
     @Inject
@@ -113,13 +114,13 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        progressDialog= new ProgressDialog(requireActivity());
+        progressDialog = new ProgressDialog(requireActivity());
         catalogViewModel = new ViewModelProvider(this).get(CatalogViewModel.class);
         loginPreference = new LoginPreference();
 
         getMoreProducts = true;
         progressDialog.StartLoadingdialog();
-        catalogObserver.getCatalog(currentPage,pageSize,selected_category);
+        catalogObserver.getCatalog(currentPage, pageSize, selected_category);
         catalogObserver.GetCategoryList();
 
         //Getting customer cart...
@@ -127,7 +128,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
 
         cartViewModel = new ViewModelProvider(requireActivity()).get(CartViewModel.class);
         customerCartId = cartPreference.GetCartId("cart_id");
-        if(customerCartId.equals(""))
+        if (customerCartId.equals(""))
             cartObserver.getCartId();
 
 
@@ -144,24 +145,24 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
         setHasOptionsMenu(true);
 
     }
+
     ArrayList<CatalogItem> catalogItemArrayList = new ArrayList<>();
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
-        fragmentCatalogBinding= DataBindingUtil.inflate(inflater,R.layout.fragment_catalog,container,false);
+        fragmentCatalogBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_catalog, container, false);
         View view = fragmentCatalogBinding.getRoot();
         fragmentCatalogBinding.topAppBar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(iscategorySelected){
-                    fragmentCatalogBinding.topAppBar.setNavigationIcon(requireContext().getResources().getDrawable(R.drawable.ic_arrow_right_24));
+                fragmentCatalogBinding.topAppBar.setNavigationIcon(requireContext().getResources().getDrawable(R.drawable.ic_navigation_24));
+
+                if (iscategorySelected) {
+                    //  fragmentCatalogBinding.topAppBar.setNavigationIcon(requireContext().getResources().getDrawable(R.drawable.ic_arrow_right_24));
                     iscategorySelected = false;
-                }
-                else
-                {
-                    fragmentCatalogBinding.topAppBar.setNavigationIcon(requireContext().getResources().getDrawable(R.drawable.ic_navigation_24));
+                } else {
                     iscategorySelected = true;
                 }
 
@@ -173,21 +174,19 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
             @Override
             public boolean onMenuItemClick(MenuItem item) {
 
-                if(item.getTitle().equals("ViewCart"))
-                {
+                if (item.getTitle().equals("ViewCart")) {
                     NavHostFragment.findNavController(CatalogFragment.this).navigate(R.id.action_homeFragment_to_cartFragment);
                 }
-                if(item.getTitle().equals("recordAudio"))
-                {
+                if (item.getTitle().equals("recordAudio")) {
                     NavHostFragment.findNavController(CatalogFragment.this).navigate(R.id.action_homeFragment_to_audioRecordingFragment);
                 }
-                if(item.getTitle().equals("Search")){
+                if (item.getTitle().equals("Search")) {
                     callSearchDialog();
 
                 }
 
-                if(item.getTitle().equals("goToWhatsapp")){
-                    String url = "https://api.whatsapp.com/send?phone="+"03102280072";
+                if (item.getTitle().equals("goToWhatsapp")) {
+                    String url = "https://api.whatsapp.com/send?phone=" + "03102280072";
                     Intent i = new Intent(Intent.ACTION_VIEW);
                     i.setData(Uri.parse(url));
                     startActivity(i);
@@ -203,16 +202,16 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
 
         //Prepare NavigationDrawerMenu...
 
-        catalogItemAdapter= new CatalogItemAdapter(requireContext(), catalogItemArrayList, new ItemClickListener() {
+        catalogItemAdapter = new CatalogItemAdapter(requireContext(), catalogItemArrayList, new ItemClickListener() {
             @Override
             public void onItemClicked(CatalogItem groceryItem) {
                 Bundle bundle = new Bundle();
                 bundle.putParcelable("catalogItem", groceryItem);
-                NavHostFragment.findNavController(CatalogFragment.this).navigate(R.id.action_homeFragment_to_productDetailFragment,bundle);
+                NavHostFragment.findNavController(CatalogFragment.this).navigate(R.id.action_homeFragment_to_productDetailFragment, bundle);
 
             }
         });
-        LinearLayoutManager gridLayoutManager = new GridLayoutManager(requireContext(),2);
+        LinearLayoutManager gridLayoutManager = new GridLayoutManager(requireContext(), 2);
         fragmentCatalogBinding.recyclerviewGroceryItems.setLayoutManager(gridLayoutManager);
         fragmentCatalogBinding.recyclerviewGroceryItems.setAdapter(catalogItemAdapter);
 
@@ -221,23 +220,22 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
             public void onChanged(List<ProductsFragment.Item> items) {
 
                 String name, price, image_url, description, itemsku;
-                if(updateProducts){
+                if (updateProducts) {
                     catalogItemArrayList = new ArrayList<>();
                     catalogItemAdapter.notifyDataSetChanged();
                 }
-                if(getMoreProducts == true || updateProducts) {
-                    if(!loginPreference.GetFirstTimePreference()){
+                if (getMoreProducts == true || updateProducts) {
+                    if (!loginPreference.GetFirstTimePreference()) {
                         progressDialog.dismissDialog();
                     }
                     fragmentCatalogBinding.btnRefresh.setVisibility(View.GONE);
                     fragmentCatalogBinding.loadingProgressbar.setVisibility(View.GONE);
                     dataFound = true;
-                    if(items.size()<1){
+                    if (items.size() < 1) {
                         fragmentCatalogBinding.tvTitle.setVisibility(View.GONE);
                         fragmentCatalogBinding.tvNoItemsFound.setVisibility(View.VISIBLE);
                         fragmentCatalogBinding.nestedScrollView.setVisibility(View.GONE);
-                    }
-                    else {
+                    } else {
                         fragmentCatalogBinding.tvTitle.setVisibility(View.VISIBLE);
 
                         shouldMakeCall = true;
@@ -247,29 +245,29 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                         for (int i = 0; i < items.size(); i++) {
                             itemsku = (items.get(i).sku());
                             name = (items.get(i).name());
-                            price = (items.get(i).price().regularPrice().amount().value().intValue() +" "+requireContext().getResources().getString(R.string.pkr));
+                            price = (items.get(i).price().regularPrice().amount().value().intValue() + " " + requireContext().getResources().getString(R.string.pkr));
                             image_url = items.get(i).small_image().url();
                             description = items.get(i).description().html();
                             catalogItemArrayList.add(new CatalogItem(itemsku, name, price, image_url, description));
                         }
                     }
-                        if (updateProducts) {
-                            catalogItemAdapter = new CatalogItemAdapter(requireContext(), catalogItemArrayList, new ItemClickListener() {
-                                @Override
-                                public void onItemClicked(CatalogItem groceryItem) {
-                                    Bundle bundle = new Bundle();
-                                    bundle.putParcelable("catalogItem", groceryItem);
-                                    NavHostFragment.findNavController(CatalogFragment.this).navigate(R.id.action_homeFragment_to_productDetailFragment, bundle);
+                    if (updateProducts) {
+                        catalogItemAdapter = new CatalogItemAdapter(requireContext(), catalogItemArrayList, new ItemClickListener() {
+                            @Override
+                            public void onItemClicked(CatalogItem groceryItem) {
+                                Bundle bundle = new Bundle();
+                                bundle.putParcelable("catalogItem", groceryItem);
+                                NavHostFragment.findNavController(CatalogFragment.this).navigate(R.id.action_homeFragment_to_productDetailFragment, bundle);
 
-                                }
-                            });
-                            LinearLayoutManager gridLayoutManager = new GridLayoutManager(requireContext(), 2);
-                            fragmentCatalogBinding.recyclerviewGroceryItems.setLayoutManager(gridLayoutManager);
-                            fragmentCatalogBinding.recyclerviewGroceryItems.setAdapter(catalogItemAdapter);
-                        } else
-                            catalogItemAdapter.notifyDataSetChanged();
-                        getMoreProducts = false;
-                        updateProducts = false;
+                            }
+                        });
+                        LinearLayoutManager gridLayoutManager = new GridLayoutManager(requireContext(), 2);
+                        fragmentCatalogBinding.recyclerviewGroceryItems.setLayoutManager(gridLayoutManager);
+                        fragmentCatalogBinding.recyclerviewGroceryItems.setAdapter(catalogItemAdapter);
+                    } else
+                        catalogItemAdapter.notifyDataSetChanged();
+                    getMoreProducts = false;
+                    updateProducts = false;
 
                 }
 
@@ -282,24 +280,23 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                 if (scrollY == v.getChildAt(0).getMeasuredHeight() - v.getMeasuredHeight()) {
                     // in this method we are incrementing page number,
                     // making progress bar visible and calling get data method.
-                     if(isCategoryMenu) {
-                         if(shouldMakeCall) {
-                             totalPages = catalogObserver.getPageCount().getValue();
-                             currentPage++;
-                             if (currentPage <= totalPages) {
-                                 fragmentCatalogBinding.loadingProgressbar.setVisibility(View.VISIBLE);
-                                 getMoreProducts = true;
-                                 catalogObserver.getUpdatedcatalog(currentPage, pageSize, selected_category);
-                                 shouldMakeCall = false;
-                             } else {
-                                     progressDialog.dismissDialog();
-                                 fragmentCatalogBinding.loadingProgressbar.setVisibility(View.GONE);
-                                 Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.no_more_data_available), Toast.LENGTH_LONG).show();
-                             }
-                         }
-                    }
-                    else {
-                        if(shouldMakeCall) {
+                    if (isCategoryMenu) {
+                        if (shouldMakeCall) {
+                            totalPages = catalogObserver.getPageCount().getValue();
+                            currentPage++;
+                            if (currentPage <= totalPages) {
+                                fragmentCatalogBinding.loadingProgressbar.setVisibility(View.VISIBLE);
+                                getMoreProducts = true;
+                                catalogObserver.getUpdatedcatalog(currentPage, pageSize, selected_category);
+                                shouldMakeCall = false;
+                            } else {
+                                progressDialog.dismissDialog();
+                                fragmentCatalogBinding.loadingProgressbar.setVisibility(View.GONE);
+                                Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.no_more_data_available), Toast.LENGTH_LONG).show();
+                            }
+                        }
+                    } else {
+                        if (shouldMakeCall) {
                             search_current_page++;
                             if (search_current_page <= search_pages_count) {
                                 fragmentCatalogBinding.loadingProgressbar.setVisibility(View.VISIBLE);
@@ -323,7 +320,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
             public void onClick(View view) {
                 progressDialog.StartLoadingdialog();
 
-                catalogObserver.getCatalog(currentPage,pageSize, selected_category);
+                catalogObserver.getCatalog(currentPage, pageSize, selected_category);
 
                 catalogObserver.GetCategoryList();
 
@@ -353,7 +350,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
             @Override
             public void onChanged(List<GetAutocompleteResultsQuery.Item> items) {
 
-                if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+                if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
                     Log.d("TESTING: ", "  resumed");
 
                     progressDialog.dismissDialog();
@@ -363,52 +360,51 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                     if (updateProducts) {
                         catalogItemArrayList = new ArrayList<>();
                         catalogItemAdapter.notifyDataSetChanged();
-                        fragmentCatalogBinding.nestedScrollView.scrollTo(0,0);
+                        fragmentCatalogBinding.nestedScrollView.scrollTo(0, 0);
 
                     }
                     if (getMoreProducts == true || updateProducts) {
-                        if(items.size()>0) {
+                        if (items.size() > 0) {
                             fragmentCatalogBinding.tvTitle.setVisibility(View.VISIBLE);
 
                             if (!items.get(0).sku().equals(item_sku)) {
-                                if(search_current_page == 1)
+                                if (search_current_page == 1)
                                     item_sku = items.get(0).sku();
                                 fragmentCatalogBinding.btnRefresh.setVisibility(View.GONE);
                                 fragmentCatalogBinding.loadingProgressbar.setVisibility(View.GONE);
                                 dataFound = true;
-                                    shouldMakeCall = true;
+                                shouldMakeCall = true;
 
-                                    fragmentCatalogBinding.tvNoItemsFound.setVisibility(View.GONE);
-                                    fragmentCatalogBinding.nestedScrollView.setVisibility(View.VISIBLE);
+                                fragmentCatalogBinding.tvNoItemsFound.setVisibility(View.GONE);
+                                fragmentCatalogBinding.nestedScrollView.setVisibility(View.VISIBLE);
 
-                                    for (int i = 0; i < items.size(); i++) {
-                                        itemsku = (items.get(i).sku());
-                                        name = (items.get(i).name());
-                                        price = (items.get(i).price().regularPrice().amount().value().intValue() +" "+ requireContext().getResources().getString(R.string.pkr));
-                                        image_url = items.get(i).small_image().url();
-                                        description = items.get(i).description().html();
-                                        catalogItemArrayList.add(new CatalogItem(itemsku, name, price, image_url, description));
+                                for (int i = 0; i < items.size(); i++) {
+                                    itemsku = (items.get(i).sku());
+                                    name = (items.get(i).name());
+                                    price = (items.get(i).price().regularPrice().amount().value().intValue() + " " + requireContext().getResources().getString(R.string.pkr));
+                                    image_url = items.get(i).small_image().url();
+                                    description = items.get(i).description().html();
+                                    catalogItemArrayList.add(new CatalogItem(itemsku, name, price, image_url, description));
+                                }
+
+                                catalogItemAdapter = new CatalogItemAdapter(requireContext(), catalogItemArrayList, new ItemClickListener() {
+                                    @Override
+                                    public void onItemClicked(CatalogItem groceryItem) {
+                                        Bundle bundle = new Bundle();
+                                        bundle.putParcelable("catalogItem", groceryItem);
+                                        NavHostFragment.findNavController(CatalogFragment.this).navigate(R.id.action_homeFragment_to_productDetailFragment, bundle);
+
                                     }
-
-                                    catalogItemAdapter = new CatalogItemAdapter(requireContext(), catalogItemArrayList, new ItemClickListener() {
-                                        @Override
-                                        public void onItemClicked(CatalogItem groceryItem) {
-                                            Bundle bundle = new Bundle();
-                                            bundle.putParcelable("catalogItem", groceryItem);
-                                            NavHostFragment.findNavController(CatalogFragment.this).navigate(R.id.action_homeFragment_to_productDetailFragment, bundle);
-
-                                        }
-                                    });
-                                    LinearLayoutManager gridLayoutManager = new GridLayoutManager(requireContext(), 2);
-                                    fragmentCatalogBinding.recyclerviewGroceryItems.setLayoutManager(gridLayoutManager);
-                                    fragmentCatalogBinding.recyclerviewGroceryItems.setAdapter(catalogItemAdapter);
-                                    updateProducts = false;
+                                });
+                                LinearLayoutManager gridLayoutManager = new GridLayoutManager(requireContext(), 2);
+                                fragmentCatalogBinding.recyclerviewGroceryItems.setLayoutManager(gridLayoutManager);
+                                fragmentCatalogBinding.recyclerviewGroceryItems.setAdapter(catalogItemAdapter);
+                                updateProducts = false;
                                 catalogItemAdapter.notifyDataSetChanged();
                                 getMoreProducts = false;
                             }
 
-                        }
-                        else {
+                        } else {
                             fragmentCatalogBinding.tvNoItemsFound.setVisibility(View.VISIBLE);
                             fragmentCatalogBinding.tvTitle.setVisibility(View.GONE);
                             fragmentCatalogBinding.nestedScrollView.setVisibility(View.GONE);
@@ -423,16 +419,14 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
         getProductsByNameObserver.getResponseSearchProducts().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String s) {
-                if(s.length()>0){
+                if (s.length() > 0) {
                     progressDialog.dismissDialog();
 
-                  if(s.contains("Network error") || s.contains("http")){
-                    Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
-                  }
-                  else
-                  {
-                      Toast.makeText(requireContext(),s,Toast.LENGTH_LONG).show();
-                  }
+                    if (s.contains("Network error") || s.contains("http")) {
+                        Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
+                    } else {
+                        Toast.makeText(requireContext(), s, Toast.LENGTH_LONG).show();
+                    }
 
                 }
             }
@@ -448,18 +442,15 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
         catalogObserver.getCatalogRequestResponse().observe(getViewLifecycleOwner(), new Observer<String>() {
             @Override
             public void onChanged(String s) {
-                if(getViewLifecycleOwner().getLifecycle().getCurrentState()== Lifecycle.State.RESUMED){
+                if (getViewLifecycleOwner().getLifecycle().getCurrentState() == Lifecycle.State.RESUMED) {
                     {
                         if (s.length() > 0) {
 
-                            if(s.contains("Network error") || s.contains("http"))
-                            {
+                            if (s.contains("Network error") || s.contains("http")) {
                                 Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.check_internet_connection), Toast.LENGTH_LONG).show();
                                 progressDialog.dismissDialog();
                                 progressDialog.dismissCacheDialog();
-                            }
-                            else
-                            {
+                            } else {
                                 progressDialog.dismissDialog();
 
                                 fragmentCatalogBinding.btnRefresh.setVisibility(View.VISIBLE);
@@ -468,8 +459,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                             }
                         }
                     }
-                }
-                else if(!loginPreference.GetFirstTimePreference())
+                } else if (!loginPreference.GetFirstTimePreference())
                     progressDialog.dismissDialog();
             }
         });
@@ -480,7 +470,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
 
         isCategoryMenu = false;
 
-        getProductsByNameObserver.getProductsByName(queryText,search_current_page,12);
+        getProductsByNameObserver.getProductsByName(queryText, search_current_page, 12);
     }
 
 
@@ -493,13 +483,13 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
     private void prepareMenuData(List<GetMegaMenuQuery.CategoryList> categoryList) {
 
         headerList = new ArrayList<>();
-        childList  = new HashMap<>();
-        String menu_name,category_id;
-        boolean has_children,is_group;
-        NavMenuItem menuModel = new NavMenuItem("تمام مصنوعات","2",false,false,""); //Menu of Android Tutorial. No sub menus
+        childList = new HashMap<>();
+        String menu_name, category_id;
+        boolean has_children, is_group;
+        NavMenuItem menuModel = new NavMenuItem("تمام مصنوعات", "2", false, false, ""); //Menu of Android Tutorial. No sub menus
         headerList.add(menuModel);
 
-        for(int i=0;i<categoryList.get(0).children().size();i++){
+        for (int i = 0; i < categoryList.get(0).children().size(); i++) {
             GetMegaMenuQuery.Child child = categoryList.get(0).children().get(i);
             menu_name = child.name();
             int children_size = child.children().size();
@@ -508,8 +498,8 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
             is_group = false;
             List<NavMenuItem> childModelsList = new ArrayList<>();
 
-            menuModel = new NavMenuItem(menu_name,category_id,has_children,is_group, "https://mcstaging.24seven.pk"+child.thumbnail());
-            if(child.include_in_menu()==1) {
+            menuModel = new NavMenuItem(menu_name, category_id, has_children, is_group, "https://mcstaging.24seven.pk" + child.thumbnail());
+            if (child.include_in_menu() == 1) {
                 headerList.add(menuModel);
                 categoryIdList.add(category_id);
 
@@ -524,9 +514,8 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                         is_group = has_children;
 
 
-                        NavMenuItem childModel = new NavMenuItem(menu_name, category_id, has_children, is_group, "https://mcstaging.24seven.pk"+child.thumbnail());
-                        if(a.include_in_menu() == 1)
-                        {
+                        NavMenuItem childModel = new NavMenuItem(menu_name, category_id, has_children, is_group, "https://mcstaging.24seven.pk" + child.thumbnail());
+                        if (a.include_in_menu() == 1) {
                             childModelsList.add(childModel);
                             categoryIdList.add(category_id);
 
@@ -542,9 +531,9 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
 
         }
 
-        if(loginPreference.GetFirstTimePreference()) {
+        if (loginPreference.GetFirstTimePreference()) {
 
-            loginPreference.SetCategoryLastItem(categoryIdList.get(categoryIdList.size()-1));
+            loginPreference.SetCategoryLastItem(categoryIdList.get(categoryIdList.size() - 1));
 
             for (int b = 0; b < categoryIdList.size(); b++) {
                 catalogObserver.GetPageSizeOfCategory(categoryIdList.get(b));
@@ -563,11 +552,9 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
             @Override
             public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
 
-                if(selected_category == headerList.get(groupPosition).category_id)
-                {
+                if (selected_category == headerList.get(groupPosition).category_id) {
                     fragmentCatalogBinding.drawerLayout.close();
-                }
-                else {
+                } else {
                     selected_category = headerList.get(groupPosition).category_id;
                     currentPage = 1;
 
@@ -595,28 +582,24 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
 
                 if (childList.get(headerList.get(groupPosition)) != null) {
-                    if(selected_category == childList.get(headerList.get(groupPosition)).get(childPosition).getCategory_id())
-                    {
+                    if (selected_category == childList.get(headerList.get(groupPosition)).get(childPosition).getCategory_id()) {
                         fragmentCatalogBinding.drawerLayout.close();
+                    } else {
+                        selected_category = childList.get(headerList.get(groupPosition)).get(childPosition).getCategory_id();
+
+
+                        currentPage = 1;
+                        progressDialog.StartLoadingdialog();
+                        fragmentCatalogBinding.drawerLayout.close();
+                        updateProducts = true;
+                        catalogItemArrayList = new ArrayList<>();
+                        catalogItemAdapter.notifyDataSetChanged();
+                        fragmentCatalogBinding.nestedScrollView.scrollTo(0, 0);
+                        catalogObserver.getUpdatedcatalog(currentPage, pageSize, selected_category);
+                        iscategorySelected = true;
+
+
                     }
-
-                    else {
-                    selected_category = childList.get(headerList.get(groupPosition)).get(childPosition).getCategory_id();
-
-
-                    currentPage = 1;
-                    progressDialog.StartLoadingdialog();
-                    fragmentCatalogBinding.drawerLayout.close();
-                    updateProducts = true;
-                    catalogItemArrayList = new ArrayList<>();
-                    catalogItemAdapter.notifyDataSetChanged();
-                    fragmentCatalogBinding.nestedScrollView.scrollTo(0,0);
-                    catalogObserver.getUpdatedcatalog(currentPage,pageSize, selected_category);
-                    iscategorySelected = true;
-
-
-
-                }
                 }
 
                 return false;

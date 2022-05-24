@@ -135,7 +135,6 @@ public class CartFragment extends Fragment {
         fragmentCartBinding.cartToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 progressDialog.dismissDialog();
                 NavHostFragment.findNavController(CartFragment.this).popBackStack();
             }

@@ -16,6 +16,7 @@ import android.os.SystemClock;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -23,6 +24,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
@@ -207,7 +209,17 @@ public class AudioRecordingFragmentTemp extends Fragment {
                 NavHostFragment.findNavController(AudioRecordingFragmentTemp.this).popBackStack();
             }
         });
+        fragmentAudioRecordingBinding.audioToolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
 
+                if(item.getTitle().equals("ViewCart"))
+                {
+                    NavHostFragment.findNavController(AudioRecordingFragmentTemp.this).navigate(R.id.action_audioRecordingFragment_to_cartFragment);
+                }
+                return false;
+            }
+        });
         return view;
 
     }

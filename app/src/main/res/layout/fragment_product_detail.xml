@@ -25,6 +25,7 @@
             android:layout_height="?attr/actionBarSize"
             app:navigationIcon="@drawable/ic_arrow_right_24"
             android:gravity="center_vertical"
+            app:menu="@menu/cart_menu"
             app:title="@string/product_detail"
             >
         </androidx.appcompat.widget.Toolbar>

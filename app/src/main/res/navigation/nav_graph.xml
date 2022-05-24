@@ -64,6 +64,11 @@
         <action
             android:id="@+id/action_productDetailFragment_to_loginFragment"
             app:destination="@id/loginFragment" />
+        <action
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="false"
+            android:id="@+id/action_productDetailFragment_to_cartFragment"
+            app:destination="@id/cartFragment" />
 
     </fragment>
     <fragment
@@ -85,6 +90,11 @@
         <action
             android:id="@+id/action_audioRecordingFragment_to_shortListedItemsFragment"
             app:destination="@id/shortListedItemsFragment" />
+        <action
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="false"
+            android:id="@+id/action_audioRecordingFragment_to_cartFragment"
+            app:destination="@id/cartFragment" />
     </fragment>
     <fragment
         android:id="@+id/checkoutFragment"

@@ -4,8 +4,11 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
+import androidx.appcompat.widget.Toolbar;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Lifecycle;
@@ -15,6 +18,7 @@ import androidx.navigation.fragment.NavHostFragment;
 
 import android.text.method.ScrollingMovementMethod;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
@@ -108,6 +112,18 @@ public class ProductDetailFragment extends Fragment {
             @Override
             public void onClick(View view) {
                 NavHostFragment.findNavController(ProductDetailFragment.this).popBackStack();
+            }
+        });
+
+        fragmentProductDetailBinding.topAppBarDetail.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+
+                if(item.getTitle().equals("ViewCart"))
+                {
+                    NavHostFragment.findNavController(ProductDetailFragment.this).navigate(R.id.action_productDetailFragment_to_cartFragment);
+                }
+                return false;
             }
         });
         
