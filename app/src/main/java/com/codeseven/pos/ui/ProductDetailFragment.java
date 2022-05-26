@@ -1,5 +1,6 @@
 package com.codeseven.pos.ui;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
@@ -28,6 +29,8 @@ import com.codeseven.pos.R;
 import com.codeseven.pos.databinding.FragmentProductDetailBinding;
 import com.codeseven.pos.model.CatalogItem;
 import com.codeseven.pos.util.AddToCartViewModel;
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.badge.BadgeUtils;
 import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
 
@@ -64,6 +67,7 @@ public class ProductDetailFragment extends Fragment {
 
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -74,6 +78,16 @@ public class ProductDetailFragment extends Fragment {
         if(productViewModel==null){
             productViewModel = new ViewModelProvider(requireActivity()).get(AddToCartViewModel.class);
         }
+
+        BadgeDrawable badge = BadgeDrawable.create(requireContext());
+        badge.setBackgroundColor(requireContext().getResources().getColor(R.color.red_200));
+        badge.setBadgeGravity(BadgeDrawable.TOP_START);
+        badge.setHorizontalOffset(8);
+        BadgeUtils.attachBadgeDrawable(badge, fragmentProductDetailBinding.topAppBarDetail, R.id.menu_cart);
+        productObserver.getCartCount().observe(requireActivity(),cartCount->{
+            if (cartCount!=null) badge.setNumber(cartCount.intValue());
+            else badge.setNumber(0);
+        });
 
         productObserver.setProductSku(catalogItem.getItemSku());
         productObserver.setProductName(catalogItem.getItemName());
@@ -96,7 +110,7 @@ public class ProductDetailFragment extends Fragment {
 
                         progressDialog.StartLoadingdialog();
                         productObserver.placeOrder();
-
+                        productObserver.getCartCount();
                     }
                     else {
                         Toast.makeText(requireContext(), requireContext().getResources().getString(R.string.enter_quantity), Toast.LENGTH_LONG).show();
@@ -108,23 +122,16 @@ public class ProductDetailFragment extends Fragment {
             }
         });
 
-        fragmentProductDetailBinding.topAppBarDetail.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                NavHostFragment.findNavController(ProductDetailFragment.this).popBackStack();
-            }
-        });
 
-        fragmentProductDetailBinding.topAppBarDetail.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
+        fragmentProductDetailBinding.topAppBarDetail.setNavigationOnClickListener(view1 -> NavHostFragment.findNavController(ProductDetailFragment.this).popBackStack());
 
-                if(item.getTitle().equals("ViewCart"))
-                {
-                    NavHostFragment.findNavController(ProductDetailFragment.this).navigate(R.id.action_productDetailFragment_to_cartFragment);
-                }
-                return false;
+        fragmentProductDetailBinding.topAppBarDetail.setOnMenuItemClickListener(item -> {
+
+            if(item.getTitle().equals("ViewCart"))
+            {
+                NavHostFragment.findNavController(ProductDetailFragment.this).navigate(R.id.action_productDetailFragment_to_cartFragment);
             }
+            return false;
         });
         
         productObserver.getRepositoryResponse().observe(getViewLifecycleOwner(), new Observer<String>() {

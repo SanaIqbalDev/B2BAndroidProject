@@ -1,5 +1,6 @@
 package com.codeseven.pos.ui;
 
+import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ExpandableListView;
 import android.widget.SearchView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -35,12 +37,15 @@ import com.codeseven.pos.model.CatalogItem;
 import com.codeseven.pos.model.CatalogItemAdapter;
 import com.codeseven.pos.model.NavMenuItem;
 import com.codeseven.pos.model.NavigationDrawerAdapter;
+import com.codeseven.pos.util.AddToCartViewModel;
 import com.codeseven.pos.util.CartPreference;
 import com.codeseven.pos.util.CartViewModel;
 import com.codeseven.pos.util.CatalogViewModel;
 import com.codeseven.pos.util.GetProductByNameViewModel;
 import com.codeseven.pos.util.ItemClickListener;
 import com.codeseven.pos.util.LoginPreference;
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.badge.BadgeUtils;
 import com.google.android.material.navigation.NavigationView;
 
 import java.util.ArrayList;
@@ -66,6 +71,8 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
     public boolean getMoreProducts = false;
     public boolean updateProducts = false;
 
+    @Inject
+    AddToCartViewModel.AddToCartObsrever addToCartObsrever;
 
     CartViewModel cartViewModel;
     @Inject
@@ -88,6 +95,8 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
     GetProductByNameViewModel getProductByNameViewModel;
     @Inject
     GetProductByNameViewModel.GetProductsByNameObserver getProductsByNameObserver;
+
+
     List<GetAutocompleteResultsQuery.Item> itemList = new ArrayList<>();
     Integer search_pages_count = 0;
     Integer search_current_page = 1;
@@ -95,6 +104,7 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
     boolean iscategorySelected = false;
     String user_query_text = "";
 
+    TextView textCartItemCount;
     String item_sku = "abcdef";
     private boolean shouldMakeCall = true;
 
@@ -148,33 +158,40 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
 
     ArrayList<CatalogItem> catalogItemArrayList = new ArrayList<>();
 
+    @SuppressLint("UnsafeOptInUsageError")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
 
         fragmentCatalogBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_catalog, container, false);
         View view = fragmentCatalogBinding.getRoot();
-        fragmentCatalogBinding.topAppBar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+        fragmentCatalogBinding.topAppBar.setNavigationOnClickListener(view1 -> {
+            if (iscategorySelected) {
                 fragmentCatalogBinding.topAppBar.setNavigationIcon(requireContext().getResources().getDrawable(R.drawable.ic_navigation_24));
-
-                if (iscategorySelected) {
-                    //  fragmentCatalogBinding.topAppBar.setNavigationIcon(requireContext().getResources().getDrawable(R.drawable.ic_arrow_right_24));
-                    iscategorySelected = false;
-                } else {
-                    iscategorySelected = true;
-                }
-
-                isCategoryMenu = true;
-                fragmentCatalogBinding.drawerLayout.open();
+                iscategorySelected = false;
+            } else {
+                fragmentCatalogBinding.topAppBar.setNavigationIcon(requireContext().getResources().getDrawable(R.drawable.ic_arrow_right_24));
+                iscategorySelected = true;
             }
+
+            isCategoryMenu = true;
+            fragmentCatalogBinding.drawerLayout.open();
         });
+        BadgeDrawable badge = BadgeDrawable.create(requireContext());
+        badge.setBackgroundColor(requireContext().getResources().getColor(R.color.red_200));
+        badge.setBadgeGravity(BadgeDrawable.TOP_START);
+        badge.setHorizontalOffset(8);
+        BadgeUtils.attachBadgeDrawable(badge, fragmentCatalogBinding.topAppBar, R.id.cart);
+        addToCartObsrever.getCartCount().observe(requireActivity(), cartCount -> {
+            if (cartCount != null) badge.setNumber(cartCount.intValue());
+            else badge.setNumber(0);
+        });
+
         fragmentCatalogBinding.topAppBar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
-
                 if (item.getTitle().equals("ViewCart")) {
+                    BaseActivity.mCartItemCount++;
                     NavHostFragment.findNavController(CatalogFragment.this).navigate(R.id.action_homeFragment_to_cartFragment);
                 }
                 if (item.getTitle().equals("recordAudio")) {
@@ -194,11 +211,8 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                 return false;
             }
         });
-
-
         fragmentCatalogBinding.setViewModel(catalogObserver);
         fragmentCatalogBinding.setLifecycleOwner(requireActivity());
-
 
         //Prepare NavigationDrawerMenu...
 
@@ -208,7 +222,6 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
                 Bundle bundle = new Bundle();
                 bundle.putParcelable("catalogItem", groceryItem);
                 NavHostFragment.findNavController(CatalogFragment.this).navigate(R.id.action_homeFragment_to_productDetailFragment, bundle);
-
             }
         });
         LinearLayoutManager gridLayoutManager = new GridLayoutManager(requireContext(), 2);
@@ -274,6 +287,9 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
             }
         });
 
+        fragmentCatalogBinding.topAppBar.setNavigationOnClickListener(view1 ->{
+
+                });
         fragmentCatalogBinding.nestedScrollView.setOnScrollChangeListener(new NestedScrollView.OnScrollChangeListener() {
             @Override
             public void onScrollChange(NestedScrollView v, int scrollX, int scrollY, int oldScrollX, int oldScrollY) {
@@ -649,4 +665,5 @@ public class CatalogFragment extends Fragment implements NavigationView.OnNaviga
     public void onExitDialog() {
 
     }
+
 }

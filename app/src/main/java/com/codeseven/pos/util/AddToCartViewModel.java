@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel;
 
 import com.codeseven.pos.BR;
 import com.codeseven.pos.api.AddProductToCartRepository;
+import com.codeseven.pos.api.ViewCartRepository;
 
 import javax.inject.Inject;
 
@@ -29,8 +30,6 @@ public class AddToCartViewModel extends ViewModel {
 
 
     public static class AddToCartObsrever extends BaseObservable{
-
-
         private String productSku;
         private String productName;
         private String productPrice;
@@ -39,6 +38,8 @@ public class AddToCartViewModel extends ViewModel {
 
         private AddProductToCartRepository productToCartRepository;
         private MutableLiveData<String> repositoryResponse;
+        private ViewCartRepository cartRepository;
+        private MutableLiveData<Double> cartCount;
 
         @Inject
         public AddToCartObsrever() {
@@ -48,8 +49,16 @@ public class AddToCartViewModel extends ViewModel {
             productQuantity = "1";
             productDescription = "";
 
+            this.cartRepository = new ViewCartRepository();
+            this.cartCount = cartRepository.getCartCount();
+
             productToCartRepository = new AddProductToCartRepository();
             repositoryResponse = productToCartRepository.getRequestResponse();
+        }
+
+        public MutableLiveData<Double> getCartCount(){
+            cartRepository.getCustomerExistingCart();
+            return cartCount;
         }
 
         public String getProductSku() {

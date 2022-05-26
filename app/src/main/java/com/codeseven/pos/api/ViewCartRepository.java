@@ -30,6 +30,7 @@ public class ViewCartRepository {
 
     private final CartPreference cartPreference;
     private final MutableLiveData<String> cartRequestResponse;
+    private MutableLiveData<Double> cartCount;
     private String cartId ;
     private final MutableLiveData<List<GetCartByIdQuery.Item>> cartItems;
     private final ApolloClientClass apolloClientClass;
@@ -38,6 +39,7 @@ public class ViewCartRepository {
         cartPreference = new CartPreference();
         this.cartRequestResponse = new MutableLiveData<>();
         cartId = "";
+        cartCount =  new MutableLiveData<>();
         cartItems = new MutableLiveData<>(new ArrayList<>());
         apolloClientClass = new ApolloClientClass();
     }
@@ -64,6 +66,7 @@ public class ViewCartRepository {
                     cartRequestResponse.postValue(response.getData().toString());
                     cartId = response.getData().customerCart().id();
                     GetCartById(cartId);
+                    cartCount.postValue(response.getData().customerCart().total_quantity());
                     cartPreference.AddCartId("cart_id", cartId);
                 }
             }
@@ -128,6 +131,10 @@ public class ViewCartRepository {
     }
     public MutableLiveData<List<GetCartByIdQuery.Item>> getCartItemsList(){
         return cartItems;
+    }
+
+    public MutableLiveData<Double> getCartCount(){
+        return cartCount;
     }
 
 }

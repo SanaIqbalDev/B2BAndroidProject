@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <color name="red_200">#ff6659</color>
     <color name="primaryColor">#ca1033</color>
     <color name="primaryLightColor">#FF545D</color>
     <color name="colorDivider">#FFD2DB</color>

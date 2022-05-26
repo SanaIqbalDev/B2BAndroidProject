@@ -54,7 +54,7 @@ public class LoginViewModel extends ViewModel {
 
         @Inject
         public LoginObserver() {
-            userEmail.setValue("waleed.umar@codeninja.pk");
+            userEmail.setValue("quratulain.naqvi@24seven.pk");
             userPassword.setValue("Admin@321");
             isSuccessful.setValue(false);
             userLoginState.setValue(false);

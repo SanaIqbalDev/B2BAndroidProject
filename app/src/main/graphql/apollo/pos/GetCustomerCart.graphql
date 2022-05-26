@@ -1,6 +1,7 @@
 query getCustomerCart{
     customerCart{
-        id
+        id,
+        total_quantity,
         shipping_addresses
         {
             city

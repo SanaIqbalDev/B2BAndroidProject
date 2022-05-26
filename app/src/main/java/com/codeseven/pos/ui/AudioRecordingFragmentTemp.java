@@ -4,6 +4,7 @@ import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -29,6 +30,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.fragment.NavHostFragment;
 
 import com.airbnb.lottie.LottieAnimationView;
@@ -42,8 +44,11 @@ import com.android.volley.toolbox.Volley;
 import com.codeseven.pos.R;
 import com.codeseven.pos.databinding.FragmentAudioRecordingBinding;
 import com.codeseven.pos.helper.WavAudioRecorder;
+import com.codeseven.pos.util.AddToCartViewModel;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.badge.BadgeDrawable;
+import com.google.android.material.badge.BadgeUtils;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -58,6 +63,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+
+import javax.inject.Inject;
 
 public class AudioRecordingFragmentTemp extends Fragment {
 
@@ -122,6 +129,11 @@ public class AudioRecordingFragmentTemp extends Fragment {
 
     private LottieAnimationView animationView;
 
+
+    AddToCartViewModel addToCartViewModel;
+    @Inject
+    AddToCartViewModel.AddToCartObsrever addToCartObsrever;
+
     public AudioRecordingFragmentTemp() {
         // Required empty public constructor
     }
@@ -136,6 +148,7 @@ public class AudioRecordingFragmentTemp extends Fragment {
         return requireContext();
     }
 
+    @SuppressLint("UnsafeOptInUsageError")
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -143,7 +156,9 @@ public class AudioRecordingFragmentTemp extends Fragment {
 
         fragmentAudioRecordingBinding = DataBindingUtil.inflate(inflater, R.layout.fragment_audio_recording, container, false);
         View view = fragmentAudioRecordingBinding.getRoot();
-//
+
+        addToCartViewModel = new ViewModelProvider(requireActivity()).get(AddToCartViewModel.class);
+
         mHorizon = new Horizon(fragmentAudioRecordingBinding.glSurface, getResources().getColor(R.color.black),
                 48000, 1, 16);
 
@@ -199,7 +214,15 @@ public class AudioRecordingFragmentTemp extends Fragment {
             }
         });
 
-
+        BadgeDrawable badge = BadgeDrawable.create(requireContext());
+        badge.setBackgroundColor(requireContext().getResources().getColor(R.color.red_200));
+        badge.setBadgeGravity(BadgeDrawable.TOP_START);
+        badge.setHorizontalOffset(8);
+        BadgeUtils.attachBadgeDrawable(badge, fragmentAudioRecordingBinding.audioToolbar, R.id.menu_cart);
+        addToCartViewModel.productObserver.getCartCount().observe(requireActivity(),cartCount->{
+            if (cartCount!=null) badge.setNumber(cartCount.intValue());
+            else badge.setNumber(0);
+        });
 
         fragmentAudioRecordingBinding.audioToolbar.setNavigationOnClickListener(new View.OnClickListener() {
             @Override
